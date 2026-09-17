@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thắng &amp; Oanh · 28.11.2026</title>
+    <meta
+      name="description"
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Thị Oanh — Thứ bảy, 28.11.2026 tại Nhà hàng Sen Vàng, Hà Nội."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lora:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="top" class="page">
+      <!-- Lớp cánh hoa rơi, do script.js sinh ra -->
+      <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
+
+      <header class="site-header" id="siteHeader">
+        <div class="header-inner">
+          <a href="#top" class="brand" aria-label="Về đầu trang">
+            <span class="sigil">囍</span>
+          </a>
+
+          <nav class="site-nav" aria-label="Điều hướng chính">
+            <a href="#top" class="nav-link is-active">Trang chủ</a>
+            <a href="#story" class="nav-link">Hành trình</a>
+            <a href="#when" class="nav-link">Thời gian &amp; Địa điểm</a>
+            <a href="#album" class="nav-link">Album ảnh</a>
+            <a href="#rsvp" class="nav-link">Lời chúc</a>
+          </nav>
+
+          <a href="#rsvp" class="btn btn--outline btn--header">
+            <span class="btn-icon">✉</span>Xác nhận tham dự
+          </a>
+        </div>
+      </header>
+
+      <!-- ============================ HERO ============================ -->
+      <section class="hero">
+        <div class="hero-weave" aria-hidden="true"></div>
+        <!-- Nền trang trí (phượng hoàng + hoa đào) trải dưới header và hero.
+             Đổi ảnh tại đây và tại biến --bg-top trong styles.css -->
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <div class="hero-text">
+            <p class="eyebrow">Trân trọng kính mời</p>
+            <h1 class="couple-name">Đỗ Mạnh Thắng</h1>
+            <p class="amp">&amp;</p>
+            <h1 class="couple-name">Nguyễn Thị Oanh</h1>
+            <p class="hero-sub">Cùng chúng tôi<br />tham dự lễ thành hôn</p>
+            <div class="rule-row">
+              <span class="rule"></span>
+              <span class="rule-text">Thứ bảy</span>
+              <span class="rule"></span>
+            </div>
+            <p class="hero-date">28 · 11 · 2026</p>
+            <p class="hero-note">
+              Sự hiện diện của bạn là niềm vinh hạnh lớn lao và là món quà ý
+              nghĩa nhất đối với chúng tôi!
+            </p>
+          </div>
+
+          <!-- THAY ẢNH: ảnh cô dâu & chú rể (tỉ lệ ~16:11).
+               Đường dẫn khai báo ở biến --photo-couple trong styles.css -->
+          <div
+            class="hero-photo"
+            role="img"
+            aria-label="Đỗ Mạnh Thắng và Nguyễn Thị Oanh trong trang phục cưới truyền thống"
+          ></div>
+        </div>
+
+        <!-- Đường bo cong ở đáy hero. Dùng SVG path thay vì border-radius vì
+             cần một cung mở, rộng hơn hero và hai đầu chạy ra ngoài khung.
+             preserveAspectRatio="none" cho cung co giãn theo bề ngang. -->
+        <svg
+          class="hero-curve"
+          viewBox="0 0 1200 200"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M0,0 C 300,190 900,190 1200,0 L1200,200 L0,200 Z" />
+        </svg>
+      </section>
+
+      <!-- ========================== ĐẾM NGƯỢC ========================== -->
+      <section class="countdown-section">
+        <div class="rule-row rule-row--heading">
+          <span class="rule rule--wide"></span>
+          <h2 class="a rule-text">Đếm ngược thời gian</h2>
+          <span class="rule rule--wide"></span>
+        </div>
+        <div class="countdown">
+          <div class="cd-cell">
+            <div class="cd-num" id="cdDays">00</div>
+            <div class="cd-label">Ngày</div>
+          </div>
+          <div class="cd-cell">
+            <div class="cd-num" id="cdHours">00</div>
+            <div class="cd-label">Giờ</div>
+          </div>
+          <div class="cd-cell">
+            <div class="cd-num" id="cdMinutes">00</div>
+            <div class="cd-label">Phút</div>
+          </div>
+          <div class="cd-cell">
+            <div class="cd-num" id="cdSeconds">00</div>
+            <div class="cd-label">Giây</div>
+          </div>
+        </div>
+        <p class="ornament">❊</p>
+      </section>
+
+      <!-- ========================== OUR STORY ========================== -->
+      <section id="story" class="story-section">
+        <div class="story-Oanhn">
+          <div class="story-copy">
+            <p class="eyebrow">Our story</p>
+            <h2 class="script-heading">Hành trình<br />của chúng tôi</h2>
+            <p class="body-text">
+              Từ những ngày đầu gặp gỡ, qua bao khoảnh khắc cùng nhau, chúng tôi
+              đã chọn nắm tay, đồng hành và viết tiếp câu chuyện tình yêu của
+              mình.
+            </p>
+            <p class="body-text">
+              Và giờ đây, chúng tôi muốn tiếp tục hành trình ấy với một chương
+              mới — hôn nhân.
+            </p>
+            <a href="#album" class="btn btn--outline"
+              >Xem thêm <span>→</span></a
+            >
+          </div>
+
+          <!-- THAY ẢNH: album, hai khung 3:4 xếp chồng -->
+          <div id="album" class="album">
+            <div class="album-photo album-photo--back photo-ph">
+              <img
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới 3:4"
+                class="album-photo-img"
+              />
+            </div>
+            <div class="album-photo album-photo--front">
+              <img
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới 3:4"
+                class="album-photo-img"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div class="ornament ornament--tight">❖</div>
+
+          <div class="tl-item">
+            <div class="tl-marker">
+              <span class="tl-dot"></span><span class="tl-line"></span>
+            </div>
+            <div class="tl-body">
+              <div class="tl-date">12.03.2021</div>
+              <div class="tl-title">Lần đầu gặp nhau</div>
+              <div class="tl-text">Một buổi chiều thật đặc biệt...</div>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker">
+              <span class="tl-dot"></span><span class="tl-line"></span>
+            </div>
+            <div class="tl-body">
+              <div class="tl-date">20.08.2022</div>
+              <div class="tl-title">Chính thức hẹn hò</div>
+              <div class="tl-text">
+                Từ bạn bè, chúng tôi trở thành người yêu.
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker">
+              <span class="tl-dot"></span><span class="tl-line"></span>
+            </div>
+            <div class="tl-body">
+              <div class="tl-date">14.02.2024</div>
+              <div class="tl-title">Cầu hôn</div>
+              <div class="tl-text">Một lời hứa cho tương lai.</div>
+            </div>
+          </div>
+
+          <div class="tl-item tl-item--last">
+            <div class="tl-marker">
+              <span class="tl-dot"></span><span class="tl-line"></span>
+            </div>
+            <div class="tl-body">
+              <div class="tl-date">28.11.2026</div>
+              <div class="tl-title">Lễ thành hôn</div>
+              <div class="tl-text">Chúng tôi chính thức về chung một nhà.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== THỜI GIAN & ĐỊA ĐIỂM ==================== -->
+      <section id="when" class="when-section">
+        <div class="when-card">
+          <h2 class="section-title section-title--block">
+            Thời gian &amp; Địa điểm
+          </h2>
+          <div class="when-grid">
+            <div class="when-col">
+              <div class="when-icon">▦</div>
+              <div class="when-kicker">Thứ bảy</div>
+              <div class="when-date">28.11.2026</div>
+              <div class="when-line">Vào lúc 17:00</div>
+              <div class="when-line when-line--muted">(Đón khách từ 16:00)</div>
+            </div>
+            <div class="when-col">
+              <div class="when-icon">◈</div>
+              <div class="when-venue">Nhà hàng Sen Vàng</div>
+              <div class="when-line">
+                Số 123 Nguyễn Văn Cừ,<br />Quận Long Biên, Hà Nội
+              </div>
+            </div>
+            <div class="when-col when-col--action">
+              <a href="#rsvp" class="btn btn--solid btn--lg"
+                ><span class="btn-icon">✉</span>Xác nhận tham dự</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHƯƠNG TRÌNH TIỆC ===================== -->
+      <section class="program-section">
+        <h2 class="section-title section-title--block">
+          Chương trình tiệc cưới
+        </h2>
+        <div class="program-grid">
+          <div class="pg-item">
+            <div class="pg-mark">☗</div>
+            <div class="pg-time">16:00</div>
+            <div class="pg-label">Đón khách</div>
+          </div>
+          <div class="pg-item">
+            <div class="pg-mark">❁</div>
+            <div class="pg-time">17:00</div>
+            <div class="pg-label">Lễ thành hôn</div>
+          </div>
+          <div class="pg-item">
+            <div class="pg-mark">⚱</div>
+            <div class="pg-time">18:00</div>
+            <div class="pg-label">Khai tiệc</div>
+          </div>
+          <div class="pg-item">
+            <div class="pg-mark">❖</div>
+            <div class="pg-time">19:30</div>
+            <div class="pg-label">Cắt bánh</div>
+          </div>
+          <div class="pg-item">
+            <div class="pg-mark">♡</div>
+            <div class="pg-time">21:00</div>
+            <div class="pg-label">Tiễn khách</div>
+          </div>
+        </div>
+        <p class="ornament">❊</p>
+      </section>
+
+      <!-- ========================= VIDEO CƯỚI ========================= -->
+      <section class="video-section">
+        <div class="video-weave" aria-hidden="true"></div>
+        <div class="video-inner">
+          <p class="video-quote">
+            &ldquo; Cảm ơn bạn<br />đã là một phần trong<br />câu chuyện của
+            chúng tôi! &rdquo;
+          </p>
+          <!-- THAY VIDEO: nhúng iframe YouTube/Vimeo vào đây, tỉ lệ 16:9 -->
+          <div class="video-frame">
+            <div class="video-cta">
+              <span class="video-play">▶</span>
+              <span class="video-play-label">Xem video cưới</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== LỜI CHÚC / RSVP ====================== -->
+      <section id="rsvp" class="rsvp-section">
+        <h2 class="section-title section-title--block section-title--tight">
+          Lời chúc
+        </h2>
+        <p class="rsvp-intro">
+          Hãy để lại lời chúc và cho chúng tôi biết bạn có thể đến chung vui.
+        </p>
+
+        <form class="rsvp-form" id="rsvpForm" novalidate>
+          <div class="rsvp-row">
+            <label class="field">
+              <span class="field-label">Họ và tên</span>
+              <input
+                class="field-input"
+                type="text"
+                id="rsvpName"
+                name="name"
+                placeholder="Nguyễn Minh Anh"
+                autocomplete="name"
+              />
+            </label>
+            <div class="field">
+              <span class="field-label">Bạn sẽ tham dự?</span>
+              <div
+                class="choice-row"
+                role="radiogroup"
+                aria-label="Bạn sẽ tham dự?"
+              >
+                <button
+                  type="button"
+                  class="choice is-active"
+                  data-going="yes"
+                  role="radio"
+                  aria-checked="true"
+                >
+                  Có, tôi sẽ đến
+                </button>
+                <button
+                  type="button"
+                  class="choice"
+                  data-going="no"
+                  role="radio"
+                  aria-checked="false"
+                >
+                  Rất tiếc, không thể
+                </button>
+              </div>
+            </div>
+          </div>
+          <label class="field">
+            <span class="field-label">Lời chúc</span>
+            <textarea
+              class="field-input field-input--area"
+              id="rsvpMsg"
+              name="msg"
+              rows="4"
+              placeholder="Chúc hai bạn trăm năm hạnh phúc..."
+            ></textarea>
+          </label>
+          <button type="submit" class="btn btn--solid btn--lg btn--center">
+            Gửi lời chúc
+          </button>
+        </form>
+
+        <div class="rsvp-thanks" id="rsvpThanks" hidden>
+          <div class="thanks-title">Cảm ơn bạn!</div>
+          <p class="thanks-text">
+            Lời chúc của bạn đã được gửi tới Thắng &amp; Oanh.
+          </p>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="footer-inner">
+          <div class="footer-brand">
+            <span class="sigil sigil--sm">囍</span>
+            <span class="footer-name">Thắng &amp; Oanh · 28.11.2026</span>
+          </div>
+          <div class="footer-center">
+            <a href="#top" class="to-top" aria-label="Lên đầu trang">↑</a>
+          </div>
+          <div class="footer-social">
+            <a href="#top">Facebook</a>
+            <a href="#top">Instagram</a>
+            <a href="#top">YouTube</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
