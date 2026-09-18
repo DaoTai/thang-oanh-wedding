@@ -196,6 +196,124 @@
   }
 
   /* -------------------------------------------------------
+     Nhạc nền
+     Modal xin phép hiện ra sau khi tải trang; "Bật nhạc" dùng chính cú
+     click đó làm cử chỉ người dùng để play() không bị trình duyệt chặn.
+     Không lưu trạng thái vào localStorage — mỗi lần tải lại trang, trình
+     duyệt vẫn đòi một cử chỉ mới nên modal cố tình hiện lại từ đầu.
+     ------------------------------------------------------- */
+  function initMusic() {
+    var audio = document.getElementById("bgMusic");
+    var modal = document.getElementById("musicModal");
+    var toggle = document.getElementById("soundToggle");
+    if (!audio || !modal || !toggle) return;
+
+    var backdrop = document.getElementById("musicModalBackdrop");
+    var playBtn = document.getElementById("musicModalPlay");
+    var laterBtn = document.getElementById("musicModalLater");
+    var hideTimer = null;
+
+    function setPlayingState(isPlaying) {
+      toggle.classList.toggle("is-playing", isPlaying);
+      toggle.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+      toggle.setAttribute(
+        "aria-label",
+        isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"
+      );
+    }
+
+    function playAudio() {
+      var playPromise = audio.play();
+      // play() có thể không trả Promise trên trình duyệt cũ
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise
+          .then(function () {
+            setPlayingState(true);
+          })
+          .catch(function () {
+            // Tự phát bị chặn hoặc lỗi khác — im lặng, giữ trạng thái "tắt"
+            setPlayingState(false);
+          });
+      } else {
+        setPlayingState(true);
+      }
+    }
+
+    // Chỉ có hai phần tử focus được bên trong hộp thoại — bẫy Tab/Shift+Tab
+    // giữa chúng để bàn phím không lọt ra ngoài khi modal đang mở.
+    function handleKeydown(e) {
+      if (e.key === "Escape") {
+        closeModal();
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === playBtn) {
+          e.preventDefault();
+          laterBtn.focus();
+        }
+      } else {
+        if (document.activeElement === laterBtn) {
+          e.preventDefault();
+          playBtn.focus();
+        }
+      }
+    }
+
+    function openModal() {
+      modal.hidden = false;
+      // Gỡ [hidden] và thêm class kích hoạt animation cách nhau một khung
+      // hình, nếu không trình duyệt gộp hai thay đổi lại và bỏ qua hiệu ứng
+      requestAnimationFrame(function () {
+        modal.classList.add("is-open");
+      });
+      document.addEventListener("keydown", handleKeydown);
+      // Đưa focus vào hộp thoại để trình đọc màn hình thông báo đã vào modal
+      // và người dùng bàn phím không lọt thẳng ra nội dung phía sau backdrop.
+      playBtn.focus();
+    }
+
+    function closeModal() {
+      if (modal.hidden) return;
+      modal.classList.remove("is-open");
+      document.removeEventListener("keydown", handleKeydown);
+
+      if (hideTimer) clearTimeout(hideTimer);
+      // Chờ hiệu ứng thoát chạy xong rồi mới gắn lại [hidden], tránh biến
+      // mất đột ngột
+      hideTimer = setTimeout(function () {
+        modal.hidden = true;
+      }, 450);
+
+      // Trả focus về nút điều khiển nhạc trên header thay vì để trôi mất
+      // (về <body>) khi phần tử đang được focus vừa biến mất.
+      toggle.focus();
+    }
+
+    playBtn.addEventListener("click", function () {
+      playAudio();
+      closeModal();
+    });
+    laterBtn.addEventListener("click", function () {
+      playAudio();
+      closeModal();
+    });
+    if (backdrop) backdrop.addEventListener("click", closeModal);
+
+    toggle.addEventListener("click", function () {
+      if (audio.paused) {
+        playAudio();
+      } else {
+        audio.pause();
+        setPlayingState(false);
+      }
+    });
+
+    setTimeout(openModal, 500);
+  }
+
+  /* -------------------------------------------------------
      Header cố định
      Header nằm đè lên ảnh nền nên để trong suốt khi ở đầu trang,
      chỉ mờ nền lại sau khi cuộn xuống. Chiều cao thật của header
@@ -236,6 +354,7 @@
     initStoryBurst();
     initCountdown();
     initRsvp();
+    initMusic();
   }
 
   if (document.readyState === "loading") {

@@ -21,11 +21,18 @@
       <!-- Lớp cánh hoa rơi, do script.js sinh ra -->
       <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
 
+      <!-- Nhạc nền: chỉ phát sau khi có thao tác thật của người dùng (modal hoặc nút ở header) -->
+      <audio id="bgMusic" loop preload="auto" hidden>
+        <source src="public/assets/sound.mp3" type="audio/mpeg" />
+      </audio>
+
       <header class="site-header" id="siteHeader">
         <div class="header-inner">
-          <a href="#top" class="brand" aria-label="Về đầu trang">
-            <span class="sigil">囍</span>
-          </a>
+          <div class="brand-group">
+            <a href="#top" class="brand" aria-label="Về đầu trang">
+              <span class="sigil">囍</span>
+            </a>
+          </div>
 
           <nav class="site-nav" aria-label="Điều hướng chính">
             <a href="#top" class="nav-link is-active">Trang chủ</a>
@@ -35,9 +42,27 @@
             <a href="#rsvp" class="nav-link">Lời chúc</a>
           </nav>
 
-          <a href="#rsvp" class="btn btn--outline btn--header">
-            <span class="btn-icon">✉</span>Xác nhận tham dự
-          </a>
+          <div class="header-actions">
+            <button
+              type="button"
+              id="soundToggle"
+              class="sound-toggle"
+              aria-pressed="false"
+              aria-label="Bật nhạc nền"
+            >
+              <span class="music-note" aria-hidden="true">
+                <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <ellipse class="note-head" cx="6.4" cy="13.6" rx="3" ry="2.2" transform="rotate(-16 6.4 13.6)" fill="currentColor" />
+                  <path class="note-stem" d="M9.3 12.6 V3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                  <path class="note-flag" d="M9.3 3.4 C12.2 3.9 13.6 6.3 12.6 9.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </span>
+            </button>
+
+            <a href="#rsvp" class="btn btn--outline btn--header">
+              <span class="btn-icon">✉</span>Xác nhận tham dự
+            </a>
+          </div>
         </div>
       </header>
 
@@ -141,14 +166,14 @@
           <div id="album" class="album">
             <div class="album-photo album-photo--back photo-ph">
               <img
-                src="public/assets/3-4.jpg"
+                src="public/assets/3-4-v2.png"
                 alt="Ảnh cưới 3:4"
                 class="album-photo-img"
               />
             </div>
             <div class="album-photo album-photo--front">
               <img
-                src="public/assets/3-4.jpg"
+                src="public/assets/3-4-v2.png"
                 alt="Ảnh cưới 3:4"
                 class="album-photo-img"
               />
@@ -379,6 +404,33 @@
           </div>
         </div>
       </footer>
+    </div>
+
+    <!-- ==================== NHẠC NỀN — HỘP THOẠI XÁC NHẬN ==================== -->
+    <div class="music-modal" id="musicModal" hidden>
+      <div class="music-modal-backdrop" id="musicModalBackdrop"></div>
+      <div
+        class="music-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="musicModalTitle"
+      >
+        <p class="music-modal-flourish" aria-hidden="true">❊</p>
+        <h2 class="music-modal-title" id="musicModalTitle">
+          Làm tí nhạc cưới nhỉ?
+        </h2>
+        <p class="music-modal-sub">
+          Hãy gửi những lời chúc tốt đẹp, viên mãn nhất tới đôi uyên ương nhé
+        </p>
+        <div class="music-modal-actions">
+          <button type="button" class="btn btn--solid" id="musicModalPlay">
+            Bật nhạc
+          </button>
+          <button type="button" class="btn btn--outline" id="musicModalLater">
+            Ok luôn
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="script.js"></script>
