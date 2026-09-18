@@ -111,8 +111,8 @@
       function (entries) {
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
-          burstPetalsFrom(6, 500); // Góc dưới trái
-          burstPetalsFrom(94, 500); // Góc dưới phải
+          burstPetalsFrom(6, 48); // Góc dưới trái
+          burstPetalsFrom(94, 48); // Góc dưới phải
           observer.disconnect();
         });
       },
@@ -120,6 +120,88 @@
     );
 
     observer.observe(story);
+  }
+
+  function initWhenReveal() {
+    var mapBlocks = document.querySelectorAll(
+      ".when-map, .families, .when-calendar, .when-date-block"
+    );
+    if (!mapBlocks.length) return;
+
+    if (typeof IntersectionObserver !== "function") {
+      mapBlocks.forEach(function (block) {
+        block.classList.add("is-visible");
+      });
+      return;
+    }
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      mapBlocks.forEach(function (block) {
+        block.classList.add("is-visible");
+      });
+      return;
+    }
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    mapBlocks.forEach(function (block) {
+      observer.observe(block);
+    });
+  }
+
+  /* -------------------------------------------------------
+     Lịch tháng cưới
+     Dựng từ CONFIG.weddingDateIso. Ngày/tháng/năm đọc thẳng từ chuỗi
+     (không qua múi giờ của trình duyệt) để người xem ở nước khác không bị
+     lệch sang ngày hôm trước/sau.
+     ------------------------------------------------------- */
+  function initCalendar() {
+    var title = document.getElementById("calTitle");
+    var body = document.getElementById("calBody");
+    if (!title || !body) return;
+
+    var parts = /^(\d{4})-(\d{2})-(\d{2})/.exec(CONFIG.weddingDateIso);
+    if (!parts) return;
+    var year = Number(parts[1]);
+    var month = Number(parts[2]); // 1–12
+    var day = Number(parts[3]);
+
+    var firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay(); // 0 = CN
+    var daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    var totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
+
+    title.textContent = "Tháng " + month + " - " + year;
+
+    var row = null;
+    for (var i = 0; i < totalCells; i++) {
+      if (i % 7 === 0) {
+        row = document.createElement("tr");
+        body.appendChild(row);
+      }
+      var cell = document.createElement("td");
+      var num = i - firstWeekday + 1;
+      if (num === day) {
+        var mark = document.createElement("span");
+        mark.className = "cal-wedding";
+        mark.textContent = String(num);
+        cell.setAttribute("aria-current", "date");
+        cell.appendChild(mark);
+      } else if (num >= 1 && num <= daysInMonth) {
+        cell.textContent = String(num);
+      }
+      row.appendChild(cell);
+    }
   }
 
   /* -------------------------------------------------------
@@ -196,17 +278,80 @@
   }
 
   /* -------------------------------------------------------
+     Tên cô dâu chú rể "viết tay"
+     Ẩn tên ngay từ đầu rồi trả về hàm bắt đầu viết. Modal nhạc che hero nên
+     việc viết chỉ bắt đầu khi modal đóng; hai tên viết song song và cùng xong
+     một lúc, thời lượng theo tên dài nhất. Thiếu hỗ trợ mask hoặc bật giảm
+     chuyển động thì bỏ qua hiệu ứng, tên hiện đủ như thường.
+     ------------------------------------------------------- */
+  function initNameWriting() {
+    var names = document.querySelectorAll(".couple-name");
+    var maskGradient = "linear-gradient(#000, #000)";
+    var supportsMask =
+      window.CSS &&
+      typeof CSS.supports === "function" &&
+      (CSS.supports("mask-image", maskGradient) ||
+        CSS.supports("-webkit-mask-image", maskGradient));
+    var reduceMotion =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!names.length || !supportsMask || reduceMotion) return function () {};
+
+    var SECONDS_PER_CHAR = 0.17;
+    var START_DELAY = 0.35; // Chờ modal tan bớt để nét bút đầu tiên không bị che
+
+    Array.prototype.forEach.call(names, function (name) {
+      name.classList.add("is-pending");
+    });
+
+    var started = false;
+    function write() {
+      if (started) return;
+      started = true;
+
+      var longest = 0;
+      Array.prototype.forEach.call(names, function (name) {
+        longest = Math.max(longest, name.textContent.trim().length);
+      });
+      var duration = longest * SECONDS_PER_CHAR;
+
+      Array.prototype.forEach.call(names, function (name) {
+        var ink = name.querySelector(".couple-name__ink");
+        ink.style.setProperty("--write-duration", duration + "s");
+        ink.style.setProperty("--write-delay", START_DELAY + "s");
+        ink.addEventListener("animationend", function () {
+          name.classList.add("is-written");
+        });
+        name.classList.remove("is-pending");
+        name.classList.add("is-writing");
+      });
+    }
+
+    // Đợi font Aquarelle tải xong để không viết bằng font dự phòng rồi đổi
+    // font giữa chừng; tối đa chờ 1.5s cho mạng chậm.
+    return function start() {
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(write);
+        setTimeout(write, 1500);
+      } else {
+        write();
+      }
+    };
+  }
+
+  /* -------------------------------------------------------
      Nhạc nền
      Modal xin phép hiện ra sau khi tải trang; "Bật nhạc" dùng chính cú
      click đó làm cử chỉ người dùng để play() không bị trình duyệt chặn.
      Không lưu trạng thái vào localStorage — mỗi lần tải lại trang, trình
      duyệt vẫn đòi một cử chỉ mới nên modal cố tình hiện lại từ đầu.
+     Trả về true nếu đã dựng modal; onModalClosed được gọi mỗi khi modal đóng.
      ------------------------------------------------------- */
-  function initMusic() {
+  function initMusic(onModalClosed) {
     var audio = document.getElementById("bgMusic");
     var modal = document.getElementById("musicModal");
     var toggle = document.getElementById("soundToggle");
-    if (!audio || !modal || !toggle) return;
+    if (!audio || !modal || !toggle) return false;
 
     var backdrop = document.getElementById("musicModalBackdrop");
     var playBtn = document.getElementById("musicModalPlay");
@@ -289,16 +434,15 @@
       // Trả focus về nút điều khiển nhạc trên header thay vì để trôi mất
       // (về <body>) khi phần tử đang được focus vừa biến mất.
       toggle.focus();
+
+      if (onModalClosed) onModalClosed();
     }
 
     playBtn.addEventListener("click", function () {
       playAudio();
       closeModal();
     });
-    laterBtn.addEventListener("click", function () {
-      playAudio();
-      closeModal();
-    });
+    laterBtn.addEventListener("click", closeModal);
     if (backdrop) backdrop.addEventListener("click", closeModal);
 
     toggle.addEventListener("click", function () {
@@ -311,6 +455,60 @@
     });
 
     setTimeout(openModal, 500);
+    return true;
+  }
+
+  /* -------------------------------------------------------
+     Hộp thoại mừng cưới (chúc phúc / lì xì)
+     Mở từ nút #giftModalOpen; dùng lại bộ style .music-modal*. Đóng bằng nút
+     Đóng, phím Escape hoặc bấm nền mờ, rồi trả focus về nút đã mở.
+     ------------------------------------------------------- */
+  function initGiftModal() {
+    var modal = document.getElementById("giftModal");
+    var openBtn = document.getElementById("giftModalOpen");
+    var closeBtn = document.getElementById("giftModalClose");
+    if (!modal || !openBtn || !closeBtn) return;
+
+    var backdrop = document.getElementById("giftModalBackdrop");
+    var hideTimer = null;
+
+    // Chỉ có một phần tử focus được (nút Đóng) — giữ Tab/Shift+Tab ở lại đó
+    // để bàn phím không lọt ra nội dung phía sau backdrop.
+    function handleKeydown(e) {
+      if (e.key === "Escape") {
+        closeModal();
+      } else if (e.key === "Tab") {
+        e.preventDefault();
+        closeBtn.focus();
+      }
+    }
+
+    function openModal() {
+      if (hideTimer) clearTimeout(hideTimer);
+      modal.hidden = false;
+      // Gỡ [hidden] và thêm class kích hoạt animation cách nhau một khung hình,
+      // nếu không trình duyệt gộp hai thay đổi lại và bỏ qua hiệu ứng
+      requestAnimationFrame(function () {
+        modal.classList.add("is-open");
+      });
+      document.addEventListener("keydown", handleKeydown);
+      closeBtn.focus();
+    }
+
+    function closeModal() {
+      if (modal.hidden) return;
+      modal.classList.remove("is-open");
+      document.removeEventListener("keydown", handleKeydown);
+      // Chờ hiệu ứng thoát chạy xong rồi mới gắn lại [hidden]
+      hideTimer = setTimeout(function () {
+        modal.hidden = true;
+      }, 450);
+      openBtn.focus();
+    }
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    if (backdrop) backdrop.addEventListener("click", closeModal);
   }
 
   /* -------------------------------------------------------
@@ -352,9 +550,15 @@
     initHeader();
     renderPetals();
     initStoryBurst();
+    initCalendar();
+    initWhenReveal();
     initCountdown();
     initRsvp();
-    initMusic();
+    initGiftModal();
+    // Đặt ngay trước initMusic: ẩn tên và nối hàm bắt đầu viết vào modal là một
+    // cặp, để lỗi ở các bước trước không làm tên bị ẩn mà không bao giờ hiện.
+    var writeNames = initNameWriting();
+    if (!initMusic(writeNames)) writeNames();
   }
 
   if (document.readyState === "loading") {

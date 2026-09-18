@@ -3,15 +3,59 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Thắng &amp; Oanh · 28.11.2026</title>
+    <title>Mạnh Thắng &amp; Ngọc Oanh · 28.11.2026</title>
     <meta
       name="description"
-      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Thị Oanh — Thứ bảy, 28.11.2026 tại Nhà hàng Sen Vàng, Hà Nội."
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026 tại Làng Văn Phú, Hà Nội."
     />
+    <meta
+      name="keywords"
+      content="thiệp cưới online, thiệp mời cưới, đám cưới Mạnh Thắng Ngọc Oanh, wedding invitation"
+    />
+    <meta name="author" content="Mạnh Thắng &amp; Ngọc Oanh" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#8c1c1c" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="public/assets/icon.png" />
+    <link rel="apple-touch-icon" href="public/assets/icon.png" />
+
+    <!-- Open Graph / Facebook, Zalo -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Mạnh Thắng &amp; Ngọc Oanh · 28.11.2026"
+    />
+    <meta
+      property="og:description"
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026 tại Làng Văn Phú, Hà Nội."
+    />
+    <meta property="og:image" content="public/assets/icon.png" />
+    <meta property="og:locale" content="vi_VN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Mạnh Thắng &amp; Ngọc Oanh · 28.11.2026"
+    />
+    <meta
+      name="twitter:description"
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026 tại Làng Văn Phú, Hà Nội."
+    />
+    <meta name="twitter:image" content="public/assets/icon.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lora:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chỉ tải đúng ký tự 囍 (vài KB) để chữ Hỷ ở huy hiệu có nét đậm thật,
+         thay vì phụ thuộc vào font CJK dự phòng của từng thiết bị. Để riêng
+         một <link> vì tham số text= sẽ áp lên mọi font trong cùng yêu cầu. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&text=%E5%9B%8D&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -51,10 +95,34 @@
               aria-label="Bật nhạc nền"
             >
               <span class="music-note" aria-hidden="true">
-                <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <ellipse class="note-head" cx="6.4" cy="13.6" rx="3" ry="2.2" transform="rotate(-16 6.4 13.6)" fill="currentColor" />
-                  <path class="note-stem" d="M9.3 12.6 V3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  <path class="note-flag" d="M9.3 3.4 C12.2 3.9 13.6 6.3 12.6 9.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <svg
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <ellipse
+                    class="note-head"
+                    cx="6.4"
+                    cy="13.6"
+                    rx="3"
+                    ry="2.2"
+                    transform="rotate(-16 6.4 13.6)"
+                    fill="currentColor"
+                  />
+                  <path
+                    class="note-stem"
+                    d="M9.3 12.6 V3.4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    class="note-flag"
+                    d="M9.3 3.4 C12.2 3.9 13.6 6.3 12.6 9.2"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
                 </svg>
               </span>
             </button>
@@ -75,9 +143,13 @@
         <div class="hero-inner">
           <div class="hero-text">
             <p class="eyebrow">Trân trọng kính mời</p>
-            <h1 class="couple-name">Đỗ Mạnh Thắng</h1>
+            <h1 class="couple-name">
+              <span class="couple-name__ink">Đỗ Mạnh Thắng</span>
+            </h1>
             <p class="amp">&amp;</p>
-            <h1 class="couple-name">Nguyễn Thị Oanh</h1>
+            <h1 class="couple-name">
+              <span class="couple-name__ink">Nguyễn Ngọc Oanh</span>
+            </h1>
             <p class="hero-sub">Cùng chúng tôi<br />tham dự lễ thành hôn</p>
             <div class="rule-row">
               <span class="rule"></span>
@@ -85,6 +157,7 @@
               <span class="rule"></span>
             </div>
             <p class="hero-date">28 · 11 · 2026</p>
+            <p class="hero-lunar">(Tức ngày 20 tháng 10 năm Bính Ngọ)</p>
             <p class="hero-note">
               Sự hiện diện của bạn là niềm vinh hạnh lớn lao và là món quà ý
               nghĩa nhất đối với chúng tôi!
@@ -96,7 +169,7 @@
           <div
             class="hero-photo"
             role="img"
-            aria-label="Đỗ Mạnh Thắng và Nguyễn Thị Oanh trong trang phục cưới truyền thống"
+            aria-label="Đỗ Mạnh Thắng và Nguyễn Ngọc Oanh trong trang phục cưới truyền thống"
           ></div>
         </div>
 
@@ -146,7 +219,7 @@
       <section id="story" class="story-section">
         <div class="story-Oanhn">
           <div class="story-copy">
-            <p class="eyebrow">Our story</p>
+            <!-- <p class="eyebrow">Our story</p> -->
             <h2 class="script-heading">Hành trình<br />của chúng tôi</h2>
             <p class="body-text">
               Từ những ngày đầu gặp gỡ, qua bao khoảnh khắc cùng nhau, chúng tôi
@@ -235,27 +308,177 @@
       <!-- ==================== THỜI GIAN & ĐỊA ĐIỂM ==================== -->
       <section id="when" class="when-section">
         <div class="when-card">
-          <h2 class="section-title section-title--block">
-            Thời gian &amp; Địa điểm
-          </h2>
-          <div class="when-grid">
-            <div class="when-col">
-              <div class="when-icon">▦</div>
-              <div class="when-kicker">Thứ bảy</div>
-              <div class="when-date">28.11.2026</div>
-              <div class="when-line">Vào lúc 17:00</div>
-              <div class="when-line when-line--muted">(Đón khách từ 16:00)</div>
+          <!-- NGÀY CƯỚI: chữ cố định. Nếu đổi ngày, sửa cả CONFIG.weddingDateIso
+               trong script.js (lịch tháng tự dựng từ đó) lẫn dòng ngày âm bên
+               dưới — ngày âm không tự tính. -->
+          <div class="when-date-block" id="whenDateBlock">
+            <h2 class="wd-title">Lễ thành hôn</h2>
+            <p class="wd-time">17:00, Thứ bảy</p>
+            <div class="wd-date">
+              <span class="wd-side">Tháng 11</span>
+              <span class="wd-day">28</span>
+              <span class="wd-side">Năm 2026</span>
             </div>
-            <div class="when-col">
-              <div class="when-icon">◈</div>
-              <div class="when-venue">Nhà hàng Sen Vàng</div>
-              <div class="when-line">
-                Số 123 Nguyễn Văn Cừ,<br />Quận Long Biên, Hà Nội
+            <p class="wd-lunar">(Tức ngày 20 tháng 10 năm Bính Ngọ)</p>
+          </div>
+
+          <!-- THAY TÊN BỐ MẸ: các tên trong ngoặc vuông là chỗ TẠM — điền họ tên
+               thật của hai bên gia đình vào các thẻ .family-name trước khi gửi
+               thiệp. -->
+          <div class="families" id="whenFamilies">
+            <div class="family family--groom">
+              <span class="family-kicker">Nhà trai</span>
+              <p class="family-parent">
+                <span class="family-role">Ông</span>
+                <span class="family-name">Đỗ Văn Giang</span>
+              </p>
+              <p class="family-parent">
+                <span class="family-role">Bà</span>
+                <span class="family-name">Nguyễn Thị Hồng</span>
+              </p>
+              <p class="family-place">
+                <span class="family-place-icon" aria-hidden="true">◈</span>
+                Hà Nội
+              </p>
+            </div>
+
+            <!-- Biểu tượng chữ Hỷ — chỉ để trang trí, không có nội dung cho
+                 trình đọc màn hình -->
+            <div class="hy-emblem" aria-hidden="true">
+              <span class="hy-ripple"></span>
+              <span class="hy-ripple hy-ripple--late"></span>
+              <span class="hy-ring"></span>
+              <span class="hy-disc"><span class="hy-char">囍</span></span>
+            </div>
+
+            <div class="family family--bride">
+              <span class="family-kicker">Nhà gái</span>
+              <p class="family-parent">
+                <span class="family-role">Ông</span>
+                <span class="family-name">Trần Văn Hùng</span>
+              </p>
+              <p class="family-parent">
+                <span class="family-role">Bà</span>
+                <span class="family-name">Lê Thị Lan</span>
+              </p>
+              <p class="family-place">
+                <span class="family-place-icon" aria-hidden="true">◈</span>
+                Ninh Bình
+              </p>
+            </div>
+          </div>
+
+          <div class="when-divider" aria-hidden="true"></div>
+
+          <!-- HÀNG LỊCH + NÚT: desktop lịch bên trái, hai nút xếp dọc bên phải;
+               màn hình hẹp thì tự xuống dòng và căn giữa. -->
+          <div class="when-cal-row">
+            <!-- Lịch tháng cưới: tiêu đề và các ô ngày do initCalendar() trong
+                 script.js dựng từ CONFIG.weddingDateIso -->
+            <div class="when-calendar" id="whenCalendar">
+              <div class="cal-head">
+                <svg
+                  class="cal-clip"
+                  viewBox="0 0 16 30"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M6.5 22 V8 a3 3 0 0 1 6 0 V22 a5 5 0 0 1 -10 0 V6 a4.2 4.2 0 0 1 8.4 0 V17"
+                  />
+                </svg>
+                <h3 class="cal-title" id="calTitle"></h3>
               </div>
+              <table class="cal-table" aria-labelledby="calTitle">
+                <thead>
+                  <tr>
+                    <th scope="col">CN</th>
+                    <th scope="col">T2</th>
+                    <th scope="col">T3</th>
+                    <th scope="col">T4</th>
+                    <th scope="col">T5</th>
+                    <th scope="col">T6</th>
+                    <th scope="col">T7</th>
+                  </tr>
+                </thead>
+                <tbody id="calBody"></tbody>
+              </table>
             </div>
-            <div class="when-col when-col--action">
+
+            <div class="when-actions">
               <a href="#rsvp" class="btn btn--solid btn--lg"
                 ><span class="btn-icon">✉</span>Xác nhận tham dự</a
+              >
+              <button
+                type="button"
+                class="btn btn--outline btn--lg"
+                id="giftModalOpen"
+                aria-haspopup="dialog"
+              >
+                <span class="btn-icon">✿</span>Chúc phúc lì xì
+              </button>
+            </div>
+          </div>
+
+          <div class="when-divider" aria-hidden="true"></div>
+
+          <div class="when-map-group">
+            <!-- THAY BẢN ĐỒ NHÀ TRAI: đổi src iframe tại đây nếu đổi địa điểm -->
+            <div class="when-map" id="whenMapGroom">
+              <div class="when-map-head">
+                <span class="when-map-kicker">Nhà trai</span>
+                <h3 class="when-map-venue">Nhà Văn Hóa Văn Phú</h3>
+                <p class="when-map-address">
+                  36 P. Văn Phú, Khu đô thị Văn Phú, Kiến Hưng, Hà Nội
+                </p>
+              </div>
+              <div class="map-frame">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d478.7772768106462!2d105.76884985404394!3d20.960529351490603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31345311a6f8f6ad%3A0xf3195be9754b6397!2zTmjDoCBWxINuIEjDs2EgVsSDbiBQaMO6!5e1!3m2!1svi!2s!4v1789744339027!5m2!1svi!2s"
+                  title="Bản đồ chỉ đường tới nhà trai — Làng Văn Phú"
+                  loading="lazy"
+                  allowfullscreen
+                  referrerpolicy="strict-origin-when-cross-origin"
+                ></iframe>
+              </div>
+              <a
+                class="btn btn--outline map-cta"
+                href="https://www.google.com/maps/search/?api=1&amp;query=Nh%C3%A0%20h%C3%A0ng%20Sen%20V%C3%A0ng%2C%20123%20Nguy%E1%BB%85n%20V%C4%83n%20C%E1%BB%AB%2C%20Long%20Bi%C3%AAn%2C%20H%C3%A0%20N%E1%BB%99i&amp;query_place_id=0x31345311a6f8f6ad:0xf3195be9754b6397"
+                target="_blank"
+                rel="noopener"
+                ><span class="btn-icon">➤</span>Chỉ đường</a
+              >
+            </div>
+
+            <!-- THAY BẢN ĐỒ NHÀ GÁI: bản đồ đang trỏ chung về Ninh Bình. Thay
+                 src iframe, tên địa điểm, địa chỉ hiển thị, và link "Chỉ đường"
+                 bằng địa chỉ cụ thể của nhà gái trước khi gửi thiệp. -->
+            <div class="when-map" id="whenMapBride">
+              <div class="when-map-head">
+                <span class="when-map-kicker">Nhà gái</span>
+                <h3 class="when-map-venue">Tại gia</h3>
+                <p class="when-map-address">35 P.Tràng An, Ninh Bình</p>
+              </div>
+              <div class="map-frame">
+                <iframe
+                  src="https://www.google.com/maps?q=Ninh%20B%C3%ACnh%2C%20Vi%E1%BB%87t%20Nam&amp;output=embed"
+                  title="Bản đồ chỉ đường tới nhà gái, Ninh Bình (địa chỉ tạm — cần cập nhật)"
+                  loading="lazy"
+                  allowfullscreen
+                  referrerpolicy="strict-origin-when-cross-origin"
+                ></iframe>
+              </div>
+              <a
+                class="btn btn--outline map-cta"
+                href="https://www.google.com/maps/search/?api=1&amp;query=Ninh%20B%C3%ACnh%2C%20Vi%E1%BB%87t%20Nam"
+                target="_blank"
+                rel="noopener"
+                ><span class="btn-icon">➤</span>Chỉ đường</a
               >
             </div>
           </div>
@@ -417,17 +640,125 @@
       >
         <p class="music-modal-flourish" aria-hidden="true">❊</p>
         <h2 class="music-modal-title" id="musicModalTitle">
-          Làm tí nhạc cưới nhỉ?
+          Làm Tí Nhạc Cưới Nhỉ?
+          <span class="music-note" aria-hidden="true">
+            <svg
+              viewBox="0 0 18 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <ellipse
+                class="note-head"
+                cx="6.4"
+                cy="13.6"
+                rx="3"
+                ry="2.2"
+                transform="rotate(-16 6.4 13.6)"
+                fill="currentColor"
+              />
+              <path
+                class="note-stem"
+                d="M9.3 12.6 V3.4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+              <path
+                class="note-flag"
+                d="M9.3 3.4 C12.2 3.9 13.6 6.3 12.6 9.2"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
         </h2>
         <p class="music-modal-sub">
-          Hãy gửi những lời chúc tốt đẹp, viên mãn nhất tới đôi uyên ương nhé
+          Bật giai điệu yêu thương, gửi đôi lời chúc phúc và cùng cô dâu chú rể
+          ngân vang bài ca hạnh phúc nhé!
         </p>
         <div class="music-modal-actions">
           <button type="button" class="btn btn--solid" id="musicModalPlay">
-            Bật nhạc
+            Oke luôn
           </button>
           <button type="button" class="btn btn--outline" id="musicModalLater">
-            Ok luôn
+            Để lát nữa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MỪNG CƯỚI — HỘP THOẠI CHÚC PHÚC / LÌ XÌ ============
+         Mở từ nút #giftModalOpen. Dùng lại bộ style .music-modal*.
+         THAY THÔNG TIN MỪNG CƯỚI: có hai bộ (Chú rể — Mạnh Thắng, Cô dâu —
+         Ngọc Oanh). Các chữ trong ngoặc vuông là chỗ TẠM — trong mỗi bộ, thay
+         chữ trong khung .gift-qr bằng ảnh QR thật (khung viền tự có sẵn), ví dụ:
+         <div class="gift-qr"><img src="public/assets/qr-chu-re.png" alt="Mã QR mừng cưới chú rể" /></div>
+         rồi điền ngân hàng, số tài khoản, tên chủ tài khoản. -->
+    <div class="music-modal gift-modal" id="giftModal" hidden>
+      <div class="music-modal-backdrop" id="giftModalBackdrop"></div>
+      <div
+        class="music-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="giftModalTitle"
+      >
+        <p class="music-modal-flourish" aria-hidden="true">❊</p>
+        <h2 class="music-modal-title" id="giftModalTitle">
+          Chúc Phúc &amp; Lì Xì
+        </h2>
+        <p class="music-modal-sub">
+          Sự hiện diện của bạn là món quà quý nhất với chúng tôi. Nếu muốn gửi
+          thêm chút tấm lòng, bạn có thể dùng thông tin bên dưới nhé!
+        </p>
+        <div class="gift-grid">
+          <section class="gift-person" aria-labelledby="giftGroomName">
+            <span class="gift-role">Chú rể</span>
+            <h3 class="gift-name" id="giftGroomName">Mạnh Thắng</h3>
+            <div class="gift-qr">
+              <span class="ph-label">[Ảnh mã QR]</span>
+            </div>
+            <dl class="gift-info">
+              <div class="gift-row">
+                <dt>Ngân hàng</dt>
+                <dd>[Tên ngân hàng]</dd>
+              </div>
+              <div class="gift-row">
+                <dt>Số tài khoản</dt>
+                <dd class="gift-account">[Số tài khoản]</dd>
+              </div>
+              <div class="gift-row">
+                <dt>Chủ tài khoản</dt>
+                <dd>[Tên chủ tài khoản]</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="gift-person" aria-labelledby="giftBrideName">
+            <span class="gift-role">Cô dâu</span>
+            <h3 class="gift-name" id="giftBrideName">Ngọc Oanh</h3>
+            <div class="gift-qr">
+              <span class="ph-label">[Ảnh mã QR]</span>
+            </div>
+            <dl class="gift-info">
+              <div class="gift-row">
+                <dt>Ngân hàng</dt>
+                <dd>[Tên ngân hàng]</dd>
+              </div>
+              <div class="gift-row">
+                <dt>Số tài khoản</dt>
+                <dd class="gift-account">[Số tài khoản]</dd>
+              </div>
+              <div class="gift-row">
+                <dt>Chủ tài khoản</dt>
+                <dd>[Tên chủ tài khoản]</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+        <div class="music-modal-actions">
+          <button type="button" class="btn btn--outline" id="giftModalClose">
+            Đóng
           </button>
         </div>
       </div>
