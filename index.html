@@ -6,7 +6,7 @@
     <title>Mạnh Thắng &amp; Ngọc Oanh · 28.11.2026</title>
     <meta
       name="description"
-      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026 tại Làng Văn Phú, Hà Nội."
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026."
     />
     <meta
       name="keywords"
@@ -32,7 +32,7 @@
     />
     <meta
       property="og:description"
-      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026 tại Làng Văn Phú, Hà Nội."
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026."
     />
     <meta
       property="og:image"
@@ -55,7 +55,7 @@
     />
     <meta
       name="twitter:description"
-      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026 tại Làng Văn Phú, Hà Nội."
+      content="Thiệp mời cưới Đỗ Mạnh Thắng &amp; Nguyễn Ngọc Oanh — Thứ bảy, 28.11.2026"
     />
     <meta
       name="twitter:image"
@@ -178,9 +178,10 @@
             <button
               type="button"
               id="soundToggle"
-              class="sound-toggle"
+              class="icon-btn sound-toggle has-tip"
               aria-pressed="false"
               aria-label="Bật nhạc nền"
+              data-tip="Bật nhạc nền"
             >
               <span class="music-note" aria-hidden="true">
                 <svg
@@ -220,8 +221,9 @@
             <button
               type="button"
               id="shareBtn"
-              class="btn btn--outline btn--header"
-              aria-live="polite"
+              class="icon-btn has-tip has-tip--end"
+              aria-label="Chia sẻ thiệp"
+              data-tip="Chia sẻ thiệp"
             >
               <span class="btn-icon share-icon" aria-hidden="true">
                 <svg
@@ -229,9 +231,27 @@
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <circle cx="13.6" cy="3.9" r="2.4" stroke="currentColor" stroke-width="1.4" />
-                  <circle cx="4.4" cy="9" r="2.4" stroke="currentColor" stroke-width="1.4" />
-                  <circle cx="13.6" cy="14.1" r="2.4" stroke="currentColor" stroke-width="1.4" />
+                  <circle
+                    cx="13.6"
+                    cy="3.9"
+                    r="2.4"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                  />
+                  <circle
+                    cx="4.4"
+                    cy="9"
+                    r="2.4"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                  />
+                  <circle
+                    cx="13.6"
+                    cy="14.1"
+                    r="2.4"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                  />
                   <path
                     d="M6.5 7.8 11.5 5.1M6.5 10.2 11.5 12.9"
                     stroke="currentColor"
@@ -240,8 +260,16 @@
                   />
                 </svg>
               </span>
-              <span class="btn-label" id="shareBtnLabel">Chia sẻ</span>
             </button>
+            <!-- Nút chỉ còn icon nên phản hồi "Đã sao chép" không hiện thành
+                 chữ trên nút nữa: người dùng thường thấy qua tooltip, còn
+                 trình đọc màn hình đọc qua vùng thông báo ẩn này. -->
+            <span
+              class="sr-only"
+              id="shareBtnLabel"
+              role="status"
+              aria-live="polite"
+            ></span>
           </div>
         </div>
       </header>

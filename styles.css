@@ -109,6 +109,36 @@ body {
   }
 }
 
+/* Bôi đen chữ Hỷ (囍): nền trắng, chữ đỏ — giữ nét chữ rõ thay vì bị
+   màu highlight mặc định của trình duyệt phủ lên. */
+.sigil::selection,
+.hy-char::selection {
+  background: #ffffff;
+  color: var(--red);
+  text-shadow: none;
+}
+.sigil::-moz-selection,
+.hy-char::-moz-selection {
+  background: #ffffff;
+  color: var(--red);
+  text-shadow: none;
+}
+
+/* Chỉ dành cho trình đọc màn hình: vẫn nằm trong cây a11y nhưng không
+   chiếm chỗ và không nhìn thấy được. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
@@ -349,8 +379,17 @@ button:focus-visible,
   animation-name: petalBurst;
   animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   animation-fill-mode: forwards;
-  /* drop-shadow bám theo mask (box-shadow sẽ bị mask cắt thành hình chữ nhật) */
-  filter: drop-shadow(0 2px 4px rgba(120, 24, 28, 0.28));
+  /* Cố tình KHÔNG có filter: drop-shadow ở đây.
+     Một chùm burst có ~96 cánh cùng bay; mỗi cánh lại đang được mask bằng
+     SVG, nên chỉ cần có filter là trình duyệt phải render riêng từng cánh
+     qua một lượt offscreen ở MỖI khung hình — đo được 34/176 khung > 32ms
+     (~44fps, đỉnh 100ms) khi cuộn tới #story, bỏ filter đi còn 0-1 khung.
+     Giảm bán kính blur không cứu được: chi phí nằm ở việc CÓ filter, không
+     phải ở độ nhoè (blur 0 vẫn janky 11 khung). Cánh burst chỉ 11-23px lại
+     bay xoay liên tục nên bóng gần như không nhìn thấy, và cánh rơi nền
+     (.petal) vốn cũng không có bóng — bỏ đi là đồng bộ luôn.
+     Nếu sau này cần chiều sâu, hãy làm bằng gradient trong background
+     (gradient đo được gần như miễn phí), đừng dùng filter. */
 }
 
 /* ---------------------------------------------------------
@@ -522,35 +561,33 @@ button:focus-visible,
 .btn--center {
   justify-self: center;
 }
-.btn--header {
-  gap: 9px;
-  padding: 11px 22px;
-  white-space: nowrap;
-}
 
 /* Nút chia sẻ ở header: icon vẽ bằng SVG nên cần khung cố định để không
-   co giãn theo font, và nhãn đổi chữ ("Chia sẻ" → "Đã sao chép ✓") nên
-   khoá chiều rộng tối thiểu để nút không giật khi đổi trạng thái. */
+   co giãn theo font. Cỡ icon bằng .music-note để hai nút tròn cạnh nhau
+   trông cùng một bộ. */
 .share-icon {
   display: inline-flex;
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
 }
 .share-icon svg {
   width: 100%;
   height: 100%;
   display: block;
 }
-/* Khoá bề rộng theo nhãn dài nhất ("Đã sao chép ✓") để header không giật
-   khi nút đổi trạng thái, và canh giữa cả cụm icon + chữ trong bề rộng đó. */
-#shareBtn {
-  min-width: 160px;
-  justify-content: center;
+#shareBtn:hover .share-icon {
+  opacity: 1;
 }
+/* Sao chép xong thì đảo màu nút trong ~2s (xem flash() ở script.js) */
 #shareBtn.is-copied {
   background: var(--red-deep);
   border-color: var(--red-deep);
   color: var(--cream-soft);
+}
+#shareBtn.is-copied .share-icon {
+  opacity: 1;
 }
 
 /* ---------------------------------------------------------
@@ -635,7 +672,7 @@ button:focus-visible,
   font-size: 19px;
 }
 
-/* Bọc #soundToggle + .btn--header làm một khối trong .header-inner */
+/* Bọc #soundToggle + #shareBtn làm một khối trong .header-inner */
 .header-actions {
   position: relative;
   z-index: 2;
@@ -645,22 +682,79 @@ button:focus-visible,
   gap: 14px;
 }
 
-/* Nút bật/tắt nhạc nền — cùng cỡ với .sigil để cân đối cạnh logo */
-.sound-toggle {
+/* Nút tròn chỉ có icon ở header (nhạc nền, chia sẻ) — cùng cỡ với .sigil
+   để cân đối cạnh logo. Nhãn chữ nằm ở tooltip .has-tip bên dưới. */
+.icon-btn {
   display: grid;
   place-items: center;
   width: 40px;
   height: 40px;
+  padding: 0;
   border: 1px solid rgba(140, 28, 28, 0.35);
   border-radius: 999px;
   background: transparent;
   color: var(--red);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
 }
-.sound-toggle:hover {
+.icon-btn:hover {
   border-color: var(--red-deep);
   background: rgba(140, 28, 28, 0.06);
+}
+
+/* Tooltip cho nút chỉ có icon: chữ lấy từ data-tip nên đổi trạng thái chỉ
+   cần đổi một thuộc tính (xem setPlayingState/flash ở script.js). Đây là
+   lớp trang trí — tên nút cho trình đọc màn hình vẫn nằm ở aria-label. */
+.has-tip {
+  position: relative;
+}
+.has-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  z-index: 3;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--red-deep);
+  color: var(--cream-soft);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+/* Nút cuối hàng: neo mép phải để tooltip không tràn ra ngoài lề trang */
+.has-tip--end::after {
+  left: auto;
+  right: 0;
+  transform: translate(0, -4px);
+}
+.has-tip:hover::after,
+.has-tip:focus-visible::after,
+.has-tip.is-copied::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.has-tip--end:hover::after,
+.has-tip--end:focus-visible::after,
+.has-tip--end.is-copied::after {
+  transform: translate(0, 0);
+}
+/* Thiết bị cảm ứng không có hover: bỏ tooltip đi cho khỏi kẹt lại sau khi
+   chạm, trừ phản hồi "Đã sao chép ✓" vốn tự tắt sau 2s. */
+@media (hover: none) {
+  .has-tip:hover::after,
+  .has-tip:focus-visible::after {
+    opacity: 0;
+  }
+  .has-tip.is-copied::after {
+    opacity: 1;
+  }
 }
 .music-note {
   display: inline-flex;
@@ -744,11 +838,6 @@ button:focus-visible,
   padding-bottom: 3px;
   color: var(--red);
   border-bottom: 1.5px solid var(--red);
-}
-.btn--header {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
 }
 
 /* ---------------------------------------------------------
@@ -2162,7 +2251,7 @@ button:focus-visible,
   }
 }
 
-/* .header-actions (soundToggle 40px + gap + btn--header) đã ăn bớt phần lề
+/* .header-actions (2 nút tròn 40px + gap) đã ăn bớt phần lề
    an toàn mà .header-inner từng có ở khoảng 901–1000px khi vẫn nowrap — bọc
    nhóm sớm hơn (1080px thay vì 900px) để nav/CTA không bị chèn/tràn trước
    khi flex-wrap kịp bật. */

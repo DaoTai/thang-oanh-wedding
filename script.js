@@ -323,20 +323,25 @@
 
   function initShare() {
     var btn = document.getElementById("shareBtn");
-    var label = document.getElementById("shareBtnLabel");
-    if (!btn || !label) return;
+    // Vùng aria-live ẩn: nút chỉ còn icon nên phản hồi cho trình đọc màn
+    // hình phát ra ở đây, còn người dùng nhìn thấy qua tooltip (data-tip).
+    var live = document.getElementById("shareBtnLabel");
+    if (!btn) return;
 
-    var IDLE_TEXT = label.textContent;
+    var IDLE_TIP = btn.getAttribute("data-tip") || "";
     var FEEDBACK_MS = 2000;
     var resetTimer = null;
 
     // Bấm liên tiếp thì hẹn lại giờ, không để nhiều timer chồng nhau
     function flash(message) {
-      label.textContent = message;
+      if (live) live.textContent = message;
+      btn.setAttribute("data-tip", message);
+      // .is-copied vừa đảo màu nút vừa giữ tooltip hiện trong lúc phản hồi
       btn.classList.add("is-copied");
       clearTimeout(resetTimer);
       resetTimer = setTimeout(function () {
-        label.textContent = IDLE_TEXT;
+        if (live) live.textContent = "";
+        btn.setAttribute("data-tip", IDLE_TIP);
         btn.classList.remove("is-copied");
       }, FEEDBACK_MS);
     }
@@ -462,10 +467,10 @@
     function setPlayingState(isPlaying) {
       toggle.classList.toggle("is-playing", isPlaying);
       toggle.setAttribute("aria-pressed", isPlaying ? "true" : "false");
-      toggle.setAttribute(
-        "aria-label",
-        isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"
-      );
+      var label = isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền";
+      toggle.setAttribute("aria-label", label);
+      // data-tip là chữ hiện trong tooltip (.has-tip::after ở styles.css)
+      toggle.setAttribute("data-tip", label);
     }
 
     function playAudio() {
