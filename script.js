@@ -18,6 +18,17 @@
   /* -------------------------------------------------------
      Cánh hoa rơi
      ------------------------------------------------------- */
+  /* Dáng cánh (ngoài / cuốn lệch / trong lòng bông) và tông màu hồng thật —
+     định nghĩa trong styles.css, ở đây chỉ bốc thăm cho từng cánh. */
+  var PETAL_SHAPES = ["", " petal--s2", " petal--s3"];
+  var PETAL_TONES = [
+    " petal--t1",
+    " petal--t2",
+    " petal--t3",
+    " petal--t4",
+    " petal--t5",
+  ];
+
   function renderPetals() {
     var layer = document.getElementById("petalLayer");
     if (!layer || CONFIG.showPetals === false) return;
@@ -27,13 +38,16 @@
 
     for (var i = 0; i < count; i++) {
       var petal = document.createElement("span");
-      petal.className = "petal";
+      petal.className =
+        "petal" +
+        PETAL_SHAPES[i % PETAL_SHAPES.length] +
+        PETAL_TONES[i % PETAL_TONES.length];
       // Rải đều theo chiều ngang bằng bước góc vàng 137.5°
       petal.style.left = ((i * 137.5) % 100) + "%";
-      petal.style.width = 8 + (i % 4) * 2 + "px";
-      petal.style.height = 11 + (i % 3) * 3 + "px";
-      petal.style.background =
-        i % 3 === 0 ? "rgba(206, 51, 33, 0.75)" : "rgba(238, 112, 101, 0.6)";
+      // Cánh hồng thật bè ngang (rộng hơn cao), không thon dài như lá
+      var width = 14 + (i % 6) * 2;
+      petal.style.width = width + "px";
+      petal.style.height = Math.round(width * (0.8 + (i % 3) * 0.06)) + "px";
       petal.style.setProperty("--dx", ((i % 5) - 2) * 60 + "px");
       petal.style.animation =
         "petalFall " +
@@ -51,12 +65,6 @@
      Confetti boom — cánh hoa bắn lên từ hai góc dưới khi
      mục #story lọt vào khung nhìn (chỉ chạy một lần).
      ------------------------------------------------------- */
-  var BURST_COLORS = [
-    "rgba(255, 74, 74, 0.95)",
-    "rgba(204, 61, 45, 0.92)",
-    "rgba(241, 22, 22, 0.88)",
-  ];
-
   function burstPetalsFrom(originXPercent, count) {
     var layer = document.getElementById("petalLayer");
     if (!layer) return;
@@ -66,12 +74,15 @@
 
     for (var i = 0; i < count; i++) {
       var petal = document.createElement("span");
-      petal.className = "petal petal--burst";
+      petal.className =
+        "petal petal--burst" +
+        PETAL_SHAPES[i % PETAL_SHAPES.length] +
+        PETAL_TONES[(i + 2) % PETAL_TONES.length];
 
-      var size = 4 + Math.random() * 10;
+      // Cánh hồng thật bè ngang; nhiều cỡ để chùm hoa có chiều sâu
+      var size = 11 + Math.random() * 12;
       petal.style.width = size + "px";
-      petal.style.height = size * 1.35 + "px";
-      petal.style.background = BURST_COLORS[i % BURST_COLORS.length];
+      petal.style.height = size * (0.78 + Math.random() * 0.16) + "px";
       petal.style.left = originXPercent + (Math.random() * 10 - 5) + "%";
       // Góc bắn dao động quanh 45° (15°–75°) để cả chùm xòe ra hình phễu/quạt
       // thay vì bay thẳng một đường, thân hẹp ở góc và loe rộng dần lên trên

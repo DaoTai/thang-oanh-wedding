@@ -243,10 +243,95 @@ button {
   z-index: 60;
   overflow: hidden;
 }
+/* Cánh hoa hồng thật: gốc cánh thon (claw), thân phình rộng, đỉnh hơi khuyết
+   — không thể tả bằng border-radius nên dùng mask SVG làm khuôn silhouette,
+   rồi đổ gradient bên trong để lấy độ cong/khối. */
 .petal {
   position: absolute;
   top: -8vh;
-  border-radius: 60% 0 60% 0;
+  /* Mặc định: cánh ngoài — bản rộng, mép trên vòng cung liền (mép hơi lệch cho
+     tự nhiên), thân thóp dần xuống gốc cánh */
+  --petal-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M50 97C33 90 13 79 6 61 0 43 3 19 24 9 38 2 62 2 77 9 98 19 100 43 94 61 87 79 67 90 50 97Z' fill='%23000'/%3E%3C/svg%3E");
+  --petal-edge: #f2a3a4;
+  --petal-mid: #d2585c;
+  --petal-deep: #9b2a32;
+  -webkit-mask-image: var(--petal-shape);
+  mask-image: var(--petal-shape);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* Cánh hoa là lớp mỏng gần như trong suốt: mép phải sáng lên (ánh sáng lọt qua),
+     chứ không tối đi như khối cầu; chỉ một phía đổ bóng để thấy độ cong. */
+  background-image:
+    /* gân giữa: vệt sáng rất loãng, không phải đường kẻ */ linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 34%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0) 66%
+    ),
+    /* viền mép mỏng nên ăn sáng, sáng hơn phần giữa cánh */
+      radial-gradient(
+        112% 112% at 50% 46%,
+        rgba(255, 255, 255, 0) 56%,
+        rgba(255, 255, 255, 0.34)
+      ),
+    /* nguồn sáng chếch trên-trái: một phía cánh chìm xuống → cảm giác cong */
+      linear-gradient(
+        118deg,
+        rgba(255, 255, 255, 0.26),
+        rgba(255, 255, 255, 0) 38%,
+        rgba(96, 26, 34, 0.18) 88%
+      ),
+    /* gốc cánh sẫm lại chỗ đính vào đài hoa */
+      radial-gradient(
+        52% 34% at 50% 99%,
+        rgba(74, 14, 20, 0.22),
+        rgba(74, 14, 20, 0) 72%
+      ),
+    linear-gradient(
+      184deg,
+      var(--petal-edge),
+      var(--petal-mid) 52%,
+      var(--petal-deep)
+    );
+}
+
+/* Ba dáng cánh theo vị trí trên bông hồng thật */
+.petal--s2 {
+  /* Cánh cuốn lệch: một mép cuộn vào trong nên cả dáng nghiêng sang phải */
+  --petal-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M42 97C26 88 8 74 5 55 2 34 14 12 36 7 52 3 72 8 84 20 97 33 98 55 88 70 78 85 60 93 42 97Z' fill='%23000'/%3E%3C/svg%3E");
+}
+.petal--s3 {
+  /* Cánh trong lòng bông: hẹp hơn, dài hơn, gốc thóp rõ */
+  --petal-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M50 97C36 89 19 78 14 60 9 42 14 18 32 9 43 3 57 3 68 9 86 18 91 42 86 60 81 78 64 89 50 97Z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* Bảng màu hồng thật: phớt hồng → hồng đào → đỏ cổ điển → đỏ nhung → mặt sau cánh */
+.petal--t1 {
+  --petal-edge: #fdeef0;
+  --petal-mid: #f3c3cc;
+  --petal-deep: #d98fa0;
+}
+.petal--t2 {
+  --petal-edge: #f9d3cd;
+  --petal-mid: #eda69e;
+  --petal-deep: #c9787a;
+}
+.petal--t3 {
+  --petal-edge: #ef8f8c;
+  --petal-mid: #d3565a;
+  --petal-deep: #9d2b33;
+}
+.petal--t4 {
+  --petal-edge: #cf5a5f;
+  --petal-mid: #a52a34;
+  --petal-deep: #6e141f;
+}
+.petal--t5 {
+  --petal-edge: #fff6f2;
+  --petal-mid: #f4d8d0;
+  --petal-deep: #dcaaa4;
 }
 
 /* Chùm cánh hoa "confetti boom" bắn lên từ hai góc dưới khi #story lọt vào khung nhìn */
@@ -256,7 +341,8 @@ button {
   animation-name: petalBurst;
   animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   animation-fill-mode: forwards;
-  box-shadow: 0 0 6px rgba(140, 28, 28, 0.25);
+  /* drop-shadow bám theo mask (box-shadow sẽ bị mask cắt thành hình chữ nhật) */
+  filter: drop-shadow(0 2px 4px rgba(120, 24, 28, 0.28));
 }
 
 /* ---------------------------------------------------------
