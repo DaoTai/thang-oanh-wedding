@@ -353,7 +353,9 @@
             flash("Đã sao chép ✓");
           },
           function () {
-            flash(copyByExecCommand(url) ? "Đã sao chép ✓" : "Không sao chép được");
+            flash(
+              copyByExecCommand(url) ? "Đã sao chép ✓" : "Không sao chép được"
+            );
           }
         );
         return;
