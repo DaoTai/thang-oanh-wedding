@@ -544,6 +544,260 @@
   }
 
   /* -------------------------------------------------------
+     Màn mở đầu
+     Hai nửa thiệp bay vào ghép thành chữ 囍, rung và loé sáng, được
+     viền bằng vòng tròn đỏ, rồi mở ra như hai cánh cửa khoe tên và
+     ngày cưới trước khi gập lại và tan đi.
+
+     Toàn bộ chuyển động nằm ở styles.css; hàm này chỉ bật lần lượt
+     các class .is-* rồi đọc thời lượng từ chính các biến CSS trong
+     khối .intro — sửa nhịp ở stylesheet là JS tự chạy theo, hai bên
+     không bao giờ lệch nhau.
+
+     onDone được gọi đúng một lần: hết màn, bấm bỏ qua, hay ngay lập
+     tức nếu trang không có markup intro.
+     ------------------------------------------------------- */
+  function initIntro(onDone) {
+    var intro = document.getElementById("intro");
+    var stage = document.getElementById("introStage");
+    var skipBtn = document.getElementById("introSkip");
+    var canvas = document.getElementById("introSparks");
+    var page = document.getElementById("top");
+
+    var done = false;
+    var timers = [];
+    var stopSparks = null;
+
+    function finish() {
+      if (done) return;
+      done = true;
+      onDone();
+    }
+
+    if (!intro) {
+      finish();
+      return;
+    }
+
+    function at(delay, fn) {
+      timers.push(setTimeout(fn, delay));
+    }
+
+    function clearTimers() {
+      for (var i = 0; i < timers.length; i++) clearTimeout(timers[i]);
+      timers = [];
+    }
+
+    // Đọc một mốc thời gian từ biến CSS. Nhận cả "780ms" lẫn "0.78s",
+    // trả về mili giây; hỏng thì dùng giá trị dự phòng thay vì NaN.
+    var cs = window.getComputedStyle(intro);
+    function step(name, fallback) {
+      var raw = cs.getPropertyValue(name).trim();
+      var n = parseFloat(raw);
+      if (!raw || isNaN(n)) return fallback;
+      return raw.slice(-2) === "ms" ? n : n * 1000;
+    }
+
+    /* Hạt sáng bắn ra hai bên đúng lúc hai nửa chạm nhau. Canvas chỉ
+       phủ vừa khung thiệp chứ không full-screen, DPR chặn ở 2, và
+       vòng lặp tự dừng khi hạt cuối tắt — không để rAF chạy nền. */
+    function burstSparks() {
+      var ctx = canvas && canvas.getContext && canvas.getContext("2d");
+      if (!ctx || !stage) return null;
+
+      var box = stage.getBoundingClientRect();
+      var w = box.width;
+      var h = box.height;
+      if (!w || !h) return null;
+
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.scale(dpr, dpr);
+
+      var parts = [];
+      for (var i = 0; i < 44; i++) {
+        var dir = i % 2 ? 1 : -1;
+        parts.push({
+          x: w / 2,
+          y: h / 2 + (Math.random() - 0.5) * h * 0.5,
+          vx: dir * (1.1 + Math.random() * 3.6),
+          vy: (Math.random() - 0.5) * 2.2,
+          r: 1.2 + Math.random() * 2.4,
+          life: 0,
+          max: 520 + Math.random() * 420,
+          gold: Math.random() > 0.3,
+        });
+      }
+
+      var raf = 0;
+      var last = 0;
+      function frame(now) {
+        if (!last) last = now;
+        // Chặn bước nhảy lớn khi tab bị treo, kẻo hạt văng hết một lần
+        var dt = Math.min(now - last, 34);
+        last = now;
+
+        ctx.clearRect(0, 0, w, h);
+        var k = dt / 16.7;
+        var alive = 0;
+
+        for (var j = 0; j < parts.length; j++) {
+          var p = parts[j];
+          p.life += dt;
+          if (p.life >= p.max) continue;
+          alive++;
+
+          p.x += p.vx * k;
+          p.y += p.vy * k;
+          p.vy += 0.035 * k;
+          p.vx *= 0.985;
+
+          var a = 1 - p.life / p.max;
+          ctx.globalAlpha = a * a;
+          // Nền thiệp vốn màu kem, nên hạt phải là vàng đậm và đỏ son mới
+          // nổi — hạt trắng sẽ mất hút hoàn toàn. Quầng sáng cùng màu để
+          // mỗi hạt trông như một đốm lửa nhỏ chứ không phải chấm phẳng.
+          var tone = p.gold ? "#c08a3e" : "#a8272b";
+          ctx.fillStyle = tone;
+          ctx.shadowColor = tone;
+          ctx.shadowBlur = 6 * a;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * (0.4 + a * 0.6), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (alive) {
+          raf = requestAnimationFrame(frame);
+        } else {
+          raf = 0;
+          ctx.clearRect(0, 0, w, h);
+        }
+      }
+      raf = requestAnimationFrame(frame);
+
+      return function () {
+        if (raf) cancelAnimationFrame(raf);
+        raf = 0;
+        ctx.clearRect(0, 0, w, h);
+      };
+    }
+
+    function onKey(e) {
+      if (e.key === "Escape") skip();
+    }
+
+    function teardown() {
+      clearTimers();
+      document.removeEventListener("keydown", onKey);
+      if (stopSparks) stopSparks();
+
+      document.documentElement.classList.remove("intro-lock");
+      if (page) {
+        page.removeAttribute("aria-hidden");
+        page.inert = false;
+      }
+      if (intro.parentNode) intro.parentNode.removeChild(intro);
+
+      finish();
+    }
+
+    function leave(outMs) {
+      intro.classList.add("is-leaving");
+      at(outMs, teardown);
+    }
+
+    function skip() {
+      if (done) return;
+      clearTimers();
+      if (stopSparks) stopSparks();
+      // Ai đã bấm bỏ qua thì không bắt họ chờ nốt 700ms tan chậm rãi
+      intro.style.setProperty("--intro-out", "320ms");
+      leave(320);
+    }
+
+    // Khoá trang phía sau: inert chặn chuột lẫn Tab, aria-hidden lo phần
+    // trình đọc màn hình cho trình duyệt chưa hỗ trợ inert.
+    document.documentElement.classList.add("intro-lock");
+    if (page) {
+      page.setAttribute("aria-hidden", "true");
+      page.inert = true;
+    }
+
+    if (skipBtn) skipBtn.addEventListener("click", skip);
+    intro.addEventListener("click", skip);
+    document.addEventListener("keydown", onKey);
+
+    var reduce =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function play() {
+      if (done) return;
+
+      if (reduce) {
+        // styles.css đã dựng sẵn thiệp ở trạng thái ghép xong: chỉ hiện
+        // rồi tan, không rung, không xoay, không hạt sáng.
+        at(900, function () {
+          leave(400);
+        });
+        return;
+      }
+
+      var t = step("--intro-lead", 260);
+      at(t, function () {
+        intro.classList.add("is-entering");
+      });
+
+      t += step("--intro-in", 780);
+      at(t, function () {
+        intro.classList.add("is-impact");
+        stopSparks = burstSparks();
+      });
+
+      t += step("--intro-impact", 420);
+      at(t, function () {
+        intro.classList.add("is-fusing");
+      });
+
+      t += step("--intro-fuse", 980);
+      at(t, function () {
+        intro.classList.add("is-open");
+      });
+
+      t += step("--intro-open", 800) + step("--intro-hold", 1200);
+      at(t, function () {
+        intro.classList.add("is-closing");
+      });
+
+      t += step("--intro-close", 700);
+      at(t, function () {
+        leave(step("--intro-out", 700));
+      });
+    }
+
+    /* Chờ font có chữ 囍 rồi mới diễn, nếu không hai nửa sẽ ghép bằng
+       glyph dự phòng rồi mới đổi nét giữa chừng. Có hẹn giờ 800ms để
+       font hỏng hay mạng chậm không khoá người xem lại ở màn trống. */
+    if (document.fonts && document.fonts.load) {
+      var started = false;
+      var go = function () {
+        if (started) return;
+        started = true;
+        play();
+      };
+      at(800, go);
+      try {
+        document.fonts.load('700 100px "Noto Serif TC"', "囍").then(go, go);
+      } catch (err) {
+        go();
+      }
+    } else {
+      play();
+    }
+  }
+
+  /* -------------------------------------------------------
      Khởi động
      ------------------------------------------------------- */
   function init() {
@@ -558,7 +812,11 @@
     // Đặt ngay trước initMusic: ẩn tên và nối hàm bắt đầu viết vào modal là một
     // cặp, để lỗi ở các bước trước không làm tên bị ẩn mà không bao giờ hiện.
     var writeNames = initNameWriting();
-    if (!initMusic(writeNames)) writeNames();
+    // Màn mở đầu chặn phía trước: chỉ khi nó tan đi mới tới lượt modal
+    // xin phép bật nhạc, rồi tên cô dâu chú rể mới bắt đầu được viết.
+    initIntro(function () {
+      if (!initMusic(writeNames)) writeNames();
+    });
   }
 
   if (document.readyState === "loading") {

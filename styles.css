@@ -2223,3 +2223,597 @@ button {
     width: 28px;
   }
 }
+
+/* =========================================================
+   MÀN MỞ ĐẦU (INTRO)
+   Markup ở đầu <body> trong index.html, nhịp diễn do initIntro()
+   trong script.js bật/tắt bằng các class .is-* trên #intro.
+
+   Mọi mốc thời gian nằm ở nhóm biến ngay dưới đây — script.js đọc
+   lại đúng các biến này bằng getComputedStyle, nên đổi thời lượng
+   chỉ cần sửa một dòng ở đây, không phải đụng vào JS hay keyframes.
+
+   Các class nối tiếp nhau chứ không thay thế nhau: .is-closing đứng
+   sau .is-open trong file để đè lại góc xoay.
+   ========================================================= */
+.intro {
+  /* --- Nhịp diễn (script.js đọc trực tiếp) --- */
+  --intro-lead: 260ms; /* lặng trước khi hai nửa bay vào */
+  --intro-in: 780ms; /* hai nửa trượt vào giữa */
+  --intro-impact: 420ms; /* chạm nhau: rung + lóe sáng */
+  --intro-fuse: 980ms; /* hợp nhất: vẽ vòng tròn, hào quang */
+  --intro-open: 800ms; /* bật hai cánh ra */
+  --intro-hold: 1200ms; /* giữ mở cho kịp đọc */
+  --intro-close: 700ms; /* gập lại */
+  --intro-out: 700ms; /* tan đi, trả trang lại */
+
+  /* --- Kích thước: mọi thứ suy ra từ đường kính vòng tròn --- */
+  --ring: clamp(300px, 76vmin, 440px);
+  --card-w: calc(var(--ring) * 0.5);
+  --card-h: calc(var(--ring) * 0.66);
+
+  --ease-card: cubic-bezier(0.16, 0.84, 0.34, 1);
+  --ease-swing: cubic-bezier(0.34, 0.9, 0.3, 1);
+
+  position: fixed;
+  inset: 0;
+  /* Trên cả .music-modal (200) — màn mở đầu phải che được mọi thứ kể cả
+     khi một lớp nào đó lỡ hiện sớm. */
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  /* Vòng tròn nở ra lúc mở cánh có thể vươn quá mép trên máy hẹp — cắt
+     ở đây thay vì để nó đẻ ra thanh cuộn ngang. */
+  overflow: hidden;
+  background: radial-gradient(
+      circle at 50% 42%,
+      #fffaf3 0%,
+      var(--cream-soft) 42%,
+      #f2e3d2 100%
+    )
+    var(--cream-soft);
+  /* Phao cứu sinh thuần CSS: nếu script.js chết giữa chừng thì màn che
+     vẫn tự biến mất thay vì khoá trang vĩnh viễn. Chạy bình thường,
+     initIntro() đã gỡ hẳn phần tử này từ lâu trước mốc 12s. */
+  animation: intro-failsafe 0.01s linear 12s forwards;
+}
+@keyframes intro-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* Lớp vân giấy rất mờ cho nền đỡ phẳng */
+.intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--weave-soft);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.intro-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--ring);
+  height: var(--ring);
+  /* perspective đặt ở đây, .intro-card giữ preserve-3d để truyền tiếp
+     xuống hai cánh — nếu không, rotateY sẽ trông phẳng lì. */
+  perspective: 1400px;
+}
+
+/* ----- Hào quang toả ra lúc hợp nhất ----- */
+.intro-halo {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 233, 196, 0.85) 0%,
+    rgba(214, 150, 96, 0.4) 38%,
+    rgba(140, 28, 28, 0.12) 60%,
+    transparent 72%
+  );
+  opacity: 0;
+  transform: scale(0.55);
+  pointer-events: none;
+}
+
+/* ----- Vòng tròn đỏ ----- */
+.intro-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  /* Bắt đầu vẽ từ đỉnh 12 giờ thay vì mép phải */
+  transform: rotate(-90deg);
+}
+.intro-ring circle {
+  fill: none;
+  stroke-linecap: round;
+}
+.intro-ring__track {
+  stroke: rgba(176, 141, 94, 0.22);
+  stroke-width: 0.5;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.intro-ring__draw {
+  stroke: var(--red);
+  stroke-width: 1.1;
+  /* Chu vi = 2π × 94 ≈ 590.6; làm tròn lên để chắc chắn khép kín vòng */
+  stroke-dasharray: 591;
+  stroke-dashoffset: 591;
+  filter: drop-shadow(0 0 3px rgba(140, 28, 28, 0.45));
+}
+
+/* ----- Hạt sáng bắn ra lúc chạm (canvas 2D, script.js vẽ) ----- */
+.intro-sparks {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  /* Nhô hẳn ra trước mặt thiệp (z=0) — chỉ dựa vào thứ tự DOM thì trong
+     ngữ cảnh 3D của .intro-stage vẫn có máy sắp xếp khác đi. */
+  transform: translateZ(4px);
+  pointer-events: none;
+}
+
+/* ----- Thiệp ----- */
+.intro-card {
+  position: relative;
+  width: var(--card-w);
+  height: var(--card-h);
+  transform-style: preserve-3d;
+}
+
+/* Ruột thiệp — lùi sau hai cánh theo trục Z nên bị che kín khi đóng */
+.intro-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--ring) * 0.05);
+  border-radius: 12px;
+  background: linear-gradient(170deg, var(--paper), var(--cream));
+  /* Bóng đổ lớn của cả tấm thiệp treo ở đây chứ không ở hai cánh: ruột
+     thiệp là một phần tử liền, đúng bằng khổ thiệp, nên bóng không thể
+     nứt ra ở đường ghép. Lúc hai cánh mở, bóng vẫn ở lại dưới thiệp —
+     đúng như vật thật. */
+  box-shadow: 0 26px 50px -22px rgba(88, 48, 43, 0.5),
+    inset 0 0 0 1px rgba(176, 141, 94, 0.45),
+    inset 0 0 0 5px rgba(255, 255, 255, 0.55),
+    inset 0 0 0 6px rgba(176, 141, 94, 0.28);
+  text-align: center;
+  transform: translateZ(-3px);
+}
+.intro-inner > * {
+  margin: 0;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.intro-inner__kicker {
+  font-family: var(--font-serif);
+  font-size: calc(var(--ring) * 0.026);
+  /* Giãn chữ vừa phải thôi: ruột thiệp chỉ rộng bằng nửa vòng tròn,
+     rộng hơn nữa là dòng này gãy làm đôi. */
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted-warm);
+}
+.intro-inner__name {
+  margin-top: calc(var(--ring) * 0.022);
+  font-family: var(--font-script);
+  font-size: calc(var(--ring) * 0.082);
+  line-height: 1.1;
+  color: var(--red-deep);
+}
+.intro-inner__amp {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: calc(var(--ring) * 0.042);
+  color: var(--gold);
+}
+.intro-inner__rule {
+  width: calc(var(--ring) * 0.16);
+  height: 1px;
+  margin: calc(var(--ring) * 0.035) 0 calc(var(--ring) * 0.028);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--line-gold),
+    transparent
+  );
+}
+.intro-inner__date {
+  font-family: var(--font-serif);
+  font-size: calc(var(--ring) * 0.042);
+  letter-spacing: 0.14em;
+  color: var(--brown-dark);
+}
+
+/* ----- Hai cánh ----- */
+.intro-half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--intro-in) var(--ease-card);
+}
+/* Bản lề nằm ở mép ngoài — vừa là trục bật cánh, vừa khiến cú nghiêng
+   lúc bay vào trông như đang đu vào giữa. */
+.intro-half--left {
+  left: 0;
+  transform-origin: left center;
+  transform: translate3d(calc(-50vw - 100%), 6%, 0) rotate(-7deg) rotateY(0deg);
+}
+.intro-half--right {
+  right: 0;
+  transform-origin: right center;
+  transform: translate3d(calc(50vw + 100%), 6%, 0) rotate(7deg) rotateY(0deg);
+}
+
+.intro-half__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Bóng của cánh phải sẽ đè lên cánh trái nếu vệt mờ tràn qua đường
+     ghép — và vệt mờ Gauss loang rộng hơn con số blur khá nhiều. Giữ
+     tầm loang (~0.75 × blur = 15px) nhỏ hơn spread âm (18px) thì bóng
+     không bao giờ chạm tới mép trong. Phần bóng dày đã nằm ở
+     .intro-inner. */
+  box-shadow: 0 14px 20px -18px rgba(88, 48, 43, 0.5);
+}
+/* Gradient phải trải liên tục qua cả tấm thiệp chứ không phải mỗi nửa vẽ
+   lại từ đầu — nếu không, chỗ ghép lộ một vệt sáng hơn hẳn. Kéo ảnh nền
+   rộng gấp đôi khung cánh (= bề ngang tấm thiệp) rồi mỗi nửa neo về một
+   phía, hai mảnh ráp lại thành đúng một dải gradient. */
+.intro-half__face--front {
+  background-image: linear-gradient(165deg, var(--paper) 0%, var(--cream) 100%);
+  background-size: 200% 100%;
+}
+.intro-half--left .intro-half__face--front {
+  background-position: left center;
+}
+.intro-half--right .intro-half__face--front {
+  background-position: right center;
+}
+/* Khung chỉ vàng trên mặt trước, cũng cắt làm đôi theo kiểu ấy: mỗi nửa
+   chỉ kẻ ba cạnh ngoài, khép lại thành một khung kín. */
+.intro-half__face--front::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--ring) * 0.028);
+  bottom: calc(var(--ring) * 0.028);
+  border-color: rgba(176, 141, 94, 0.45);
+  border-style: solid;
+}
+.intro-half--left .intro-half__face--front::after {
+  left: calc(var(--ring) * 0.028);
+  right: 0;
+  border-width: 1px 0 1px 1px;
+}
+.intro-half--right .intro-half__face--front::after {
+  left: 0;
+  right: calc(var(--ring) * 0.028);
+  border-width: 1px 1px 1px 0;
+}
+.intro-half__face--back {
+  background: linear-gradient(165deg, var(--cream) 0%, #f3e6d6 100%);
+  /* Đẩy lùi 1px sau khi lật, nếu không hai mặt nằm đúng cùng một mặt
+     phẳng z=0 và có máy sẽ tranh nhau vẽ ra viền lởm chởm. */
+  transform: rotateY(180deg) translateZ(1px);
+}
+.intro-half__face--back::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--ring) * 0.028);
+  border: 1px solid rgba(176, 141, 94, 0.38);
+}
+/* Viền và bo góc chỉ ở ba cạnh ngoài, để khi khép lại thành một tấm liền */
+.intro-half--left .intro-half__face {
+  border-radius: 12px 0 0 12px;
+  border-left: 1px solid rgba(176, 141, 94, 0.5);
+  border-top: 1px solid rgba(176, 141, 94, 0.5);
+  border-bottom: 1px solid rgba(176, 141, 94, 0.5);
+}
+.intro-half--right .intro-half__face {
+  border-radius: 0 12px 12px 0;
+  border-right: 1px solid rgba(176, 141, 94, 0.5);
+  border-top: 1px solid rgba(176, 141, 94, 0.5);
+  border-bottom: 1px solid rgba(176, 141, 94, 0.5);
+}
+/* Mặt sau lật 180° nên trái/phải đảo chiều — bo góc phải đảo theo */
+.intro-half--left .intro-half__face--back {
+  border-radius: 0 12px 12px 0;
+}
+.intro-half--right .intro-half__face--back {
+  border-radius: 12px 0 0 12px;
+}
+
+/* Chữ 囍 rộng gấp đôi khung cánh (= đúng bề ngang tấm thiệp) rồi bị
+   overflow:hidden của .intro-half__face cắt đi một nửa. Cánh trái giữ
+   nửa trái, cánh phải dịch sang trái để giữ nửa phải. */
+.intro-glyph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 200%;
+  height: 100%;
+  font-family: "Noto Serif TC", "Noto Serif SC", "PingFang TC", serif;
+  font-weight: 700;
+  font-size: calc(var(--ring) * 0.33);
+  line-height: 1;
+  color: var(--red);
+  user-select: none;
+}
+.intro-half--right .intro-glyph {
+  left: -100%;
+}
+
+/* Vệt sáng quét dọc đường ghép */
+.intro-seam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(var(--ring) * 0.02);
+  height: 100%;
+  margin-left: calc(var(--ring) * -0.01);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 245, 220, 0.95),
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ----- Nút bỏ qua ----- */
+.intro-skip {
+  position: absolute;
+  top: max(20px, env(safe-area-inset-top));
+  right: 20px;
+  padding: 9px 18px;
+  border: 1px solid rgba(140, 28, 28, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 500ms ease 900ms, background-color 200ms ease,
+    color 200ms ease;
+}
+.intro.is-entering .intro-skip {
+  opacity: 1;
+}
+.intro-skip:hover,
+.intro-skip:focus-visible {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--red);
+}
+
+/* ===================== NHỊP DIỄN ===================== */
+
+/* 1. Hai nửa trượt vào giữa */
+.intro.is-entering .intro-half--left,
+.intro.is-entering .intro-half--right {
+  transform: translate3d(0, 0, 0) rotate(0deg) rotateY(0deg);
+}
+
+/* 2. Chạm nhau: rung tắt dần + vệt sáng loé lên */
+.intro.is-impact .intro-card {
+  animation: intro-shake var(--intro-impact)
+    cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.intro.is-impact .intro-seam {
+  animation: intro-seam-flash var(--intro-impact) ease-out;
+}
+@keyframes intro-shake {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  14% {
+    transform: translate3d(-10px, 0, 0);
+  }
+  30% {
+    transform: translate3d(8px, 0, 0);
+  }
+  46% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  62% {
+    transform: translate3d(3px, 0, 0);
+  }
+  80% {
+    transform: translate3d(-1.5px, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes intro-seam-flash {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.4) scaleY(0.2);
+  }
+  22% {
+    opacity: 1;
+    transform: scaleX(3.2) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+/* 3. Hợp nhất: vòng tròn đỏ tự vẽ, hào quang đập hai nhịp */
+.intro.is-fusing .intro-ring__track {
+  opacity: 1;
+}
+.intro.is-fusing .intro-ring__draw {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--intro-fuse)
+    cubic-bezier(0.62, 0.02, 0.28, 1);
+}
+.intro.is-fusing .intro-halo {
+  animation: intro-halo-pulse var(--intro-fuse) ease-out;
+}
+@keyframes intro-halo-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  18% {
+    opacity: 0.9;
+    transform: scale(0.92);
+  }
+  46% {
+    opacity: 0.32;
+    transform: scale(1.02);
+  }
+  70% {
+    opacity: 0.7;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* 4. Bật hai cánh ra, ruột thiệp hiện dần */
+.intro.is-open .intro-half {
+  transition: transform var(--intro-open) var(--ease-swing);
+}
+.intro.is-open .intro-half--left {
+  transform: translate3d(0, 0, 0) rotate(0deg) rotateY(-155deg);
+}
+.intro.is-open .intro-half--right {
+  transform: translate3d(0, 0, 0) rotate(0deg) rotateY(155deg);
+}
+/* Mép ngoài của cánh khi mở 155° vươn ra gần đúng bằng bán kính vòng
+   tròn, che mất hai bên vòng. Nở vòng rộng thêm một nhịp cho thoáng. */
+.intro.is-open .intro-ring {
+  transform: rotate(-90deg) scale(1.16);
+  transition: transform var(--intro-open) var(--ease-swing);
+}
+.intro.is-open .intro-inner > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 520ms ease, transform 620ms var(--ease-card);
+}
+/* Các dòng trong ruột thiệp hiện so le cho có nhịp */
+.intro.is-open .intro-inner > *:nth-child(1) {
+  transition-delay: 320ms;
+}
+.intro.is-open .intro-inner > *:nth-child(2) {
+  transition-delay: 400ms;
+}
+.intro.is-open .intro-inner > *:nth-child(3) {
+  transition-delay: 460ms;
+}
+.intro.is-open .intro-inner > *:nth-child(4) {
+  transition-delay: 520ms;
+}
+.intro.is-open .intro-inner > *:nth-child(5) {
+  transition-delay: 600ms;
+}
+.intro.is-open .intro-inner > *:nth-child(6) {
+  transition-delay: 660ms;
+}
+
+/* 5. Gập lại. Đặt sau .is-open để đè lại góc xoay — cùng độ ưu tiên
+      nên luật đứng sau thắng. */
+.intro.is-closing .intro-half {
+  transition: transform var(--intro-close) var(--ease-swing);
+}
+.intro.is-closing .intro-half--left,
+.intro.is-closing .intro-half--right {
+  transform: translate3d(0, 0, 0) rotate(0deg) rotateY(0deg);
+}
+.intro.is-closing .intro-ring {
+  transform: rotate(-90deg) scale(1);
+  transition: transform var(--intro-close) var(--ease-swing);
+}
+.intro.is-closing .intro-inner > * {
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 260ms ease;
+  transition-delay: 0s;
+}
+
+/* 6. Tan đi, trả trang lại */
+.intro.is-leaving {
+  opacity: 0;
+  transition: opacity var(--intro-out) ease;
+  pointer-events: none;
+}
+.intro.is-leaving .intro-card {
+  transform: scale(1.09);
+  transition: transform var(--intro-out) cubic-bezier(0.4, 0, 0.6, 1);
+}
+.intro.is-leaving .intro-ring {
+  opacity: 0;
+  transform: rotate(-90deg) scale(1.14);
+  transition: opacity var(--intro-out) ease,
+    transform var(--intro-out) cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Khoá cuộn trang trong lúc intro chạy */
+.intro-lock,
+.intro-lock body {
+  overflow: hidden;
+}
+
+/* ----- Tôn trọng prefers-reduced-motion -----
+   Bỏ toàn bộ chuyển động: thiệp hiện ra ở trạng thái đã ghép rồi tan.
+   script.js cũng đọc cờ này để rút nhịp diễn xuống còn hai bước. */
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .intro * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .intro.is-leaving {
+    transition: opacity 400ms ease !important;
+  }
+  .intro-half--left,
+  .intro-half--right {
+    transform: none !important;
+  }
+  .intro-ring__draw {
+    stroke-dashoffset: 0;
+  }
+  .intro-ring__track {
+    opacity: 1;
+  }
+  .intro-skip {
+    opacity: 1;
+  }
+  .intro-sparks {
+    display: none;
+  }
+}
+
+/* Màn hình thấp: thu nhỏ để vòng tròn không chạm mép trên/dưới */
+@media (max-height: 560px) {
+  .intro {
+    --ring: clamp(240px, 62vmin, 320px);
+  }
+}

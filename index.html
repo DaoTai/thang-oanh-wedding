@@ -82,6 +82,73 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- ============================ INTRO ============================
+         Màn mở đầu. Hai nửa thiệp bay vào ghép lại thành chữ 囍, rung và
+         lóe sáng, được viền bằng vòng tròn đỏ, rồi mở ra như hai cánh cửa
+         khoe tên & ngày cưới trước khi gập lại và tan đi.
+
+         Mỗi nửa chứa một chữ 囍 đầy đủ rộng gấp đôi khung và bị .intro-half
+         __face cắt đi một nửa — vì 囍 vốn là hai chữ 喜 đặt cạnh nhau nên
+         mỗi mảnh cắt ra đúng bằng một chữ 喜 và khi ghép lại nét khớp tuyệt
+         đối. Nhờ vậy không phải tải thêm glyph 喜 (bộ font ở <head> cố ý
+         chỉ xin đúng ký tự 囍).
+
+         Viết thẳng trong HTML chứ không để script.js sinh ra, để khung hình
+         đầu tiên đã có màn che — người xem không kịp thấy nội dung trang
+         nhấp nháy. Nhịp diễn do initIntro() trong script.js điều khiển. -->
+    <div class="intro" id="intro">
+      <div class="intro-stage" id="introStage" aria-hidden="true">
+        <div class="intro-halo"></div>
+
+        <svg
+          class="intro-ring"
+          viewBox="0 0 200 200"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle class="intro-ring__track" cx="100" cy="100" r="94" />
+          <circle class="intro-ring__draw" cx="100" cy="100" r="94" />
+        </svg>
+
+        <div class="intro-card">
+          <!-- Ruột thiệp: nằm lùi về sau theo trục Z nên bị hai cánh che
+               kín khi đóng, chỉ lộ ra lúc cánh mở. -->
+          <div class="intro-inner">
+            <p class="intro-inner__kicker">Trân trọng kính mời</p>
+            <p class="intro-inner__name">Mạnh Thắng</p>
+            <p class="intro-inner__amp">&amp;</p>
+            <p class="intro-inner__name">Ngọc Oanh</p>
+            <span class="intro-inner__rule"></span>
+            <p class="intro-inner__date">28 · 11 · 2026</p>
+          </div>
+
+          <div class="intro-half intro-half--left">
+            <div class="intro-half__face intro-half__face--front">
+              <span class="intro-glyph">囍</span>
+            </div>
+            <div class="intro-half__face intro-half__face--back"></div>
+          </div>
+
+          <div class="intro-half intro-half--right">
+            <div class="intro-half__face intro-half__face--front">
+              <span class="intro-glyph">囍</span>
+            </div>
+            <div class="intro-half__face intro-half__face--back"></div>
+          </div>
+
+          <!-- Vệt sáng quét dọc đường ghép đúng lúc hai nửa chạm nhau -->
+          <span class="intro-seam"></span>
+        </div>
+
+        <!-- Đứng sau .intro-card và được đẩy lên trước theo trục Z: hạt
+             sáng phải phủ lên mặt thiệp, chứ nằm dưới thì chúng tắt trước
+             khi kịp bay ra khỏi mép và coi như vô hình. -->
+        <canvas class="intro-sparks" id="introSparks"></canvas>
+      </div>
+
+      <button type="button" class="intro-skip" id="introSkip">Bỏ qua</button>
+    </div>
+
     <div id="top" class="page">
       <!-- Lớp cánh hoa rơi, do script.js sinh ra -->
       <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
