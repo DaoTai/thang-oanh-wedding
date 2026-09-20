@@ -289,6 +289,96 @@
   }
 
   /* -------------------------------------------------------
+     Chia sẻ thiệp
+     Ưu tiên share sheet của hệ điều hành (mobile có sẵn Zalo, Messenger,
+     Facebook...). Máy không hỗ trợ thì sao chép liên kết vào clipboard.
+     Tiêu đề và mô tả lấy từ thẻ og: trong <head> để chỉ phải sửa một nơi.
+     ------------------------------------------------------- */
+  function metaContent(prop, fallback) {
+    var tag = document.querySelector('meta[property="' + prop + '"]');
+    var value = tag && tag.getAttribute("content");
+    return value ? value.trim() : fallback;
+  }
+
+  /* Đường lui cho trình duyệt cũ không có navigator.clipboard (hoặc trang
+     chạy qua http). Trả về true nếu sao chép được. */
+  function copyByExecCommand(text) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-9999px";
+    document.body.appendChild(area);
+
+    var copied = false;
+    try {
+      area.select();
+      copied = document.execCommand("copy");
+    } catch (err) {
+      copied = false;
+    }
+    document.body.removeChild(area);
+    return copied;
+  }
+
+  function initShare() {
+    var btn = document.getElementById("shareBtn");
+    var label = document.getElementById("shareBtnLabel");
+    if (!btn || !label) return;
+
+    var IDLE_TEXT = label.textContent;
+    var FEEDBACK_MS = 2000;
+    var resetTimer = null;
+
+    // Bấm liên tiếp thì hẹn lại giờ, không để nhiều timer chồng nhau
+    function flash(message) {
+      label.textContent = message;
+      btn.classList.add("is-copied");
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(function () {
+        label.textContent = IDLE_TEXT;
+        btn.classList.remove("is-copied");
+      }, FEEDBACK_MS);
+    }
+
+    function copyLink(url) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(
+          function () {
+            flash("Đã sao chép ✓");
+          },
+          function () {
+            flash(copyByExecCommand(url) ? "Đã sao chép ✓" : "Không sao chép được");
+          }
+        );
+        return;
+      }
+      flash(copyByExecCommand(url) ? "Đã sao chép ✓" : "Không sao chép được");
+    }
+
+    btn.addEventListener("click", function () {
+      var url = window.location.href;
+      var data = {
+        title: metaContent("og:title", document.title),
+        text: metaContent("og:description", document.title),
+        url: url,
+      };
+
+      if (navigator.share) {
+        navigator.share(data).catch(function (err) {
+          // Người dùng đóng share sheet là chuyện bình thường, không báo gì.
+          // Lỗi khác (trình duyệt từ chối kiểu dữ liệu...) thì lui về sao chép.
+          if (err && err.name === "AbortError") return;
+          copyLink(url);
+        });
+        return;
+      }
+
+      copyLink(url);
+    });
+  }
+
+  /* -------------------------------------------------------
      Tên cô dâu chú rể "viết tay"
      Ẩn tên ngay từ đầu rồi trả về hàm bắt đầu viết. Modal nhạc che hero nên
      việc viết chỉ bắt đầu khi modal đóng; hai tên viết song song và cùng xong
@@ -819,6 +909,7 @@
     initWhenReveal();
     initCountdown();
     initRsvp();
+    initShare();
     initGiftModal();
     // Đặt ngay trước initMusic: ẩn tên và nối hàm bắt đầu viết vào modal là một
     // cặp, để lỗi ở các bước trước không làm tên bị ẩn mà không bao giờ hiện.

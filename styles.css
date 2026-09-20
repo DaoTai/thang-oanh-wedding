@@ -138,6 +138,14 @@ button {
   font-family: inherit;
 }
 
+/* Bỏ viền outline mặc định khi nút được focus (click hoặc bàn phím) */
+button:focus,
+button:focus-visible,
+.btn:focus,
+.btn:focus-visible {
+  outline: none;
+}
+
 .page {
   position: relative;
   width: 100%;
@@ -520,6 +528,31 @@ button {
   white-space: nowrap;
 }
 
+/* Nút chia sẻ ở header: icon vẽ bằng SVG nên cần khung cố định để không
+   co giãn theo font, và nhãn đổi chữ ("Chia sẻ" → "Đã sao chép ✓") nên
+   khoá chiều rộng tối thiểu để nút không giật khi đổi trạng thái. */
+.share-icon {
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+}
+.share-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* Khoá bề rộng theo nhãn dài nhất ("Đã sao chép ✓") để header không giật
+   khi nút đổi trạng thái, và canh giữa cả cụm icon + chữ trong bề rộng đó. */
+#shareBtn {
+  min-width: 160px;
+  justify-content: center;
+}
+#shareBtn.is-copied {
+  background: var(--red-deep);
+  border-color: var(--red-deep);
+  color: var(--cream-soft);
+}
+
 /* ---------------------------------------------------------
    Header
    --------------------------------------------------------- */
@@ -628,10 +661,6 @@ button {
 .sound-toggle:hover {
   border-color: var(--red-deep);
   background: rgba(140, 28, 28, 0.06);
-}
-.sound-toggle:focus-visible {
-  outline: 2px solid var(--red-deep);
-  outline-offset: 2px;
 }
 .music-note {
   display: inline-flex;
