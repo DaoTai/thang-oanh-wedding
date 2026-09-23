@@ -1,0 +1,309 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - generic [ref=f7e7]:
+      - generic [ref=f7e8]:
+        - paragraph [ref=f7e9]: Trân trọng kính mời
+        - paragraph [ref=f7e10]: Mạnh Thắng
+        - paragraph [ref=f7e11]: "&"
+        - paragraph [ref=f7e12]: Ngọc Oanh
+        - paragraph [ref=f7e14]: 28 · 11 · 2026
+      - generic [ref=f7e15]: 囍
+      - generic [ref=f7e19]: 囍
+    - button "Bỏ qua" [ref=f7e23] [cursor=pointer]
+  - generic [aria-hidden] [ref=f7e24]:
+    - banner [ref=f7e25]:
+      - generic [ref=f7e26]:
+        - link [ref=f7e28] [cursor=pointer]:
+          - /url: "#top"
+          - generic [ref=f7e29]: 囍
+        - navigation [ref=f7e30]:
+          - link [ref=f7e31] [cursor=pointer]:
+            - /url: "#top"
+            - text: Trang chủ
+          - link [ref=f7e32] [cursor=pointer]:
+            - /url: "#story"
+            - text: Hành trình
+          - link [ref=f7e33] [cursor=pointer]:
+            - /url: "#when"
+            - text: Thời gian & Địa điểm
+          - link [ref=f7e34] [cursor=pointer]:
+            - /url: "#album"
+            - text: Album ảnh
+          - link [ref=f7e35] [cursor=pointer]:
+            - /url: "#rsvp"
+            - text: Lời chúc
+        - generic [ref=f7e36]:
+          - button [ref=f7e37] [cursor=pointer]: Bật nhạc nền
+          - button [ref=f7e42] [cursor=pointer]: Chia sẻ thiệp
+          - status [ref=f7e49]
+    - generic [ref=f7e52]:
+      - paragraph [ref=f7e53]: Trân trọng kính mời
+      - paragraph [ref=f7e54]: "&"
+      - paragraph [ref=f7e55]: Cùng chúng tôi tham dự lễ thành hôn
+      - generic [ref=f7e56]: Thứ bảy
+      - paragraph [ref=f7e60]: 28 · 11 · 2026
+      - paragraph [ref=f7e61]: (Tức ngày 20 tháng 10 năm Bính Ngọ)
+      - paragraph [ref=f7e62]: Sự hiện diện của bạn là niềm vinh hạnh lớn lao và là món quà ý nghĩa nhất đối với chúng tôi!
+    - generic [ref=f7e64]:
+      - heading [level=2] [ref=f7e67]: Đếm ngược thời gian
+      - generic [ref=f7e69]:
+        - generic [ref=f7e70]:
+          - generic [ref=f7e71]: "65"
+          - generic [ref=f7e72]: Ngày
+        - generic [ref=f7e73]:
+          - generic [ref=f7e74]: "17"
+          - generic [ref=f7e75]: Giờ
+        - generic [ref=f7e76]:
+          - generic [ref=f7e77]: "53"
+          - generic [ref=f7e78]: Phút
+        - generic [ref=f7e79]:
+          - generic [ref=f7e80]: "09"
+          - generic [ref=f7e81]: Giây
+      - paragraph [ref=f7e82]: ❊
+    - generic [ref=f7e83]:
+      - generic [ref=f7e85]:
+        - heading [level=2] [ref=f7e86]: Hành trình của chúng tôi
+        - paragraph [ref=f7e87]: Từ những ngày đầu gặp gỡ, qua bao khoảnh khắc cùng nhau, chúng tôi đã chọn nắm tay, đồng hành và viết tiếp câu chuyện tình yêu của mình.
+        - paragraph [ref=f7e88]: Và giờ đây, chúng tôi muốn tiếp tục hành trình ấy với một chương mới — hôn nhân.
+        - link [ref=f7e89] [cursor=pointer]:
+          - /url: "#album"
+          - text: Xem thêm
+          - generic [ref=f7e90]: →
+      - generic [ref=f7e96]:
+        - generic [ref=f7e114]:
+          - generic [ref=f7e115]: 12.03.2021
+          - generic [ref=f7e116]: Lần đầu gặp nhau
+          - generic [ref=f7e117]: Một buổi chiều thật đặc biệt...
+        - generic [ref=f7e123]:
+          - generic [ref=f7e124]: 20.08.2022
+          - generic [ref=f7e125]: Chính thức hẹn hò
+          - generic [ref=f7e126]: Từ bạn bè, chúng tôi trở thành người yêu.
+        - generic [ref=f7e132]:
+          - generic [ref=f7e133]: 14.02.2024
+          - generic [ref=f7e134]: Cầu hôn
+          - generic [ref=f7e135]: Một lời hứa cho tương lai.
+        - generic [ref=f7e141]:
+          - generic [ref=f7e142]: 28.11.2026
+          - generic [ref=f7e143]: Lễ thành hôn
+          - generic [ref=f7e144]: Chúng tôi chính thức về chung một nhà.
+    - generic [ref=f7e146]:
+      - generic [ref=f7e147]:
+        - heading [level=2] [ref=f7e148]: Lễ thành hôn
+        - paragraph [ref=f7e149]: 17:00, Thứ bảy
+        - generic [ref=f7e150]:
+          - generic [ref=f7e151]: Tháng 11
+          - generic [ref=f7e152]: "28"
+          - generic [ref=f7e153]: Năm 2026
+        - paragraph [ref=f7e154]: (Tức ngày 20 tháng 10 năm Bính Ngọ)
+      - generic [ref=f7e155]:
+        - generic [ref=f7e156]:
+          - generic [ref=f7e157]: Nhà trai
+          - paragraph [ref=f7e158]: Ông Đỗ Văn Giang
+          - paragraph [ref=f7e159]: Bà Nguyễn Thị Hồng
+          - paragraph [ref=f7e160]: ◈ Hà Nội
+        - generic [ref=f7e165]: 囍
+        - generic [ref=f7e167]:
+          - generic [ref=f7e168]: Nhà gái
+          - paragraph [ref=f7e169]: Ông Trần Văn Hùng
+          - paragraph [ref=f7e170]: Bà Lê Thị Lan
+          - paragraph [ref=f7e171]: ◈ Ninh Bình
+      - generic [ref=f7e173]:
+        - generic [ref=f7e174]:
+          - heading [level=3] [ref=f7e178]: Tháng 11 - 2026
+          - table [ref=f7e179]:
+            - rowgroup [ref=f7e180]:
+              - row [ref=f7e181]:
+                - columnheader [ref=f7e182]: CN
+                - columnheader [ref=f7e183]: T2
+                - columnheader [ref=f7e184]: T3
+                - columnheader [ref=f7e185]: T4
+                - columnheader [ref=f7e186]: T5
+                - columnheader [ref=f7e187]: T6
+                - columnheader [ref=f7e188]: T7
+            - rowgroup [ref=f7e189]:
+              - row [ref=f7e190]:
+                - cell [ref=f7e191]: "1"
+                - cell [ref=f7e192]: "2"
+                - cell [ref=f7e193]: "3"
+                - cell [ref=f7e194]: "4"
+                - cell [ref=f7e195]: "5"
+                - cell [ref=f7e196]: "6"
+                - cell [ref=f7e197]: "7"
+              - row [ref=f7e198]:
+                - cell [ref=f7e199]: "8"
+                - cell [ref=f7e200]: "9"
+                - cell [ref=f7e201]: "10"
+                - cell [ref=f7e202]: "11"
+                - cell [ref=f7e203]: "12"
+                - cell [ref=f7e204]: "13"
+                - cell [ref=f7e205]: "14"
+              - row [ref=f7e206]:
+                - cell [ref=f7e207]: "15"
+                - cell [ref=f7e208]: "16"
+                - cell [ref=f7e209]: "17"
+                - cell [ref=f7e210]: "18"
+                - cell [ref=f7e211]: "19"
+                - cell [ref=f7e212]: "20"
+                - cell [ref=f7e213]: "21"
+              - row [ref=f7e214]:
+                - cell [ref=f7e215]: "22"
+                - cell [ref=f7e216]: "23"
+                - cell [ref=f7e217]: "24"
+                - cell [ref=f7e218]: "25"
+                - cell [ref=f7e219]: "26"
+                - cell [ref=f7e220]: "27"
+                - cell [ref=f7e221]:
+                  - generic [ref=f7e222]: "28"
+              - row [ref=f7e223]:
+                - cell [ref=f7e224]: "29"
+                - cell [ref=f7e225]: "30"
+                - cell [ref=f7e226]
+                - cell [ref=f7e227]
+                - cell [ref=f7e228]
+                - cell [ref=f7e229]
+                - cell [ref=f7e230]
+        - generic [ref=f7e231]:
+          - link [ref=f7e232] [cursor=pointer]:
+            - /url: "#rsvp"
+            - generic [ref=f7e233]: ✉
+            - text: Xác nhận tham dự
+          - button [ref=f7e234] [cursor=pointer]:
+            - generic [ref=f7e235]: ✿
+            - text: Chúc phúc lì xì
+      - generic [ref=f7e237]:
+        - generic [ref=f7e238]:
+          - generic [ref=f7e239]:
+            - generic [ref=f7e240]: Nhà trai
+            - heading [level=3] [ref=f7e241]: Nhà Văn Hóa Văn Phú
+            - paragraph [ref=f7e242]: 36 P. Văn Phú, Khu đô thị Văn Phú, Kiến Hưng, Hà Nội
+          - iframe [ref=f7e244]
+          - link [ref=f7e245] [cursor=pointer]:
+            - /url: https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20h%C3%A0ng%20Sen%20V%C3%A0ng%2C%20123%20Nguy%E1%BB%85n%20V%C4%83n%20C%E1%BB%AB%2C%20Long%20Bi%C3%AAn%2C%20H%C3%A0%20N%E1%BB%99i&query_place_id=0x31345311a6f8f6ad:0xf3195be9754b6397
+            - generic [ref=f7e246]: ➤
+            - text: Chỉ đường
+        - generic [ref=f7e247]:
+          - generic [ref=f7e248]:
+            - generic [ref=f7e249]: Nhà gái
+            - heading [level=3] [ref=f7e250]: Tại gia
+            - paragraph [ref=f7e251]: 35 P.Tràng An, Ninh Bình
+          - iframe [ref=f7e253]
+          - link [ref=f7e254] [cursor=pointer]:
+            - /url: https://www.google.com/maps/search/?api=1&query=Ninh%20B%C3%ACnh%2C%20Vi%E1%BB%87t%20Nam
+            - generic [ref=f7e255]: ➤
+            - text: Chỉ đường
+    - generic [ref=f7e256]:
+      - generic [ref=f7e257]:
+        - generic [ref=f7e258]:
+          - generic [ref=f7e259]:
+            - paragraph [ref=f7e260]: "01"
+            - heading [level=2] [ref=f7e262]: Tất cả ảnh
+          - list [ref=f7e264]:
+            - listitem [ref=f7e265]:
+              - button [pressed] [ref=f7e266] [cursor=pointer]:
+                - generic [ref=f7e267]: "01"
+                - generic [ref=f7e268]: Tất cả ảnh
+            - listitem [ref=f7e269]:
+              - button [ref=f7e270] [cursor=pointer]:
+                - generic [ref=f7e271]: "02"
+                - generic [ref=f7e272]: Lễ ăn hỏi
+            - listitem [ref=f7e273]:
+              - button [ref=f7e274] [cursor=pointer]:
+                - generic [ref=f7e275]: "03"
+                - generic [ref=f7e276]: Lễ thành hôn
+            - listitem [ref=f7e277]:
+              - button [ref=f7e278] [cursor=pointer]:
+                - generic [ref=f7e279]: "04"
+                - generic [ref=f7e280]: Ngoại cảnh
+        - generic [ref=f7e282]:
+          - button [ref=f7e283] [cursor=pointer]
+          - button [ref=f7e285] [cursor=pointer]
+          - button [ref=f7e287] [cursor=pointer]
+          - button [ref=f7e289] [cursor=pointer]
+          - button [ref=f7e291] [cursor=pointer]
+          - button [ref=f7e293] [cursor=pointer]
+          - button [ref=f7e295] [cursor=pointer]
+        - generic [ref=f7e297]:
+          - button [ref=f7e298] [cursor=pointer]
+          - status [ref=f7e301]:
+            - generic [ref=f7e302]: "01"
+            - generic [aria-hidden] [ref=f7e303]: /
+            - generic [ref=f7e304]: "21"
+          - button [ref=f7e305] [cursor=pointer]
+      - generic [ref=f7e310]: 囍
+    - generic [ref=f7e312]:
+      - heading [level=2] [ref=f7e313]: Chương trình tiệc cưới
+      - generic [ref=f7e314]:
+        - generic [ref=f7e315]:
+          - generic [ref=f7e316]: ☗
+          - generic [ref=f7e317]: 16:00
+          - generic [ref=f7e318]: Đón khách
+        - generic [ref=f7e319]:
+          - generic [ref=f7e320]: ❁
+          - generic [ref=f7e321]: 17:00
+          - generic [ref=f7e322]: Lễ thành hôn
+        - generic [ref=f7e323]:
+          - generic [ref=f7e324]: ⚱
+          - generic [ref=f7e325]: 18:00
+          - generic [ref=f7e326]: Khai tiệc
+        - generic [ref=f7e327]:
+          - generic [ref=f7e328]: ❖
+          - generic [ref=f7e329]: 19:30
+          - generic [ref=f7e330]: Cắt bánh
+        - generic [ref=f7e331]:
+          - generic [ref=f7e332]: ♡
+          - generic [ref=f7e333]: 21:00
+          - generic [ref=f7e334]: Tiễn khách
+      - paragraph [ref=f7e335]: ❊
+    - generic [ref=f7e337]:
+      - paragraph [ref=f7e338]: “ Cảm ơn bạn đã là một phần trong câu chuyện của chúng tôi! ”
+      - generic [ref=f7e340]:
+        - generic [ref=f7e341]: ▶
+        - generic [ref=f7e342]: Xem video cưới
+    - generic [ref=f7e343]:
+      - heading [level=2] [ref=f7e344]: Lời chúc
+      - paragraph [ref=f7e345]: Hãy để lại lời chúc và cho chúng tôi biết bạn có thể đến chung vui.
+      - generic [ref=f7e346]:
+        - generic [ref=f7e347]:
+          - generic [ref=f7e348]:
+            - generic [ref=f7e349]: Họ và tên
+            - textbox [ref=f7e350]:
+              - /placeholder: Nguyễn Minh Anh
+          - generic [ref=f7e351]:
+            - generic [ref=f7e352]: Bạn sẽ tham dự?
+            - radiogroup [ref=f7e353]:
+              - radio [checked] [ref=f7e354] [cursor=pointer]: Có, tôi sẽ đến
+              - radio [ref=f7e355] [cursor=pointer]: Rất tiếc, không thể
+        - generic [ref=f7e356]:
+          - generic [ref=f7e357]: Lời chúc
+          - textbox [ref=f7e358]:
+            - /placeholder: Chúc hai bạn trăm năm hạnh phúc...
+        - button [ref=f7e359] [cursor=pointer]: Gửi lời chúc
+    - contentinfo [ref=f7e360]:
+      - generic [ref=f7e361]:
+        - generic [ref=f7e362]:
+          - generic [ref=f7e363]: 囍
+          - generic [ref=f7e364]: Thắng & Oanh · 28.11.2026
+        - link [ref=f7e366] [cursor=pointer]:
+          - /url: "#top"
+          - text: ↑
+        - generic [ref=f7e367]:
+          - link [ref=f7e368] [cursor=pointer]:
+            - /url: "#top"
+            - text: Facebook
+          - link [ref=f7e369] [cursor=pointer]:
+            - /url: "#top"
+            - text: Instagram
+          - link [ref=f7e370] [cursor=pointer]:
+            - /url: "#top"
+            - text: YouTube
+      - generic [ref=f7e371]:
+        - paragraph [ref=f7e372]:
+          - text: ©
+          - generic [ref=f7e373]: "2026"
+          - text: Thắng & Oanh. Giữ trọn yêu thương.
+        - paragraph [ref=f7e374]:
+          - text: Thiết kế & phát triển bởi
+          - link [ref=f7e375] [cursor=pointer]:
+            - /url: https://www.facebook.com/YC011
+            - generic [ref=f7e378]: A$AP Money
+  - text: 囍 囍

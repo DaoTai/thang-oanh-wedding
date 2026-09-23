@@ -379,7 +379,7 @@
           </div>
 
           <!-- THAY ẢNH: album, hai khung 3:4 xếp chồng -->
-          <div id="album" class="album">
+          <div class="album">
             <div class="album-photo album-photo--back photo-ph">
               <img
                 src="public/assets/3-4-v2.png"
@@ -398,11 +398,44 @@
         </div>
 
         <div class="timeline">
-          <div class="ornament ornament--tight">❖</div>
+          <!-- Hoa văn đầu dòng thời gian: bông tứ quý (quatrefoil) nằm chính
+               giữa trục dọc. Nét được "vẽ" dần bằng stroke-dashoffset khi
+               .is-visible được thêm (initTimelineReveal trong script.js). -->
+          <svg
+            class="tl-ornament"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <g class="tl-ornament-petals">
+              <circle cx="24" cy="15" r="7.5" />
+              <circle cx="33" cy="24" r="7.5" />
+              <circle cx="24" cy="33" r="7.5" />
+              <circle cx="15" cy="24" r="7.5" />
+            </g>
+            <rect
+              class="tl-ornament-core"
+              x="20.5"
+              y="20.5"
+              width="7"
+              height="7"
+              transform="rotate(45 24 24)"
+            />
+            <g class="tl-ornament-dots">
+              <circle cx="9.5" cy="9.5" r="1.5" />
+              <circle cx="38.5" cy="9.5" r="1.5" />
+              <circle cx="9.5" cy="38.5" r="1.5" />
+              <circle cx="38.5" cy="38.5" r="1.5" />
+            </g>
+          </svg>
 
           <div class="tl-item">
             <div class="tl-marker">
-              <span class="tl-dot"></span><span class="tl-line"></span>
+              <span class="tl-dot">
+                <span class="tl-dot-halo"></span>
+                <span class="tl-dot-gem"></span>
+              </span>
+              <span class="tl-line"><i class="tl-line-fill"></i></span>
             </div>
             <div class="tl-body">
               <div class="tl-date">12.03.2021</div>
@@ -413,7 +446,11 @@
 
           <div class="tl-item">
             <div class="tl-marker">
-              <span class="tl-dot"></span><span class="tl-line"></span>
+              <span class="tl-dot">
+                <span class="tl-dot-halo"></span>
+                <span class="tl-dot-gem"></span>
+              </span>
+              <span class="tl-line"><i class="tl-line-fill"></i></span>
             </div>
             <div class="tl-body">
               <div class="tl-date">20.08.2022</div>
@@ -426,7 +463,11 @@
 
           <div class="tl-item">
             <div class="tl-marker">
-              <span class="tl-dot"></span><span class="tl-line"></span>
+              <span class="tl-dot">
+                <span class="tl-dot-halo"></span>
+                <span class="tl-dot-gem"></span>
+              </span>
+              <span class="tl-line"><i class="tl-line-fill"></i></span>
             </div>
             <div class="tl-body">
               <div class="tl-date">14.02.2024</div>
@@ -437,7 +478,11 @@
 
           <div class="tl-item tl-item--last">
             <div class="tl-marker">
-              <span class="tl-dot"></span><span class="tl-line"></span>
+              <span class="tl-dot">
+                <span class="tl-dot-halo"></span>
+                <span class="tl-dot-gem"></span>
+              </span>
+              <span class="tl-line"><i class="tl-line-fill"></i></span>
             </div>
             <div class="tl-body">
               <div class="tl-date">28.11.2026</div>
@@ -628,6 +673,423 @@
         </div>
       </section>
 
+      <!-- =========================== ALBUM ẢNH =========================== -->
+      <!-- Lưới ảnh 7 ô/trang. Mỗi ô là một <button> để bấm vào là phóng to.
+           THAY ẢNH: đổi src/alt của từng <img> bên dưới; data-cat quyết định
+           ô đó thuộc bộ ảnh nào, data-caption là dòng chữ dưới ảnh phóng to.
+           Thêm/bớt ô thoải mái — script.js tự chia trang lại. -->
+      <section id="album" class="gallery-section">
+        <div class="gallery-bg" aria-hidden="true"></div>
+        <div class="gallery-inner">
+          <!-- Cột trái: bộ ảnh đang xem + danh sách các bộ -->
+          <div class="gallery-rail">
+            <div class="gal-rail-head">
+              <p class="gal-index" id="galIndex">01</p>
+              <div>
+                <h2 class="section-title gal-name" id="galName">Tất cả ảnh</h2>
+                <span class="gal-rail-rule" aria-hidden="true"></span>
+              </div>
+            </div>
+
+            <ul class="gal-cats" id="galCats">
+              <li>
+                <button
+                  type="button"
+                  class="gal-cat is-active"
+                  data-cat="all"
+                  aria-pressed="true"
+                >
+                  <span class="gal-cat-no">01</span>
+                  <span class="gal-cat-label">Tất cả ảnh</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="gal-cat"
+                  data-cat="an-hoi"
+                  aria-pressed="false"
+                >
+                  <span class="gal-cat-no">02</span>
+                  <span class="gal-cat-label">Lễ ăn hỏi</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="gal-cat"
+                  data-cat="thanh-hon"
+                  aria-pressed="false"
+                >
+                  <span class="gal-cat-no">03</span>
+                  <span class="gal-cat-label">Lễ thành hôn</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="gal-cat"
+                  data-cat="ngoai-canh"
+                  aria-pressed="false"
+                >
+                  <span class="gal-cat-no">04</span>
+                  <span class="gal-cat-label">Ngoại cảnh</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Lưới ảnh -->
+          <div class="gal-grid" id="galGrid">
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 01"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 02"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 03"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 04"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 05"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 06"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="an-hoi"
+              data-caption="Lễ ăn hỏi"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ ăn hỏi 07"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 01"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 02"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 03"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 04"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 05"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 06"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="thanh-hon"
+              data-caption="Lễ thành hôn"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Lễ thành hôn 07"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 01"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 02"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 03"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 04"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/3-4.jpg"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 05"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 06"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+            <button
+              type="button"
+              class="gal-cell"
+              data-cat="ngoai-canh"
+              data-caption="Ngoại cảnh"
+            >
+              <img
+                class="gal-img"
+                src="public/assets/pride-groom.png"
+                alt="Ảnh cưới Thắng &amp; Oanh — Ngoại cảnh 07"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+          </div>
+
+          <!-- Cột phải: lật trang -->
+          <div class="gallery-nav">
+            <button
+              type="button"
+              class="gal-arrow"
+              id="galPrev"
+              aria-label="Trang ảnh trước"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path
+                  d="M3.5 10 8 5.5 12.5 10"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+
+            <p class="gal-count" role="status" aria-live="polite">
+              <span id="galCountFrom">01</span>
+              <i aria-hidden="true">/</i>
+              <span id="galCountTotal">21</span>
+            </p>
+
+            <button
+              type="button"
+              class="gal-arrow"
+              id="galNext"
+              aria-label="Trang ảnh sau"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path
+                  d="M3.5 6 8 10.5 12.5 6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="gal-divider" aria-hidden="true">
+          <span class="gal-divider-line"></span>
+          <span class="gal-divider-seal">囍</span>
+          <span class="gal-divider-line"></span>
+        </div>
+      </section>
+
       <!-- ===================== CHƯƠNG TRÌNH TIỆC ===================== -->
       <section class="program-section">
         <h2 class="section-title section-title--block">
@@ -769,6 +1231,35 @@
             <a href="#top">YouTube</a>
           </div>
         </div>
+
+        <!-- Bản quyền & tác giả. Năm được initFooterYear() cập nhật mỗi lần mở. -->
+        <div class="footer-copy">
+          <p class="footer-copy-line">
+            &copy; <span id="footerYear">2026</span> Thắng &amp; Oanh. Giữ trọn
+            yêu thương.
+          </p>
+          <p class="footer-copy-line">
+            Thiết kế &amp; phát triển bởi
+            <a
+              class="footer-author"
+              href="https://www.facebook.com/YC011"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg
+                class="footer-author-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94Z"
+                />
+              </svg>
+              <span>A$AP Money</span>
+            </a>
+          </p>
+        </div>
       </footer>
     </div>
 
@@ -905,6 +1396,73 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- ================== ALBUM ẢNH — XEM ẢNH LỚN ================== -->
+    <!-- Mở khi bấm vào một ô ảnh trong #album. Mũi tên trái/phải đi hết cả
+         bộ ảnh đang lọc, không chỉ trang đang hiện (xem initAlbum). -->
+    <div class="music-modal gal-lightbox" id="galLightbox" hidden>
+      <div class="music-modal-backdrop" id="galLightboxBackdrop"></div>
+      <figure
+        class="gal-lb-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="galLightboxCaption"
+      >
+        <img class="gal-lb-img" id="galLightboxImg" src="" alt="" />
+        <figcaption class="gal-lb-caption" id="galLightboxCaption"></figcaption>
+
+        <button
+          type="button"
+          class="gal-lb-btn gal-lb-btn--prev"
+          id="galLightboxPrev"
+          aria-label="Ảnh trước"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M10 3.5 5.5 8 10 12.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="gal-lb-btn gal-lb-btn--next"
+          id="galLightboxNext"
+          aria-label="Ảnh sau"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M6 3.5 10.5 8 6 12.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="gal-lb-btn gal-lb-btn--close"
+          id="galLightboxClose"
+          aria-label="Đóng ảnh"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M4 4 12 12M12 4 4 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </figure>
     </div>
 
     <script src="script.js"></script>

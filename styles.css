@@ -38,6 +38,9 @@
   --bg-top: url("public/assets/bg-top.png");
   /* THAY ẢNH: ảnh cô dâu & chú rể ở hero (tỉ lệ ~16:11) */
   --photo-couple: url("public/assets/pride-groom-2.png");
+  /* THAY ẢNH: nền mục album — khung tranh thuỷ mặc, hoa dồn ở bốn mép và
+     để trống hẳn khoảng giữa cho lưới ảnh (tỉ lệ 1645:956) */
+  --bg-album: url("public/assets/bg-album.png");
 
   /* Hoa văn gạch chéo dùng lại ở nhiều chỗ */
   --weave-soft: repeating-linear-gradient(
@@ -481,10 +484,6 @@ button:focus-visible,
   color: #c1a17a;
   font-size: 15px;
 }
-.ornament--tight {
-  margin: 0 0 18px;
-  font-size: 14px;
-}
 
 /* Nhãn cho các ô ảnh chưa thay */
 .ph-label {
@@ -825,19 +824,49 @@ button:focus-visible,
   gap: 32px;
   justify-content: center;
 }
+/* Gạch chân là một lớp ::after tự vẽ chứ không phải border-bottom: border chỉ
+   bật/tắt đột ngột, còn lớp này chạy được scaleX nên nét đỏ trượt ra từ giữa
+   theo mục đang nằm trong viewport. Padding-bottom đặt cho MỌI link (không chỉ
+   link đang chọn) để chữ không nhảy 3px mỗi lần đổi mục. */
 .nav-link {
+  position: relative;
+  padding-bottom: 4px;
   font-size: 13.5px;
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--muted);
+  transition: color 0.34s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition: transform 0.42s cubic-bezier(0.22, 0.9, 0.28, 1),
+    opacity 0.3s ease;
 }
 .nav-link:hover {
   color: var(--red);
 }
+/* Rê chuột chỉ hé một nét mờ và ngắn hơn — để không nhầm với mục đang xem */
+.nav-link:hover::after {
+  transform: scaleX(0.5);
+  opacity: 0.45;
+}
 .nav-link.is-active {
-  padding-bottom: 3px;
   color: var(--red);
-  border-bottom: 1.5px solid var(--red);
+}
+.nav-link.is-active::after,
+.nav-link.is-active:hover::after {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 /* ---------------------------------------------------------
@@ -1321,11 +1350,75 @@ button:focus-visible,
   transform: rotate(4deg);
 }
 
+/* ---------------------------------------------------------
+   Dòng thời gian
+   Mỗi mốc tự diễn khi lọt vào khung nhìn: viên kim cương nở ra kèm vòng
+   sóng lan, đường kẻ vàng vẽ dần xuống, rồi ngày – tiêu đề – lời kể lần
+   lượt trượt vào. Mọi trạng thái do .is-visible điều khiển
+   (initTimelineReveal trong script.js).
+   --------------------------------------------------------- */
 .timeline {
   display: grid;
   gap: 0;
   padding-top: 8px;
 }
+
+/* Hoa văn mở đầu: bông tứ quý canh đúng tâm trục dọc (cột mốc rộng 24px,
+   hoa rộng 34px nên lùi trái 5px). Nét vẽ dần bằng stroke-dashoffset. */
+.tl-ornament {
+  width: 34px;
+  height: 34px;
+  margin: 0 0 18px -5px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.1;
+  opacity: 0;
+  transform: rotate(-40deg) scale(0.55);
+  transform-origin: 50% 50%;
+  transition: opacity 0.9s ease, transform 1s cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+.tl-ornament-petals circle {
+  /* Chu vi cánh r=7.5 ≈ 47.1 → làm tròn 48 cho nét khép kín */
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  transition: stroke-dashoffset 1.2s ease 0.25s;
+}
+.tl-ornament-core {
+  fill: var(--red);
+  stroke: none;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.9s;
+}
+.tl-ornament-dots circle {
+  fill: var(--gold);
+  stroke: none;
+  opacity: 0;
+  transition: opacity 0.8s ease 1s;
+}
+.timeline.is-visible .tl-ornament {
+  opacity: 1;
+  transform: none;
+}
+.timeline.is-visible .tl-ornament-petals circle {
+  stroke-dashoffset: 0;
+}
+.timeline.is-visible .tl-ornament-core,
+.timeline.is-visible .tl-ornament-dots circle {
+  opacity: 1;
+}
+/* Bốn chấm vàng xoay chậm quanh bông hoa sau khi nét đã vẽ xong */
+.timeline.is-visible .tl-ornament-dots {
+  transform-box: view-box;
+  transform-origin: 24px 24px;
+  animation: tl-dots-turn 24s linear 1.4s infinite;
+}
+@keyframes tl-dots-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .tl-item {
   display: grid;
   grid-template-columns: 24px 1fr;
@@ -1336,23 +1429,106 @@ button:focus-visible,
   justify-items: center;
   grid-template-rows: auto 1fr;
 }
+
+/* Mốc: viên kim cương đỏ trên nền giấy, có vòng sóng lan ra khi hiện */
 .tl-dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+.tl-dot-gem {
   width: 9px;
   height: 9px;
-  margin-top: 7px;
-  transform: rotate(45deg);
   background: var(--red);
+  box-shadow: 0 0 0 4px var(--cream);
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.4, 1);
 }
+.tl-dot-halo {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(140, 28, 28, 0.45);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.35);
+}
+.tl-item.is-visible .tl-dot-gem {
+  transform: rotate(45deg) scale(1);
+}
+.tl-item.is-visible .tl-dot-halo {
+  animation: tl-halo 1.6s ease-out 0.3s 2;
+}
+@keyframes tl-halo {
+  from {
+    opacity: 0.75;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+/* Đường kẻ: rãnh mờ sẵn, phần vàng đậm được kéo dần từ trên xuống */
 .tl-line {
+  position: relative;
   width: 1px;
-  background: rgba(176, 141, 94, 0.55);
+  background: rgba(176, 141, 94, 0.18);
 }
-/* Mốc cuối không cần đường kẻ kéo dài xuống dưới */
+.tl-line-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(176, 141, 94, 0.75),
+    rgba(176, 141, 94, 0.45)
+  );
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+}
+.tl-item.is-visible .tl-line-fill {
+  transform: scaleY(1);
+}
+/* Mốc cuối: đường kẻ nhạt dần rồi tắt thay vì cắt ngang */
 .tl-item--last .tl-line {
   background: transparent;
 }
+.tl-item--last .tl-line-fill {
+  background: linear-gradient(
+    180deg,
+    rgba(176, 141, 94, 0.5),
+    rgba(176, 141, 94, 0) 70%
+  );
+}
+
 .tl-body {
   padding-bottom: 34px;
+}
+.tl-date,
+.tl-title,
+.tl-text {
+  opacity: 0;
+  transform: translate(14px, 6px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+.tl-item.is-visible .tl-date,
+.tl-item.is-visible .tl-title,
+.tl-item.is-visible .tl-text {
+  opacity: 1;
+  transform: none;
+}
+.tl-item.is-visible .tl-date {
+  transition-delay: 0.2s;
+}
+.tl-item.is-visible .tl-title {
+  transition-delay: 0.32s;
+}
+.tl-item.is-visible .tl-text {
+  transition-delay: 0.44s;
 }
 .tl-date {
   font-family: var(--font-serif);
@@ -1372,6 +1548,39 @@ button:focus-visible,
   font-size: 13.5px;
   line-height: 1.8;
   color: var(--muted-deep);
+}
+
+/* Rê chuột lên một mốc: viên kim cương lớn hơn một chút, chữ nhích sang */
+@media (hover: hover) {
+  .tl-item.is-visible:hover .tl-dot-gem {
+    transform: rotate(45deg) scale(1.3);
+  }
+  .tl-item.is-visible:hover .tl-date {
+    transform: translateX(3px);
+    transition-delay: 0s;
+  }
+}
+
+/* Bỏ chuyển động: mọi thứ hiện thẳng ở trạng thái cuối */
+@media (prefers-reduced-motion: reduce) {
+  .tl-ornament,
+  .tl-ornament-petals circle,
+  .tl-ornament-core,
+  .tl-ornament-dots circle,
+  .tl-dot-gem,
+  .tl-line-fill,
+  .tl-date,
+  .tl-title,
+  .tl-text {
+    transition: none !important;
+    animation: none !important;
+  }
+  .timeline.is-visible .tl-ornament-dots {
+    animation: none !important;
+  }
+  .tl-dot-halo {
+    display: none;
+  }
 }
 
 /* ---------------------------------------------------------
@@ -2091,6 +2300,45 @@ button:focus-visible,
   color: var(--red);
 }
 
+/* Dòng bản quyền & tác giả, nằm dưới cùng footer */
+.footer-copy {
+  border-top: 1px solid rgba(140, 28, 28, 0.1);
+  width: 100%;
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 16px var(--gutter) 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 18px;
+  text-align: center;
+}
+.footer-copy-line {
+  margin: 0;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted-warm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.footer-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--red);
+  transition: color 0.25s ease, opacity 0.25s ease;
+}
+.footer-author-icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+.footer-author:hover {
+  opacity: 0.8;
+}
+
 /* ---------------------------------------------------------
    Modal xin phép bật nhạc nền
    --------------------------------------------------------- */
@@ -2331,6 +2579,566 @@ button:focus-visible,
   }
 }
 
+/* ---------------------------------------------------------
+   Album ảnh
+   Ba cột: tên bộ ảnh — lưới ảnh — nút lật trang.
+
+   Lưới dựng trên khung 12 cột × 3 hàng và khoá tỉ lệ khung (aspect-ratio)
+   để ba hàng luôn giữ đúng chiều cao tương đối dù trang rộng hay hẹp.
+   Mỗi trang hiện đúng 7 ảnh; script.js gán cho từng ô đang hiện một class
+   .gal-cell--s1 … s7 ứng với một vị trí cố định trong khung, nên đổi bộ
+   ảnh hay lật trang thì hình dáng mảng ảnh vẫn y nguyên.
+   --------------------------------------------------------- */
+/* Mục này trải hết bề ngang trang để ảnh nền thành một khung tranh liền
+   mạch; phần chữ và ảnh bên trong mới thu về đúng bề ngang chung (--shell). */
+.gallery-section {
+  position: relative;
+  width: 100%;
+  padding: 76px 0 52px;
+  overflow: hidden;
+}
+/* Ảnh nền là một dải sơn thuỷ: núi, thuỷ đình và hai nhành đào nằm dọc mép
+   DƯỚI, nửa trên chỉ là trời để trống. Nên neo ảnh vào đáy mục và cho rộng
+   đúng bằng bề ngang trang — `100% auto`, không phải `cover`: mục luôn cao
+   hơn ảnh nhiều nên cover sẽ phóng ảnh lên rồi cắt mất hai bên, đúng chỗ có
+   hai nhành đào. Cách này ảnh luôn trải hết ngang và không bị bóp méo.
+   Phần trời thừa phía trên tan dần vào nền kem của trang. */
+.gallery-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.92;
+  background: var(--bg-album) center bottom / 100% auto no-repeat;
+  -webkit-mask-image: linear-gradient(to top, #000 62%, transparent);
+  mask-image: linear-gradient(to top, #000 62%, transparent);
+}
+
+.gallery-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(150px, 200px) minmax(0, 1fr) 48px;
+  gap: 44px;
+  align-items: center;
+  width: 100%;
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ----- Cột trái: bộ ảnh đang xem ----- */
+.gallery-rail {
+  align-self: start;
+  padding-top: 6px;
+}
+.gal-rail-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.gal-index {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(38px, 3.8vw, 50px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: lining-nums;
+  color: var(--red-deep);
+  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gal-name {
+  font-size: 15px;
+  letter-spacing: 0.28em;
+}
+.gal-rail-rule {
+  display: block;
+  width: 30px;
+  height: 1px;
+  margin-top: 12px;
+  background: var(--line-gold);
+}
+
+.gal-cats {
+  display: grid;
+  gap: 16px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.gal-cat {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--muted-soft);
+  cursor: pointer;
+  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gal-cat:hover {
+  transform: translateX(3px);
+}
+.gal-cat-no {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: lining-nums;
+  color: var(--gold);
+  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Gạch chân chạy ra từ giữa khi rê chuột / khi đang xem bộ ảnh đó */
+.gal-cat-label {
+  position: relative;
+}
+.gal-cat-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gal-cat:hover {
+  color: var(--red);
+}
+.gal-cat.is-active {
+  color: var(--red-deep);
+}
+.gal-cat.is-active .gal-cat-no {
+  color: var(--red);
+}
+.gal-cat:hover .gal-cat-label::after,
+.gal-cat.is-active .gal-cat-label::after {
+  transform: scaleX(1);
+}
+
+/* Nét dọc kết thúc cột trái, khép lại bằng một viên trám nhỏ */
+.gal-rail-tail {
+  display: block;
+  position: relative;
+  width: 1px;
+  height: 54px;
+  margin: 34px 0 0 3px;
+  background: linear-gradient(180deg, var(--line-gold), rgba(176, 141, 94, 0));
+}
+.gal-rail-tail::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--line-gold);
+  background: var(--cream);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* ----- Lưới ảnh ----- */
+.gal-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  /* 1.53 : 1 : 1.24 — đúng tỉ lệ ba hàng của bản thiết kế */
+  grid-template-rows: 1.53fr 1fr 1.24fr;
+  gap: 10px;
+  aspect-ratio: 352 / 244;
+  padding: 12px;
+  background: linear-gradient(160deg, var(--paper), var(--cream-soft));
+  box-shadow: 0 30px 60px -44px rgba(125, 18, 32, 0.55),
+    0 0 0 1px rgba(176, 141, 94, 0.18);
+}
+
+.gal-cell--s1 {
+  grid-column: 1 / span 5;
+  grid-row: 1 / span 3;
+}
+.gal-cell--s2 {
+  grid-column: 6 / span 4;
+  grid-row: 1;
+}
+.gal-cell--s3 {
+  grid-column: 10 / span 3;
+  grid-row: 1 / span 2;
+}
+.gal-cell--s4 {
+  grid-column: 6 / span 2;
+  grid-row: 2;
+}
+.gal-cell--s5 {
+  grid-column: 8 / span 2;
+  grid-row: 2;
+}
+.gal-cell--s6 {
+  grid-column: 6 / span 4;
+  grid-row: 3;
+}
+.gal-cell--s7 {
+  grid-column: 10 / span 3;
+  grid-row: 3;
+}
+
+/* Bộ ảnh ít hơn 7 tấm thì bỏ khung mosaic, xếp đều thành hàng ảnh 3:4 */
+.gal-grid--flow {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  grid-template-rows: auto;
+  aspect-ratio: auto;
+}
+.gal-grid--flow .gal-cell {
+  grid-column: auto;
+  grid-row: auto;
+  aspect-ratio: 3 / 4;
+}
+
+.gal-cell {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: #f1e0d0;
+  background-image: var(--weave-photo);
+  cursor: pointer;
+  /* Trạng thái đầu của hiệu ứng hiện dần; script.js thêm .is-in */
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.gal-cell.is-in {
+  opacity: 1;
+  transform: none;
+}
+.gal-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Lớp phủ đỏ dâng lên từ đáy ảnh khi rê chuột */
+.gal-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(125, 18, 32, 0.42),
+    rgba(125, 18, 32, 0) 55%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.gal-cell:hover::after,
+.gal-cell:focus-visible::after {
+  opacity: 1;
+}
+.gal-cell:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .gal-cell:hover .gal-img {
+    transform: scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gal-cell {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .gal-img {
+    transition: none;
+  }
+}
+
+/* ----- Cột phải: lật trang ----- */
+.gallery-nav {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 12px;
+}
+.gal-arrow {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(176, 141, 94, 0.6);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gal-arrow svg {
+  width: 15px;
+  height: 15px;
+}
+.gal-arrow:hover {
+  border-color: var(--red-deep);
+  background: rgba(140, 28, 28, 0.07);
+  transform: translateY(-2px);
+}
+.gal-arrow[disabled] {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+  border-color: rgba(176, 141, 94, 0.4);
+  transform: none;
+}
+.gal-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  font-variant-numeric: lining-nums;
+  color: var(--muted-soft);
+}
+.gal-count i {
+  font-style: normal;
+  color: var(--gold);
+}
+
+/* ----- Nét ngăn khép lại mục ----- */
+.gal-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 46px;
+}
+.gal-divider-line {
+  width: clamp(70px, 16vw, 190px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(176, 141, 94, 0), var(--line-gold));
+}
+.gal-divider-line:last-child {
+  background: linear-gradient(90deg, var(--line-gold), rgba(176, 141, 94, 0));
+}
+.gal-divider-seal {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(140, 28, 28, 0.32);
+  border-radius: 999px;
+  color: var(--red);
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------
+   Album ảnh — xem ảnh lớn
+   Dùng lại .music-modal cho lớp nền mờ và nhịp đóng/mở, chỉ thay phần thân.
+   --------------------------------------------------------- */
+.gal-lb-card {
+  position: relative;
+  max-width: min(94vw, 900px);
+  margin: 0;
+  padding: 10px 10px 0;
+  background: var(--paper);
+  box-shadow: 0 40px 80px -40px rgba(30, 10, 10, 0.75);
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.gal-lightbox.is-open .gal-lb-card {
+  opacity: 1;
+  transform: none;
+}
+.gal-lb-img {
+  display: block;
+  width: 100%;
+  max-height: min(74vh, 780px);
+  object-fit: contain;
+  background: #f1e0d0;
+}
+.gal-lb-caption {
+  margin: 0;
+  padding: 13px 4px 14px;
+  font-family: var(--font-serif);
+  font-size: 11.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--muted-soft);
+}
+
+.gal-lb-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(253, 246, 238, 0.55);
+  border-radius: 999px;
+  background: rgba(125, 18, 32, 0.55);
+  color: var(--cream-soft);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.gal-lb-btn svg {
+  width: 17px;
+  height: 17px;
+}
+.gal-lb-btn:hover {
+  background: var(--red-deep);
+  border-color: var(--cream-soft);
+}
+.gal-lb-btn--prev {
+  top: 50%;
+  left: -20px;
+  transform: translateY(-50%);
+}
+.gal-lb-btn--next {
+  top: 50%;
+  right: -20px;
+  transform: translateY(-50%);
+}
+.gal-lb-btn--close {
+  top: -20px;
+  right: -20px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gal-lb-card {
+    transition: none;
+  }
+}
+
+/* Dưới 1000px cột trái 182px ăn mất quá nhiều bề ngang của mảng ảnh: hạ
+   tên bộ ảnh xuống thành một hàng nằm trên lưới, nút lật trang xuống dưới. */
+@media (max-width: 1000px) {
+  .gallery-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .gallery-rail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 26px;
+    padding-top: 0;
+  }
+  .gal-index {
+    font-size: 34px;
+  }
+  .gal-rail-rule {
+    display: none;
+  }
+  /* Danh sách bộ ảnh nằm ngang, trượt được nếu không đủ chỗ */
+  .gal-cats {
+    display: flex;
+    gap: 24px;
+    margin: 0;
+    margin-left: auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .gal-cats::-webkit-scrollbar {
+    display: none;
+  }
+  .gal-cats li {
+    flex: 0 0 auto;
+  }
+  .gal-rail-tail {
+    display: none;
+  }
+  .gallery-nav {
+    grid-auto-flow: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+  }
+}
+
+/* Màn hẹp: khung mosaic 12 cột nén lại thì ô nhỏ nhất chỉ còn vài chục
+   pixel — đổi sang hai cột, ảnh đầu trang trải hết bề ngang làm ảnh bìa. */
+@media (max-width: 720px) {
+  .gal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+    gap: 8px;
+    aspect-ratio: auto;
+    padding: 8px;
+  }
+  .gal-grid .gal-cell--s1,
+  .gal-grid .gal-cell--s2,
+  .gal-grid .gal-cell--s3,
+  .gal-grid .gal-cell--s4,
+  .gal-grid .gal-cell--s5,
+  .gal-grid .gal-cell--s6,
+  .gal-grid .gal-cell--s7 {
+    grid-column: auto;
+    grid-row: auto;
+    aspect-ratio: 3 / 4;
+  }
+  /* Ô đầu trải hết bề ngang làm ảnh bìa, sáu ô còn lại ghép thành ba cặp
+     nên hàng cuối không còn ô trống lẻ loi */
+  .gal-grid .gal-cell--s1 {
+    grid-column: span 2;
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Hết chỗ xếp cạnh tên bộ ảnh: cho danh sách xuống hẳn một hàng riêng,
+     trượt ngang từ mép trái thay vì bị dồn về bên phải */
+  .gal-cats {
+    width: 100%;
+    margin-left: 0;
+    gap: 20px;
+  }
+  .gal-cat {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+  }
+  .gal-divider {
+    margin-top: 34px;
+  }
+  .gal-divider-line {
+    width: clamp(48px, 20vw, 120px);
+  }
+
+  /* Ảnh lớn: nút điều khiển kéo vào trong khung, ngoài khung không còn chỗ */
+  .gal-lb-btn--prev {
+    left: 8px;
+  }
+  .gal-lb-btn--next {
+    right: 8px;
+  }
+  .gal-lb-btn--close {
+    top: 8px;
+    right: 8px;
+  }
+  .gal-lb-img {
+    max-height: 66vh;
+  }
+}
+
 /* =========================================================
    Responsive
    ========================================================= */
@@ -2377,11 +3185,9 @@ button:focus-visible,
   }
   /* Nền giờ ghép từ hai nửa, nên mask cũng phải hai lớp (mặc định cộng dồn) */
   .hero-sheen {
-    -webkit-mask:
-      var(--bg-top) top left / 108% auto no-repeat,
+    -webkit-mask: var(--bg-top) top left / 108% auto no-repeat,
       var(--bg-top) top right / 108% auto no-repeat;
-    mask:
-      var(--bg-top) top left / 108% auto no-repeat,
+    mask: var(--bg-top) top left / 108% auto no-repeat,
       var(--bg-top) top right / 108% auto no-repeat;
   }
 
@@ -2471,11 +3277,9 @@ button:focus-visible,
     background-position: top right;
   }
   .hero-sheen {
-    -webkit-mask:
-      var(--bg-top) top left / 150% auto no-repeat,
+    -webkit-mask: var(--bg-top) top left / 150% auto no-repeat,
       var(--bg-top) top right / 150% auto no-repeat;
-    mask:
-      var(--bg-top) top left / 150% auto no-repeat,
+    mask: var(--bg-top) top left / 150% auto no-repeat,
       var(--bg-top) top right / 150% auto no-repeat;
   }
 
@@ -2575,6 +3379,10 @@ button:focus-visible,
   }
   .footer-social {
     justify-content: center;
+  }
+  .footer-copy {
+    flex-direction: column;
+    gap: 4px;
   }
 
   .rule-text {

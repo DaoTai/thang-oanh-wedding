@@ -172,6 +172,55 @@
   }
 
   /* -------------------------------------------------------
+     Dòng thời gian
+     Hoa văn mở đầu và từng mốc được đánh dấu .is-visible khi lọt vào khung
+     nhìn; CSS lo phần diễn. Mỗi phần tử chỉ diễn một lần (unobserve ngay)
+     để cuộn lên cuộn xuống không làm thiệp nhấp nháy.
+     ------------------------------------------------------- */
+  function initTimelineReveal() {
+    var timeline = document.querySelector(".timeline");
+    if (!timeline) return;
+
+    var targets = [timeline].concat(
+      Array.prototype.slice.call(timeline.querySelectorAll(".tl-item"))
+    );
+
+    function showAll() {
+      targets.forEach(function (el) {
+        el.classList.add("is-visible");
+      });
+    }
+
+    if (typeof IntersectionObserver !== "function") {
+      showAll();
+      return;
+    }
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      showAll();
+      return;
+    }
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      // Lùi mép dưới lên 12% để mốc chỉ diễn khi đã vào hẳn trong tầm mắt
+      { threshold: 0.35, rootMargin: "0px 0px -12% 0px" }
+    );
+
+    targets.forEach(function (el) {
+      observer.observe(el);
+    });
+  }
+
+  /* -------------------------------------------------------
      Lịch tháng cưới
      Dựng từ CONFIG.weddingDateIso. Ngày/tháng/năm đọc thẳng từ chuỗi
      (không qua múi giờ của trình duyệt) để người xem ở nước khác không bị
@@ -620,6 +669,235 @@
   }
 
   /* -------------------------------------------------------
+     Album ảnh
+     Mọi tấm ảnh đều nằm sẵn trong index.html; ở đây chỉ lo ba việc:
+
+       1. Lọc theo bộ ảnh (data-cat) khi bấm vào danh sách bên trái.
+       2. Chia bộ ảnh đang chọn thành từng trang 7 tấm, và gán cho 7 ô
+          đang hiện các class .gal-cell--s1…s7 — tức 7 vị trí cố định của
+          khung mosaic trong styles.css. Nhờ vậy khung ảnh giữ nguyên hình
+          dáng dù lật trang hay đổi bộ ảnh. Trang lẻ (ít hơn 7 tấm) thì
+          chuyển lưới sang .gal-grid--flow, xếp đều thay vì để lỗ hổng.
+       3. Phóng to ảnh khi bấm vào. Mũi tên trong khung phóng to chạy hết
+          cả bộ ảnh đang lọc chứ không dừng ở trang đang xem — sang tấm
+          thuộc trang khác thì lật luôn trang bên dưới cho khớp.
+     ------------------------------------------------------- */
+  function initAlbum() {
+    var grid = document.getElementById("galGrid");
+    if (!grid) return;
+
+    var PER_PAGE = 7;
+
+    var cells = [].slice.call(grid.querySelectorAll(".gal-cell"));
+    var catBtns = [].slice.call(document.querySelectorAll(".gal-cat"));
+    var indexEl = document.getElementById("galIndex");
+    var nameEl = document.getElementById("galName");
+    var fromEl = document.getElementById("galCountFrom");
+    var totalEl = document.getElementById("galCountTotal");
+    var prevBtn = document.getElementById("galPrev");
+    var nextBtn = document.getElementById("galNext");
+    if (!cells.length) return;
+
+    var cat = "all";
+    var page = 0;
+
+    function pad2(n) {
+      return (n < 10 ? "0" : "") + n;
+    }
+
+    // Danh sách ảnh của bộ đang chọn, theo đúng thứ tự trong index.html
+    function matching() {
+      if (cat === "all") return cells;
+      return cells.filter(function (cell) {
+        return cell.getAttribute("data-cat") === cat;
+      });
+    }
+
+    function render() {
+      var list = matching();
+      var pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+      // Đổi bộ ảnh có thể làm số trang ít đi — kéo về trang cuối còn hợp lệ
+      page = Math.max(0, Math.min(page, pages - 1));
+
+      var start = page * PER_PAGE;
+      var shown = list.slice(start, start + PER_PAGE);
+      var full = shown.length === PER_PAGE;
+
+      cells.forEach(function (cell) {
+        cell.hidden = true;
+        cell.className = "gal-cell";
+      });
+      grid.classList.toggle("gal-grid--flow", !full);
+
+      shown.forEach(function (cell, i) {
+        cell.hidden = false;
+        if (full) cell.classList.add("gal-cell--s" + (i + 1));
+        cell.style.setProperty("--i", String(i));
+      });
+
+      // Gỡ [hidden] rồi mới thêm .is-in ở khung hình sau, nếu không trình
+      // duyệt gộp hai thay đổi lại và ảnh hiện thẳng ra, không có độ trễ
+      requestAnimationFrame(function () {
+        shown.forEach(function (cell) {
+          cell.classList.add("is-in");
+        });
+      });
+
+      if (fromEl) fromEl.textContent = pad2(list.length ? start + 1 : 0);
+      if (totalEl) totalEl.textContent = pad2(list.length);
+      // Một trang duy nhất thì hai mũi tên không còn việc gì để làm
+      if (prevBtn) prevBtn.disabled = pages < 2;
+      if (nextBtn) nextBtn.disabled = pages < 2;
+    }
+
+    function setCat(next, btn) {
+      if (next === cat) return;
+      cat = next;
+      page = 0;
+      catBtns.forEach(function (item) {
+        var active = item === btn;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      if (btn) {
+        var no = btn.querySelector(".gal-cat-no");
+        var label = btn.querySelector(".gal-cat-label");
+        if (indexEl && no) indexEl.textContent = no.textContent;
+        if (nameEl && label) nameEl.textContent = label.textContent;
+      }
+      render();
+    }
+
+    // Lật trang vòng tròn: hết trang cuối thì quay lại trang đầu
+    function turn(step) {
+      var pages = Math.max(1, Math.ceil(matching().length / PER_PAGE));
+      page = (page + step + pages) % pages;
+      render();
+    }
+
+    catBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        setCat(btn.getAttribute("data-cat") || "all", btn);
+      });
+    });
+    if (prevBtn)
+      prevBtn.addEventListener("click", function () {
+        turn(-1);
+      });
+    if (nextBtn)
+      nextBtn.addEventListener("click", function () {
+        turn(1);
+      });
+
+    /* ----- Xem ảnh lớn ----- */
+    var lb = document.getElementById("galLightbox");
+    var lbImg = document.getElementById("galLightboxImg");
+    var lbCaption = document.getElementById("galLightboxCaption");
+    var lbPrev = document.getElementById("galLightboxPrev");
+    var lbNext = document.getElementById("galLightboxNext");
+    var lbClose = document.getElementById("galLightboxClose");
+    var lbBackdrop = document.getElementById("galLightboxBackdrop");
+
+    if (!lb || !lbImg || !lbClose) {
+      render();
+      return;
+    }
+
+    var lbList = [];
+    var lbAt = 0;
+    var lbOpener = null;
+    var lbHideTimer = null;
+
+    function showAt(i) {
+      if (!lbList.length) return;
+      lbAt = (i + lbList.length) % lbList.length;
+      var cell = lbList[lbAt];
+      var img = cell.querySelector(".gal-img");
+      if (!img) return;
+      lbImg.src = img.getAttribute("src");
+      lbImg.alt = img.getAttribute("alt") || "";
+      if (lbCaption) {
+        lbCaption.textContent =
+          (cell.getAttribute("data-caption") || "") +
+          " · " +
+          pad2(lbAt + 1) +
+          " / " +
+          pad2(lbList.length);
+      }
+      // Ảnh mới có thể nằm ở trang khác — kéo lưới bên dưới theo cho khớp
+      var wanted = Math.floor(lbAt / PER_PAGE);
+      if (wanted !== page) {
+        page = wanted;
+        render();
+      }
+    }
+
+    function handleLbKeydown(e) {
+      if (e.key === "Escape") {
+        closeLb();
+      } else if (e.key === "ArrowLeft") {
+        showAt(lbAt - 1);
+      } else if (e.key === "ArrowRight") {
+        showAt(lbAt + 1);
+      } else if (e.key === "Tab") {
+        // Chỉ có ba nút trong khung: giữ Tab quẩn quanh chúng để bàn phím
+        // không lọt xuống trang phía sau lớp nền mờ
+        var stops = [lbPrev, lbNext, lbClose].filter(Boolean);
+        if (!stops.length) return;
+        e.preventDefault();
+        var at = stops.indexOf(document.activeElement);
+        var step = e.shiftKey ? -1 : 1;
+        stops[(at + step + stops.length) % stops.length].focus();
+      }
+    }
+
+    function openLb(cell) {
+      lbList = matching();
+      var at = lbList.indexOf(cell);
+      if (at < 0) return;
+      lbOpener = cell;
+      if (lbHideTimer) clearTimeout(lbHideTimer);
+      lb.hidden = false;
+      showAt(at);
+      requestAnimationFrame(function () {
+        lb.classList.add("is-open");
+      });
+      document.addEventListener("keydown", handleLbKeydown);
+      lbClose.focus();
+    }
+
+    function closeLb() {
+      if (lb.hidden) return;
+      lb.classList.remove("is-open");
+      document.removeEventListener("keydown", handleLbKeydown);
+      lbHideTimer = setTimeout(function () {
+        lb.hidden = true;
+      }, 450);
+      // Trả con trỏ về đúng ô vừa xem — có thể đã đổi sau khi lật ảnh
+      var back = lbList[lbAt] || lbOpener;
+      if (back && !back.hidden) back.focus();
+    }
+
+    cells.forEach(function (cell) {
+      cell.addEventListener("click", function () {
+        openLb(cell);
+      });
+    });
+    if (lbPrev)
+      lbPrev.addEventListener("click", function () {
+        showAt(lbAt - 1);
+      });
+    if (lbNext)
+      lbNext.addEventListener("click", function () {
+        showAt(lbAt + 1);
+      });
+    lbClose.addEventListener("click", closeLb);
+    if (lbBackdrop) lbBackdrop.addEventListener("click", closeLb);
+
+    render();
+  }
+
+  /* -------------------------------------------------------
      Header cố định
      Header nằm đè lên ảnh nền nên để trong suốt khi ở đầu trang,
      chỉ mờ nền lại sau khi cuộn xuống. Chiều cao thật của header
@@ -649,6 +927,166 @@
       window.addEventListener("resize", syncHeight);
     }
     window.addEventListener("scroll", syncScrolled, { passive: true });
+  }
+
+  /* -------------------------------------------------------
+     Menu bám theo mục đang xem
+     Mỗi link trong header trỏ tới một mục; nét gạch đỏ phải nằm ở đúng
+     mục đang chiếm viewport chứ không đứng yên ở "Trang chủ".
+
+     Cách chọn mục: kẻ một đường ngang tưởng tượng (probe) ngay dưới
+     header, ở khoảng 1/3 trên của phần màn hình còn lại, rồi xem mục nào
+     đang cắt qua đường đó.
+       - Nhiều mục cùng cắt (khi một mục nằm lồng trong mục khác) → chọn
+         mục NHỎ nhất, tức mục cụ thể nhất đang thật sự ở trước mắt.
+       - Không mục nào cắt (đang ở các đoạn không có trong menu như
+         chương trình, video) → giữ mục cuối cùng đã đi qua, để nét gạch
+         không nhấp nháy về đầu trang.
+       - Chưa đi qua mục nào (hero, đếm ngược) → "Trang chủ".
+     ------------------------------------------------------- */
+  function initNavSpy() {
+    var nav = document.querySelector(".site-nav");
+    if (!nav) return;
+
+    var header = document.getElementById("siteHeader");
+    var links = [].slice.call(nav.querySelectorAll(".nav-link"));
+    var home = null;
+    var items = [];
+
+    links.forEach(function (link) {
+      var hash = (link.getAttribute("href") || "").trim();
+      if (hash.charAt(0) !== "#" || hash.length < 2) return;
+      var el = document.getElementById(hash.slice(1));
+      if (!el) return;
+      // #top bọc trọn cả trang nên không so bề cao được với các mục con:
+      // giữ riêng làm mặc định khi còn ở đầu trang.
+      if (el.id === "top") home = link;
+      else items.push({ link: link, el: el });
+    });
+
+    if (!items.length) return;
+    // Sắp theo đúng thứ tự trong DOM, không theo thứ tự của menu — hai thứ
+    // tự này không nhất thiết trùng nhau.
+    items.sort(function (a, b) {
+      var rel = a.el.compareDocumentPosition(b.el);
+      return rel & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+
+    // Ghi lại quan hệ cha–con giữa các mục (nếu có mục nào nằm lồng trong
+    // mục khác): mục con chỉ được tính là "mục đang xem" khi nó thật sự bắt
+    // đầu thấp hơn hẳn mục cha, còn khi hai mép trên trùng nhau thì nó chỉ
+    // là một phần của mục cha chứ không phải chặng riêng.
+    items.forEach(function (item) {
+      for (var i = 0; i < items.length; i++) {
+        if (items[i] !== item && items[i].el.contains(item.el)) {
+          item.parent = items[i];
+          break;
+        }
+      }
+    });
+
+    var current = null;
+    // Bấm vào menu là cuộn mượt: khoá lại một nhịp để nét gạch không chạy
+    // lướt qua từng mục trên đường đi rồi mới dừng ở đích.
+    var lockUntil = 0;
+
+    // Trên màn hẹp thanh menu trượt ngang được, mục đang xem có thể nằm
+    // ngoài tầm nhìn — kéo nó vào giữa. Tự tính rồi gọi nav.scrollTo chứ
+    // không dùng scrollIntoView, vì hàm đó sẽ cuốn theo cả trang.
+    function revealInNav(link) {
+      var slack = nav.scrollWidth - nav.clientWidth;
+      if (slack <= 2) return;
+      var target =
+        link.offsetLeft - (nav.clientWidth - link.offsetWidth) / 2;
+      target = Math.max(0, Math.min(slack, target));
+      if (Math.abs(target - nav.scrollLeft) < 4) return;
+      try {
+        nav.scrollTo({ left: target, behavior: "smooth" });
+      } catch (err) {
+        nav.scrollLeft = target;
+      }
+    }
+
+    function setActive(link) {
+      if (link === current) return;
+      current = link;
+      links.forEach(function (item) {
+        var active = item === link;
+        item.classList.toggle("is-active", active);
+        if (active) item.setAttribute("aria-current", "true");
+        else item.removeAttribute("aria-current");
+      });
+      revealInNav(link);
+    }
+
+    function pick() {
+      var headerH = header ? header.offsetHeight : 0;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var probe = headerH + (vh - headerH) * 0.32;
+      var doc = document.documentElement;
+
+      // Chạm đáy trang: mục cuối có thể quá ngắn để cắt qua probe, ép về
+      // mục cuối cùng cho khớp với thứ người đọc đang nhìn.
+      if (window.scrollY + vh >= doc.scrollHeight - 2) {
+        return items[items.length - 1].link;
+      }
+
+      var best = null;
+      var bestH = Infinity;
+      var passed = null;
+
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var rect = item.el.getBoundingClientRect();
+        if (rect.top > probe) continue;
+
+        if (item.parent) {
+          // Mục con: chỉ thắng khi đang ôm lấy đường probe VÀ đã tách hẳn
+          // khỏi mép trên của mục cha. Không bao giờ được làm "mục đã đi
+          // qua" — hết hộp của nó là trả lại cho mục cha, để nét gạch không
+          // dính ở "Album ảnh" suốt phần dòng thời gian phía sau.
+          var top = item.parent.el.getBoundingClientRect().top;
+          if (rect.top - top < vh * 0.2) continue;
+        } else {
+          passed = item;
+        }
+
+        if (rect.bottom > probe && rect.height < bestH) {
+          best = item;
+          bestH = rect.height;
+        }
+      }
+
+      if (best) return best.link;
+      if (passed) return passed.link;
+      return home || items[0].link;
+    }
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      if (Date.now() < lockUntil) return;
+      setActive(pick());
+    }
+    function schedule() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+
+    nav.addEventListener("click", function (ev) {
+      var link = ev.target.closest ? ev.target.closest(".nav-link") : null;
+      if (!link || links.indexOf(link) === -1) return;
+      setActive(link);
+      lockUntil = Date.now() + 700;
+    });
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    if (typeof ResizeObserver === "function" && header) {
+      new ResizeObserver(schedule).observe(header);
+    }
+    update();
   }
 
   /* -------------------------------------------------------
@@ -906,18 +1344,31 @@
   }
 
   /* -------------------------------------------------------
+     Footer — năm bản quyền
+     ------------------------------------------------------- */
+  function initFooterYear() {
+    var el = document.getElementById("footerYear");
+    if (!el) return;
+    el.textContent = String(new Date().getFullYear());
+  }
+
+  /* -------------------------------------------------------
      Khởi động
      ------------------------------------------------------- */
   function init() {
     initHeader();
+    initNavSpy();
     renderPetals();
     initStoryBurst();
+    initTimelineReveal();
     initCalendar();
     initWhenReveal();
     initCountdown();
     initRsvp();
     initShare();
     initGiftModal();
+    initAlbum();
+    initFooterYear();
     // Đặt ngay trước initMusic: ẩn tên và nối hàm bắt đầu viết vào modal là một
     // cặp, để lỗi ở các bước trước không làm tên bị ẩn mà không bao giờ hiện.
     var writeNames = initNameWriting();
