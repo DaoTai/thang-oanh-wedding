@@ -337,25 +337,53 @@
           <h2 class="a rule-text">Đếm ngược thời gian</h2>
           <span class="rule rule--wide"></span>
         </div>
-        <div class="countdown">
-          <div class="cd-cell">
-            <div class="cd-num" id="cdDays">00</div>
-            <div class="cd-label">Ngày</div>
+        <div class="countdown-wrap">
+          <div class="lantern lantern--left" aria-hidden="true">
+            <span class="lantern-cord"></span>
+            <span class="lantern-cap"></span>
+            <span class="lantern-body"
+              ><span class="lantern-char">囍</span></span
+            >
+            <span class="lantern-cap"></span>
+            <span class="lantern-tassel"></span>
           </div>
-          <div class="cd-cell">
-            <div class="cd-num" id="cdHours">00</div>
-            <div class="cd-label">Giờ</div>
+          <!-- Hoa văn giữa hai đèn (chỉ hiện ở mobile để lấp khoảng trống) -->
+          <span class="cd-ornament" aria-hidden="true">囍</span>
+          <div class="countdown">
+            <div class="cd-cell">
+              <div class="cd-num" id="cdDays">00</div>
+              <div class="cd-label">Ngày</div>
+            </div>
+            <div class="cd-cell">
+              <div class="cd-num" id="cdHours">00</div>
+              <div class="cd-label">Giờ</div>
+            </div>
+            <div class="cd-cell">
+              <div class="cd-num" id="cdMinutes">00</div>
+              <div class="cd-label">Phút</div>
+            </div>
+            <div class="cd-cell">
+              <div class="cd-num" id="cdSeconds">00</div>
+              <div class="cd-label">Giây</div>
+            </div>
           </div>
-          <div class="cd-cell">
-            <div class="cd-num" id="cdMinutes">00</div>
-            <div class="cd-label">Phút</div>
-          </div>
-          <div class="cd-cell">
-            <div class="cd-num" id="cdSeconds">00</div>
-            <div class="cd-label">Giây</div>
+          <div class="lantern lantern--right" aria-hidden="true">
+            <span class="lantern-cord"></span>
+            <span class="lantern-cap"></span>
+            <span class="lantern-body"
+              ><span class="lantern-char">囍</span></span
+            >
+            <span class="lantern-cap"></span>
+            <span class="lantern-tassel"></span>
           </div>
         </div>
-        <p class="ornament">❊</p>
+        <div class="cd-divider" aria-hidden="true">
+          <span class="cd-divider-line"></span>
+          <span class="cd-divider-mark">❖</span>
+          <span class="cd-divider-mark cd-divider-mark--main">❊</span>
+          <span class="cd-divider-mark">❖</span>
+          <span class="cd-divider-line"></span>
+        </div>
       </section>
 
       <!-- ========================== OUR STORY ========================== -->
@@ -526,7 +554,7 @@
               </p>
               <p class="family-place">
                 <span class="family-place-icon" aria-hidden="true">◈</span>
-                Hà Nội
+                Thành phố Hà Nội
               </p>
             </div>
 
@@ -551,7 +579,7 @@
               </p>
               <p class="family-place">
                 <span class="family-place-icon" aria-hidden="true">◈</span>
-                Ninh Bình
+                Thành phố Ninh Bình
               </p>
             </div>
           </div>
@@ -1095,41 +1123,6 @@
         </div>
       </section>
 
-      <!-- ===================== CHƯƠNG TRÌNH TIỆC ===================== -->
-      <section class="program-section">
-        <h2 class="section-title section-title--block">
-          Chương trình tiệc cưới
-        </h2>
-        <div class="program-grid">
-          <div class="pg-item">
-            <div class="pg-mark">☗</div>
-            <div class="pg-time">16:00</div>
-            <div class="pg-label">Đón khách</div>
-          </div>
-          <div class="pg-item">
-            <div class="pg-mark">❁</div>
-            <div class="pg-time">17:00</div>
-            <div class="pg-label">Lễ thành hôn</div>
-          </div>
-          <div class="pg-item">
-            <div class="pg-mark">⚱</div>
-            <div class="pg-time">18:00</div>
-            <div class="pg-label">Khai tiệc</div>
-          </div>
-          <div class="pg-item">
-            <div class="pg-mark">❖</div>
-            <div class="pg-time">19:30</div>
-            <div class="pg-label">Cắt bánh</div>
-          </div>
-          <div class="pg-item">
-            <div class="pg-mark">♡</div>
-            <div class="pg-time">21:00</div>
-            <div class="pg-label">Tiễn khách</div>
-          </div>
-        </div>
-        <p class="ornament">❊</p>
-      </section>
-
       <!-- ====================== LỜI CHÚC / RSVP ====================== -->
       <section id="rsvp" class="rsvp-section">
         <h2 class="section-title section-title--block section-title--tight">
@@ -1206,17 +1199,20 @@
       <footer class="site-footer">
         <div class="footer-inner">
           <div class="footer-brand">
-            <span class="sigil sigil--sm">囍</span>
-            <span class="footer-name">Thắng &amp; Oanh · 28.11.2026</span>
+            <span class="footer-sigil" aria-hidden="true">囍</span>
+            <div class="footer-names">Thắng <span>&amp;</span> Oanh</div>
+            <div class="footer-date">28 · 11 · 2026</div>
+            <p class="footer-thanks">
+              Sự hiện diện của bạn là niềm vinh hạnh lớn nhất của chúng mình.
+            </p>
           </div>
-          <div class="footer-center">
-            <a href="#top" class="to-top" aria-label="Lên đầu trang">↑</a>
-          </div>
-          <div class="footer-social">
-            <a href="#top">Facebook</a>
-            <a href="#top">Instagram</a>
-            <a href="#top">YouTube</a>
-          </div>
+          <nav class="footer-nav" aria-label="Điều hướng nhanh">
+            <a href="#story">Chuyện tình</a>
+            <a href="#when">Lễ cưới</a>
+            <a href="#album">Album</a>
+            <a href="#rsvp">Lời chúc</a>
+          </nav>
+          <a href="#top" class="to-top" aria-label="Lên đầu trang">↑</a>
         </div>
 
         <!-- Bản quyền & tác giả. Năm được initFooterYear() cập nhật mỗi lần mở. -->

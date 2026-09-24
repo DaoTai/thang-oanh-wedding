@@ -209,6 +209,76 @@
     });
   }
 
+  /* Phần "Hành trình": chữ và album trượt vào từ trái sang phải */
+  function initSlideIn() {
+    var els = document.querySelectorAll(".story-copy, .story-section .album");
+    if (
+      !els.length ||
+      typeof IntersectionObserver !== "function" ||
+      (window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    )
+      return;
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    els.forEach(function (el, i) {
+      el.classList.add("slide-in");
+      el.style.transitionDelay = i * 0.25 + "s";
+      observer.observe(el);
+    });
+  }
+
+  /* -------------------------------------------------------
+     fadeUp khi cuộn lần đầu
+     Gắn .fade-up bằng JS (không có JS thì nội dung vẫn hiện bình thường),
+     rồi thêm .is-visible khi khối vào khung nhìn. Chỉ diễn một lần.
+     ------------------------------------------------------- */
+  function initFadeUp() {
+    var targets = document.querySelectorAll(
+      [
+        ".countdown-section .rule-row",
+        ".countdown-section .countdown-wrap",
+        ".gallery-rail",
+        ".gallery-inner > :not(.gallery-rail)",
+        ".rsvp-section > *",
+        ".footer-inner",
+      ].join(",")
+    );
+    if (!targets.length) return;
+
+    if (
+      typeof IntersectionObserver !== "function" ||
+      (window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    )
+      return;
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+
+    targets.forEach(function (el) {
+      el.classList.add("fade-up");
+      observer.observe(el);
+    });
+  }
+
   /* -------------------------------------------------------
      Dòng thời gian
      Hoa văn mở đầu và từng mốc được đánh dấu .is-visible khi lọt vào khung
@@ -241,12 +311,28 @@
       return;
     }
 
+    // Các mốc hiện lần lượt, cách nhau ~1s dù cuộn nhanh hay chậm
+    var STAGGER_MS = 1000;
+    var nextSlot = 0;
+    function reveal(el) {
+      var now = Date.now();
+      var at = Math.max(now, nextSlot);
+      nextSlot = at + STAGGER_MS;
+      setTimeout(function () {
+        el.classList.add("is-visible");
+      }, at - now);
+    }
+
     var observer = new IntersectionObserver(
       function (entries) {
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
           observer.unobserve(entry.target);
+          if (entry.target === timeline) {
+            entry.target.classList.add("is-visible");
+          } else {
+            reveal(entry.target);
+          }
         });
       },
       // Lùi mép dưới lên 12% để mốc chỉ diễn khi đã vào hẳn trong tầm mắt
@@ -1629,6 +1715,8 @@
     renderPetals();
     initStoryBurst();
     initTimelineReveal();
+    initFadeUp();
+    initSlideIn();
     initCalendar();
     initWhenReveal();
     initCountdown();
