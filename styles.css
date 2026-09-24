@@ -1689,6 +1689,13 @@ button:focus-visible,
   justify-content: center;
   white-space: nowrap;
 }
+/* Desktop: khối QR nằm cạnh lịch nên nút RSVP xuống hẳn dòng dưới, căn giữa */
+@media (min-width: 900px) {
+  .when-actions {
+    flex: 0 0 100%;
+    align-items: center;
+  }
+}
 /* Nút outline có viền 1px — bớt padding để cao bằng nút solid bên trên */
 .when-actions .btn--outline {
   padding: 15px 44px;
@@ -2490,6 +2497,7 @@ button:focus-visible,
   position: relative;
   display: grid;
   place-items: center;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   width: 148px;
   height: 148px;
   margin: 18px auto 0;
@@ -2538,13 +2546,242 @@ button:focus-visible,
 .gift-qr img {
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  cursor: zoom-in;
   border-radius: 4px;
   object-fit: contain;
+}
+/* Nút mở modal chọn món quà, nằm dưới QR */
+.gift-pick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  margin: 26px auto 0;
+  padding: 9px 20px;
+  border: 1px solid var(--red);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  color: var(--red-deep);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.gift-pick:hover {
+  background: var(--red);
+  color: #fff;
+}
+.gift-pick-icon {
+  color: var(--gold);
+}
+.gift-pick:hover .gift-pick-icon {
+  color: inherit;
+}
+
+/* Modal chọn món quà: lưới thẻ (ảnh, tên, số tiền) */
+.gift-picker .music-modal-card {
+  max-width: 640px;
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+.gift-picker .music-modal-actions .btn {
+  flex: 0 1 200px;
+}
+.gift-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+.gift-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 8px 12px;
+  border: 1px solid var(--line-gold);
+  border-radius: 12px;
+  background: #fff;
+  font-family: var(--font-serif);
+  color: var(--brown-dark);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.gift-card:hover,
+.gift-card:focus-visible {
+  border-color: var(--red);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(88, 48, 43, 0.16);
+}
+.gift-card-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 8px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--cream-soft);
+}
+.gift-card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+}
+.gift-card-name {
+  font-size: 15px;
+}
+.gift-card-amount {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--red-deep);
+}
+/* Huy hiệu món quà: WOW! (dưới 1 triệu) lắc nhẹ như tem hồng, SUPER (từ 1 triệu)
+   là dải đỏ-vàng có vệt sáng quét ngang, kèm thẻ phát sáng nhấp nháy. */
+.gift-card {
+  position: relative;
+}
+.gift-badge {
+  position: absolute;
+  top: -9px;
+  left: -8px;
+  z-index: 2;
+  overflow: hidden;
+  padding: 4px 10px 3px;
+  border-radius: 999px;
+  font-family: var(--font-serif);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(88, 48, 43, 0.3);
+  transform-origin: 20% 80%;
+}
+.gift-badge--wow {
+  background: linear-gradient(135deg, #f0758f, #d9436c);
+  border: 1px solid #fff;
+  animation: gift-wow 2.4s ease-in-out infinite;
+}
+.gift-badge--wow::before {
+  content: "✦ ";
+  color: #ffe7a3;
+}
+.gift-badge--super {
+  padding-left: 12px;
+  padding-right: 12px;
+  background: linear-gradient(135deg, var(--red-deep), var(--red) 45%, #d99a2b);
+  border: 1px solid #f3cf82;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  animation: gift-super 2.8s ease-in-out infinite;
+}
+.gift-badge--super::before {
+  content: "★ ";
+  color: #ffe08a;
+}
+.gift-badge--super::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  transform: skewX(-20deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: gift-shine 2.8s ease-in-out infinite;
+}
+.gift-card--super {
+  border-color: #d99a2b;
+  animation: gift-glow 2.8s ease-in-out infinite;
+}
+@keyframes gift-wow {
+  0%,
+  100% {
+    transform: rotate(-8deg) scale(1);
+  }
+  25% {
+    transform: rotate(-3deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(-9deg) scale(1);
+  }
+  75% {
+    transform: rotate(-5deg) scale(1.07);
+  }
+}
+@keyframes gift-super {
+  0%,
+  100% {
+    transform: rotate(-4deg) scale(1);
+  }
+  50% {
+    transform: rotate(-4deg) scale(1.08);
+  }
+}
+@keyframes gift-shine {
+  0%,
+  35% {
+    left: -60%;
+  }
+  75%,
+  100% {
+    left: 130%;
+  }
+}
+@keyframes gift-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(217, 154, 43, 0);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(217, 154, 43, 0.55);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gift-badge,
+  .gift-badge::after,
+  .gift-card--super {
+    animation: none;
+  }
+  .gift-badge--wow {
+    transform: rotate(-6deg);
+  }
+  .gift-badge--super {
+    transform: rotate(-4deg);
+  }
+}
+@media (max-width: 899px) {
+  .gift-picker {
+    padding: 0;
+  }
+  .gift-picker .music-modal-card {
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border: 0;
+    padding: 56px 20px 32px;
+  }
+  .gift-picker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .gift-info {
   display: grid;
   gap: 12px;
-  margin: 28px 0 0;
+  margin: 24px 0 0;
 }
 .gift-row dt {
   font-family: var(--font-serif);
@@ -2566,6 +2803,103 @@ button:focus-visible,
   letter-spacing: 0.06em;
   color: var(--red-deep);
   user-select: all;
+}
+/* Phóng to QR: thẻ vừa khít ảnh, ảnh không vượt quá khung nhìn */
+.qr-zoom .music-modal-card {
+  width: min(440px, 100%);
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 32px 20px 24px;
+}
+/* Khung cố định kích thước: modal không đổi cỡ khi ảnh QR tải xong */
+.qr-zoom-frame {
+  position: relative;
+  width: min(100%, calc(100dvh - 190px));
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+}
+.qr-zoom-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+  transition: opacity 0.35s ease;
+}
+.qr-zoom-frame.is-loading .qr-zoom-img {
+  opacity: 0;
+}
+.qr-loader {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.qr-zoom-frame.is-loading .qr-loader {
+  display: flex;
+}
+.qr-loader span {
+  font-family: var(--font-serif);
+  font-size: 84px;
+  line-height: 1;
+  color: var(--red-deep);
+  animation: qr-loader-beat 1.2s ease-in-out infinite;
+}
+.qr-loader::before {
+  content: "";
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  color: var(--red-deep);
+  opacity: 0;
+  animation: qr-loader-ring 1.2s ease-out infinite;
+}
+@keyframes qr-loader-beat {
+  0%, 100% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes qr-loader-ring {
+  0% { transform: scale(0.6); opacity: 0.6; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qr-loader span,
+  .qr-loader::before {
+    animation: none;
+  }
+}
+
+/* Desktop: khối QR nằm trực tiếp cạnh lịch (script.js chuyển .gift-grid vào
+   đây). Trống trên mobile nên ẩn. */
+.gift-inline:empty {
+  display: none;
+}
+.gift-inline .gift-grid {
+  margin-top: 0;
+  gap: 32px;
+}
+.gift-inline .gift-info {
+  margin-top: 26px;
+}
+
+/* Mobile/tablet: modal QR phủ toàn màn hình, nội dung cuộn bên trong */
+@media (max-width: 899px) {
+  .gift-modal {
+    padding: 0;
+  }
+  .gift-modal .music-modal-card {
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border: 0;
+    padding: 56px 24px 32px;
+  }
 }
 @media (max-width: 720px) {
   .gift-grid {

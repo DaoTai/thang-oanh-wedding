@@ -598,6 +598,11 @@
               </table>
             </div>
 
+            <!-- Desktop: initGiftModal() chuyển khối QR (.gift-grid) từ modal
+                 sang đây, ngay cạnh lịch. Mobile: khối này rỗng (ẩn) và QR
+                 nằm trong modal toàn màn hình mở bằng nút "Chúc phúc lì xì". -->
+            <div class="gift-inline" id="giftInlineSlot"></div>
+
             <div class="when-actions">
               <a href="#rsvp" class="btn btn--solid btn--lg"
                 ><span class="btn-icon">✉</span>Xác nhận tham dự</a
@@ -1125,24 +1130,6 @@
         <p class="ornament">❊</p>
       </section>
 
-      <!-- ========================= VIDEO CƯỚI ========================= -->
-      <section class="video-section">
-        <div class="video-weave" aria-hidden="true"></div>
-        <div class="video-inner">
-          <p class="video-quote">
-            &ldquo; Cảm ơn bạn<br />đã là một phần trong<br />câu chuyện của
-            chúng tôi! &rdquo;
-          </p>
-          <!-- THAY VIDEO: nhúng iframe YouTube/Vimeo vào đây, tỉ lệ 16:9 -->
-          <div class="video-frame">
-            <div class="video-cta">
-              <span class="video-play">▶</span>
-              <span class="video-play-label">Xem video cưới</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- ====================== LỜI CHÚC / RSVP ====================== -->
       <section id="rsvp" class="rsvp-section">
         <h2 class="section-title section-title--block section-title--tight">
@@ -1256,7 +1243,7 @@
                   d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94Z"
                 />
               </svg>
-              <span>A$AP Money</span>
+              <span>Dao Tai</span>
             </a>
           </p>
         </div>
@@ -1346,52 +1333,127 @@
           thêm chút tấm lòng, bạn có thể dùng thông tin bên dưới nhé!
         </p>
         <div class="gift-grid">
-          <section class="gift-person" aria-labelledby="giftGroomName">
+          <!-- THÔNG TIN TÀI KHOẢN: sửa data-bank (mã VietQR của ngân hàng, vd
+               ICB = VietinBank, VCB = Vietcombank, MB, TCB…), data-account,
+               data-holder (không dấu, viết hoa) và chữ hiển thị bên dưới.
+               Danh sách món quà/số tiền nằm ở GIFT_ITEMS trong script.js. -->
+          <section
+            class="gift-person"
+            aria-labelledby="giftGroomName"
+            data-bank="ICB"
+            data-account="100871060908"
+            data-holder="DAO DUC TAI"
+            data-who="Chu re"
+          >
             <span class="gift-role">Chú rể</span>
             <h3 class="gift-name" id="giftGroomName">Mạnh Thắng</h3>
             <div class="gift-qr">
-              <span class="ph-label">[Ảnh mã QR]</span>
+              <img
+                src="public/assets/qr-example.jpg"
+                alt="Mã QR mừng cưới chú rể"
+              />
             </div>
+            <button type="button" class="gift-pick" aria-haspopup="dialog">
+              <span class="gift-pick-icon" aria-hidden="true">✿</span>
+              <span class="gift-pick-text">Chọn món quà</span>
+            </button>
             <dl class="gift-info">
               <div class="gift-row">
                 <dt>Ngân hàng</dt>
-                <dd>[Tên ngân hàng]</dd>
+                <dd>VietinBank</dd>
               </div>
               <div class="gift-row">
                 <dt>Số tài khoản</dt>
-                <dd class="gift-account">[Số tài khoản]</dd>
+                <dd class="gift-account">100871060908</dd>
               </div>
               <div class="gift-row">
                 <dt>Chủ tài khoản</dt>
-                <dd>[Tên chủ tài khoản]</dd>
+                <dd>DAO DUC TAI</dd>
               </div>
             </dl>
           </section>
 
-          <section class="gift-person" aria-labelledby="giftBrideName">
+          <section
+            class="gift-person"
+            aria-labelledby="giftBrideName"
+            data-bank="ICB"
+            data-account="100871060908"
+            data-holder="DAO DUC TAI"
+            data-who="Co dau"
+          >
             <span class="gift-role">Cô dâu</span>
             <h3 class="gift-name" id="giftBrideName">Ngọc Oanh</h3>
             <div class="gift-qr">
-              <span class="ph-label">[Ảnh mã QR]</span>
+              <img
+                src="public/assets/qr-example.jpg"
+                alt="Mã QR mừng cưới cô dâu"
+              />
             </div>
+            <button type="button" class="gift-pick" aria-haspopup="dialog">
+              <span class="gift-pick-icon" aria-hidden="true">✿</span>
+              <span class="gift-pick-text">Chọn món quà</span>
+            </button>
             <dl class="gift-info">
               <div class="gift-row">
                 <dt>Ngân hàng</dt>
-                <dd>[Tên ngân hàng]</dd>
+                <dd>VietinBank</dd>
               </div>
               <div class="gift-row">
                 <dt>Số tài khoản</dt>
-                <dd class="gift-account">[Số tài khoản]</dd>
+                <dd class="gift-account">100871060908</dd>
               </div>
               <div class="gift-row">
                 <dt>Chủ tài khoản</dt>
-                <dd>[Tên chủ tài khoản]</dd>
+                <dd>DAO DUC TAI</dd>
               </div>
             </dl>
           </section>
         </div>
         <div class="music-modal-actions">
           <button type="button" class="btn btn--outline" id="giftModalClose">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chọn món quà: lưới các món (ảnh, tên, số tiền) do initGiftModal() dựng
+         từ GIFT_ITEMS. Chọn một món thì QR của người đó đổi theo và được phóng to. -->
+    <div class="music-modal gift-picker" id="giftPicker" hidden>
+      <div class="music-modal-backdrop" id="giftPickerBackdrop"></div>
+      <div
+        class="music-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="giftPickerTitle"
+      >
+        <p class="music-modal-flourish" aria-hidden="true">✿</p>
+        <h2 class="music-modal-title" id="giftPickerTitle">Chọn món quà</h2>
+        <p class="music-modal-sub" id="giftPickerSub"></p>
+        <div class="gift-picker-grid" id="giftPickerGrid"></div>
+        <div class="music-modal-actions">
+          <button type="button" class="btn btn--outline" id="giftPickerClose">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phóng to mã QR: mở khi bấm vào ảnh QR (cả trong modal lẫn cạnh lịch) -->
+    <div class="music-modal qr-zoom" id="qrZoom" hidden>
+      <div class="music-modal-backdrop" id="qrZoomBackdrop"></div>
+      <div
+        class="music-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mã QR mừng cưới"
+      >
+        <div class="qr-zoom-frame" id="qrZoomFrame">
+          <img class="qr-zoom-img" id="qrZoomImg" src="" alt="" />
+          <div class="qr-loader" aria-hidden="true"><span>囍</span></div>
+        </div>
+        <div class="music-modal-actions">
+          <button type="button" class="btn btn--outline" id="qrZoomClose">
             Đóng
           </button>
         </div>

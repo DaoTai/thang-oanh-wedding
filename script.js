@@ -15,6 +15,44 @@
     petalCount: 66, // Số cánh hoa (0–40)
   };
 
+  /* Món quà mừng cưới: mỗi món là một số tiền cố định (VND). Chọn món thì QR
+     VietQR được dựng lại kèm số tiền + lời nhắn. amount: 0 = để người quét
+     tự nhập. img: ảnh minh hoạ món quà. Huy hiệu tự suy ra từ số tiền:
+     dưới 1 triệu = WOW, từ 1 triệu = SUPER (xem GIFT_SUPER_FROM). Thêm/bớt/đổi tên món ở đây. */
+  var GIFT_SUPER_FROM = 1000000;
+  var GIFT_ITEMS = [
+    {
+      label: "Lì Xì Chúc Phúc",
+      amount: 300000,
+      img: "public/assets/gifts/lucky-money.png",
+    },
+    {
+      label: "Bồ Câu Uyên Ương",
+      amount: 500000,
+      img: "public/assets/gifts/pair-birds.png",
+    },
+    {
+      label: "Wow Thiên Sứ",
+      amount: 800000,
+      img: "public/assets/gifts/angel.png",
+    },
+    {
+      label: "Super Gà Tình Yêu",
+      amount: 1000000,
+      img: "public/assets/gifts/na-than.png",
+    },
+    {
+      label: "Super Boomerang",
+      amount: 1000000,
+      img: "public/assets/gifts/boomerang.png",
+    },
+    {
+      label: "Super Nhẫn Hạnh Phúc",
+      amount: 1000000,
+      img: "public/assets/gifts/pair-rings.png",
+    },
+  ];
+
   /* -------------------------------------------------------
      Cánh hoa rơi
      ------------------------------------------------------- */
@@ -504,6 +542,14 @@
      duyệt vẫn đòi một cử chỉ mới nên modal cố tình hiện lại từ đầu.
      Trả về true nếu đã dựng modal; onModalClosed được gọi mỗi khi modal đóng.
      ------------------------------------------------------- */
+  // Focus vào nút đóng (nằm cuối thẻ) sẽ kéo thẻ cuộn xuống đáy; đặt lại về
+  // đầu rồi focus không cuộn để modal luôn mở ở phần đầu.
+  function openFocus(modalEl, el) {
+    var card = modalEl.querySelector(".music-modal-card");
+    if (card) card.scrollTop = 0;
+    el.focus({ preventScroll: true });
+  }
+
   function initMusic(onModalClosed) {
     var audio = document.getElementById("bgMusic");
     var modal = document.getElementById("musicModal");
@@ -573,7 +619,7 @@
       document.addEventListener("keydown", handleKeydown);
       // Đưa focus vào hộp thoại để trình đọc màn hình thông báo đã vào modal
       // và người dùng bàn phím không lọt thẳng ra nội dung phía sau backdrop.
-      playBtn.focus();
+      openFocus(modal, playBtn);
     }
 
     function closeModal() {
@@ -629,9 +675,227 @@
     var backdrop = document.getElementById("giftModalBackdrop");
     var hideTimer = null;
 
+    // Phóng to QR khi bấm vào ảnh (ủy quyền trên document vì .gift-grid
+    // được chuyển qua lại giữa modal và cạnh lịch)
+    var zoom = document.getElementById("qrZoom");
+    var zoomImg = document.getElementById("qrZoomImg");
+    var zoomClose = document.getElementById("qrZoomClose");
+    var zoomBackdrop = document.getElementById("qrZoomBackdrop");
+    var zoomTimer = null;
+    var zoomFrame = document.getElementById("qrZoomFrame");
+    if (zoomImg && zoomFrame) {
+      ["load", "error"].forEach(function (ev) {
+        zoomImg.addEventListener(ev, function () {
+          zoomFrame.classList.remove("is-loading");
+        });
+      });
+    }
+
+    // QR động VietQR: chọn món quà thì dựng lại ảnh QR có sẵn số tiền + lời nhắn.
+    // Ảnh nhỏ dùng mẫu qr_only (chỉ mã); ảnh phóng to dùng compact2 (có tên,
+    // số tài khoản) nằm ở data-zoom. Lỗi mạng thì quay về ảnh QR tĩnh.
+    function vietQrUrl(p, item, template) {
+      var url =
+        "https://img.vietqr.io/image/" +
+        p.dataset.bank +
+        "-" +
+        p.dataset.account +
+        "-" +
+        template +
+        ".png?accountName=" +
+        encodeURIComponent(p.dataset.holder);
+      if (item.amount) {
+        url += "&amount=" + item.amount;
+        url +=
+          "&addInfo=" +
+          encodeURIComponent(
+            "Mung cuoi " +
+              p.dataset.who +
+              " - " +
+              item.label
+                .normalize("NFD")
+                .replace(/[̀-ͯ]/g, "")
+                .replace(/đ/g, "d")
+                .replace(/Đ/g, "D")
+          );
+      }
+      return url;
+    }
+    // Chọn món quà: nút "Chọn món quà" dưới mỗi QR mở modal lưới món (ảnh, tên,
+    // số tiền). Chọn món → QR của người đó đổi theo rồi phóng to luôn.
+    var picker = document.getElementById("giftPicker");
+    var pickerGrid = document.getElementById("giftPickerGrid");
+    var pickerSub = document.getElementById("giftPickerSub");
+    var pickerClose = document.getElementById("giftPickerClose");
+    var pickerBackdrop = document.getElementById("giftPickerBackdrop");
+    var pickerTimer = null;
+    var pickerPerson = null;
+
+    function formatAmount(item) {
+      return item.amount
+        ? item.amount.toLocaleString("vi-VN") + "đ"
+        : "Tự nhập";
+    }
+    function selectItem(p, item) {
+      var img = p.querySelector(".gift-qr img");
+      var text = p.querySelector(".gift-pick-text");
+      img.dataset.zoom = vietQrUrl(p, item, "compact2");
+      img.src = vietQrUrl(p, item, "qr_only");
+      img.alt = item.amount
+        ? "Mã QR chuyển " + formatAmount(item) + " — " + item.label
+        : "Mã QR mừng cưới";
+      if (text) {
+        text.textContent = item.amount
+          ? item.label + " · " + formatAmount(item)
+          : "Chọn món quà";
+      }
+    }
+    [].forEach.call(
+      document.querySelectorAll(".gift-person[data-bank]"),
+      function (p) {
+        var img = p.querySelector(".gift-qr img");
+        if (!img) return;
+        var fallback = img.getAttribute("src");
+        img.addEventListener("error", function () {
+          if (img.getAttribute("src") !== fallback) {
+            img.src = fallback;
+            delete img.dataset.zoom;
+          }
+        });
+        selectItem(p, { label: "", amount: 0 });
+      }
+    );
+
+    function pickerKeydown(e) {
+      if (e.key === "Escape") closePicker();
+    }
+    function openPicker(p) {
+      if (pickerTimer) clearTimeout(pickerTimer);
+      pickerPerson = p;
+      pickerSub.textContent =
+        "Chọn một món để gửi tặng " +
+        p.querySelector(".gift-name").textContent +
+        ".";
+      picker.hidden = false;
+      requestAnimationFrame(function () {
+        picker.classList.add("is-open");
+      });
+      document.addEventListener("keydown", pickerKeydown);
+      openFocus(picker, pickerClose);
+    }
+    function closePicker() {
+      if (picker.hidden) return;
+      picker.classList.remove("is-open");
+      document.removeEventListener("keydown", pickerKeydown);
+      pickerTimer = setTimeout(function () {
+        picker.hidden = true;
+      }, 450);
+    }
+    if (picker && pickerGrid && pickerClose) {
+      GIFT_ITEMS.forEach(function (item) {
+        var card = document.createElement("button");
+        card.type = "button";
+        var tier = item.amount >= GIFT_SUPER_FROM ? "super" : "wow";
+        card.className = "gift-card gift-card--" + tier;
+        card.innerHTML =
+          '<span class="gift-badge gift-badge--' +
+          tier +
+          '">' +
+          (tier === "super" ? "SUPER" : "WOW!") +
+          "</span>" +
+          '<span class="gift-card-photo"><img alt="" loading="lazy" /></span>' +
+          '<span class="gift-card-name"></span><span class="gift-card-amount"></span>';
+        card.querySelector("img").src = item.img;
+        card.querySelector(".gift-card-name").textContent = item.label;
+        card.querySelector(".gift-card-amount").textContent =
+          formatAmount(item);
+        card.addEventListener("click", function () {
+          var p = pickerPerson;
+          closePicker();
+          if (!p) return;
+          // Chỉ QR phóng to đổi theo món; QR + text nút bên ngoài giữ nguyên.
+          openZoom(
+            p.querySelector(".gift-qr img"),
+            vietQrUrl(p, item, "compact2"),
+            item.amount
+              ? "Mã QR chuyển " + formatAmount(item) + " — " + item.label
+              : "Mã QR mừng cưới"
+          );
+        });
+        pickerGrid.appendChild(card);
+      });
+      document.addEventListener("click", function (e) {
+        var btn = e.target.closest && e.target.closest(".gift-pick");
+        if (btn) openPicker(btn.closest(".gift-person"));
+      });
+      pickerClose.addEventListener("click", closePicker);
+      if (pickerBackdrop) pickerBackdrop.addEventListener("click", closePicker);
+    }
+
+    function zoomKeydown(e) {
+      if (e.key === "Escape") closeZoom();
+      else if (e.key === "Tab") {
+        e.preventDefault();
+        zoomClose.focus();
+      }
+    }
+    function openZoom(img, srcOverride, altOverride) {
+      if (zoomTimer) clearTimeout(zoomTimer);
+      var src = srcOverride || img.dataset.zoom || img.currentSrc || img.src;
+      zoomImg.alt = altOverride != null ? altOverride : img.alt;
+      if (zoomImg.getAttribute("src") !== src) {
+        zoomFrame.classList.add("is-loading");
+        zoomImg.src = src;
+        if (zoomImg.complete && zoomImg.naturalWidth)
+          zoomFrame.classList.remove("is-loading");
+      }
+      zoom.hidden = false;
+      requestAnimationFrame(function () {
+        zoom.classList.add("is-open");
+      });
+      document.addEventListener("keydown", zoomKeydown);
+      openFocus(zoom, zoomClose);
+    }
+    function closeZoom() {
+      if (zoom.hidden) return;
+      zoom.classList.remove("is-open");
+      document.removeEventListener("keydown", zoomKeydown);
+      zoomTimer = setTimeout(function () {
+        zoom.hidden = true;
+      }, 450);
+      if (!modal.hidden) closeBtn.focus({ preventScroll: true });
+    }
+    if (zoom && zoomImg && zoomClose) {
+      document.addEventListener("click", function (e) {
+        var img = e.target.closest && e.target.closest(".gift-qr img");
+        if (img) openZoom(img);
+      });
+      zoomClose.addEventListener("click", closeZoom);
+      if (zoomBackdrop) zoomBackdrop.addEventListener("click", closeZoom);
+    }
+
+    // Desktop: đưa khối QR ra cạnh lịch, ẩn nút mở modal. Mobile: trả về modal.
+    var grid = modal.querySelector(".gift-grid");
+    var slot = document.getElementById("giftInlineSlot");
+    var actions = modal.querySelector(".music-modal-actions");
+    var desktopMq = window.matchMedia("(min-width: 900px)");
+
+    function placeGift() {
+      if (!grid || !slot) return;
+      if (desktopMq.matches) {
+        if (!modal.hidden) closeModal();
+        slot.appendChild(grid);
+        openBtn.hidden = true;
+      } else {
+        modal.querySelector(".music-modal-card").insertBefore(grid, actions);
+        openBtn.hidden = false;
+      }
+    }
+
     // Chỉ có một phần tử focus được (nút Đóng) — giữ Tab/Shift+Tab ở lại đó
     // để bàn phím không lọt ra nội dung phía sau backdrop.
     function handleKeydown(e) {
+      if (!zoom.hidden || !picker.hidden) return; // lớp phủ khác đang mở: để nó tự xử lý phím
       if (e.key === "Escape") {
         closeModal();
       } else if (e.key === "Tab") {
@@ -649,7 +913,7 @@
         modal.classList.add("is-open");
       });
       document.addEventListener("keydown", handleKeydown);
-      closeBtn.focus();
+      openFocus(modal, closeBtn);
     }
 
     function closeModal() {
@@ -666,6 +930,11 @@
     openBtn.addEventListener("click", openModal);
     closeBtn.addEventListener("click", closeModal);
     if (backdrop) backdrop.addEventListener("click", closeModal);
+
+    placeGift();
+    if (desktopMq.addEventListener)
+      desktopMq.addEventListener("change", placeGift);
+    else desktopMq.addListener(placeGift);
   }
 
   /* -------------------------------------------------------
@@ -996,8 +1265,7 @@
     function revealInNav(link) {
       var slack = nav.scrollWidth - nav.clientWidth;
       if (slack <= 2) return;
-      var target =
-        link.offsetLeft - (nav.clientWidth - link.offsetWidth) / 2;
+      var target = link.offsetLeft - (nav.clientWidth - link.offsetWidth) / 2;
       target = Math.max(0, Math.min(slack, target));
       if (Math.abs(target - nav.scrollLeft) < 4) return;
       try {
