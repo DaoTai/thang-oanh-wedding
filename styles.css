@@ -2824,6 +2824,64 @@ button:focus-visible,
   font-style: italic;
   color: var(--muted-warm);
 }
+/* Liên hệ Facebook chú rể & cô dâu */
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.footer-contact-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.footer-contact-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 14px;
+}
+.footer-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 8px 14px;
+  border: 1px solid var(--line-gold);
+  border-radius: 999px;
+  color: var(--red);
+  text-align: left;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.footer-contact-link:hover {
+  background: var(--red);
+  color: var(--cream-soft);
+  transform: translateY(-2px);
+}
+.footer-contact-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.footer-contact-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.footer-contact-role {
+  font-family: var(--font-serif);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.footer-contact-name {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
 .footer-nav {
   display: flex;
   flex-wrap: wrap;
@@ -2939,6 +2997,8 @@ button:focus-visible,
   transition: opacity 0.35s ease;
 }
 .music-modal-card {
+  --fx-fill: var(--cream-soft);
+  --fx-base: 0 30px 60px -24px rgba(125, 18, 32, 0.45);
   position: relative;
   z-index: 1;
   width: 100%;
@@ -2946,9 +3006,6 @@ button:focus-visible,
   padding: 40px 32px 32px;
   text-align: center;
   border-radius: 16px;
-  background: var(--cream-soft);
-  border: 1px solid var(--line-gold);
-  box-shadow: 0 30px 60px -24px rgba(125, 18, 32, 0.45);
   opacity: 0;
   transform: scale(0.88) translateY(10px);
   transition: opacity 0.35s ease,
@@ -2971,6 +3028,142 @@ button:focus-visible,
 .music-modal.is-open .music-modal-card {
   opacity: 1;
   transform: scale(1) translateY(0);
+}
+/* Thẻ modal tự cuộn (overflow-y: auto) nên thanh cuộn nằm sát mép, đè lên các
+   góc bo. Track trong suốt (không còn dải kem vuông cạnh nền thẻ) và thụt vào
+   ở hai đầu bằng margin, để chỉ còn thumb hình viên thuốc nằm gọn trong góc. */
+.music-modal-card::-webkit-scrollbar-track {
+  background: transparent;
+  box-shadow: none;
+  margin-block: 18px;
+}
+.music-modal-card::-webkit-scrollbar-thumb {
+  border-color: transparent;
+}
+
+/* Viền thẻ modal: vệt sáng đỏ chạy vòng quanh viền + tia lửa li ti nhấp nháy.
+   Vẽ hoàn toàn bằng background của chính thẻ (viền trong suốt, các lớp
+   background-clip: border-box lộ ra ở đúng đường viền) nên không bị cắt hay
+   cuộn theo nội dung ở các modal có overflow-y: auto. Ba biến góc/độ đục là
+   @property để trình duyệt nội suy được trong keyframes; trình duyệt cũ chưa
+   hỗ trợ thì chỉ thấy viền vàng tĩnh như trước. Thẻ nào dùng chung thì đặt
+   --fx-fill (màu nền thẻ) và --fx-base (bóng đổ gốc). */
+@property --fx-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@property --fx-spark {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@property --fx-tw-a {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.15;
+}
+@property --fx-tw-b {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.15;
+}
+.music-modal-card,
+.gal-lb-card {
+  border: 2px solid transparent;
+  /* Từ trên xuống: nền thẻ (chỉ phần trong viền) che phần ruột của các lớp
+     dưới → vệt sáng → hai lớp tia lửa (chu kỳ 40° và 24° lệch nhau nên không
+     đều, mỗi lớp nhấp nháy theo nhịp riêng) → nền viền vàng. */
+  background:
+    linear-gradient(var(--fx-fill), var(--fx-fill)) padding-box,
+    conic-gradient(
+      from var(--fx-angle),
+      transparent 0deg 262deg,
+      rgba(125, 18, 32, 0.5) 300deg,
+      #7d1220 338deg,
+      #d12a3f 354deg,
+      #ff6a5c 360deg
+    ) border-box,
+    repeating-conic-gradient(
+      from var(--fx-spark),
+      transparent 0deg 16.6deg,
+      rgba(214, 40, 56, var(--fx-tw-a)) 18.9deg,
+      transparent 21.2deg 40deg
+    ) border-box,
+    repeating-conic-gradient(
+      from calc(var(--fx-spark) * -1 + 9deg),
+      transparent 0deg 8.8deg,
+      rgba(255, 122, 96, var(--fx-tw-b)) 10.9deg,
+      transparent 13deg 24deg
+    ) border-box,
+    linear-gradient(var(--line-gold), var(--line-gold)) border-box;
+  background-color: var(--fx-fill);
+  box-shadow: var(--fx-base), 0 0 16px rgba(200, 50, 64, 0.28);
+  animation: modal-fx-orbit 6s linear infinite,
+    modal-fx-spark 14s linear infinite,
+    modal-fx-twinkle-a 1.9s ease-in-out infinite,
+    modal-fx-twinkle-b 2.6s ease-in-out -0.8s infinite,
+    modal-fx-glow 3.2s ease-in-out infinite;
+}
+@keyframes modal-fx-orbit {
+  to {
+    --fx-angle: 360deg;
+  }
+}
+@keyframes modal-fx-spark {
+  to {
+    --fx-spark: 360deg;
+  }
+}
+@keyframes modal-fx-twinkle-a {
+  0%,
+  100% {
+    --fx-tw-a: 0.1;
+  }
+  22% {
+    --fx-tw-a: 1;
+  }
+  45% {
+    --fx-tw-a: 0.2;
+  }
+  68% {
+    --fx-tw-a: 0.9;
+  }
+}
+@keyframes modal-fx-twinkle-b {
+  0%,
+  100% {
+    --fx-tw-b: 0.1;
+  }
+  30% {
+    --fx-tw-b: 0.95;
+  }
+  52% {
+    --fx-tw-b: 0.15;
+  }
+  80% {
+    --fx-tw-b: 0.85;
+  }
+}
+@keyframes modal-fx-glow {
+  0%,
+  100% {
+    box-shadow: var(--fx-base), 0 0 12px rgba(200, 50, 64, 0.2);
+  }
+  50% {
+    box-shadow: var(--fx-base), 0 0 28px rgba(200, 50, 64, 0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-modal-card,
+  .gal-lb-card {
+    animation: none;
+    background:
+      linear-gradient(var(--fx-fill), var(--fx-fill)) padding-box,
+      linear-gradient(var(--line-gold), var(--line-gold)) border-box;
+    background-color: var(--fx-fill);
+    box-shadow: var(--fx-base), 0 0 16px rgba(200, 50, 64, 0.18);
+  }
 }
 .music-modal-flourish {
   margin: 8px 0 0;
@@ -3931,12 +4124,12 @@ button:focus-visible,
    Dùng lại .music-modal cho lớp nền mờ và nhịp đóng/mở, chỉ thay phần thân.
    --------------------------------------------------------- */
 .gal-lb-card {
+  --fx-fill: var(--paper);
+  --fx-base: 0 40px 80px -40px rgba(30, 10, 10, 0.75);
   position: relative;
   max-width: min(94vw, 900px);
   margin: 0;
   padding: 10px 10px 0;
-  background: var(--paper);
-  box-shadow: 0 40px 80px -40px rgba(30, 10, 10, 0.75);
   opacity: 0;
   transform: translateY(14px) scale(0.98);
   transition: opacity 0.35s ease, transform 0.35s ease;
@@ -3985,19 +4178,21 @@ button:focus-visible,
   background: var(--red-deep);
   border-color: var(--cream-soft);
 }
+/* -22px = -20px cũ + 2px viền trong suốt của .gal-lb-card (toạ độ tính từ mép
+   trong của viền) */
 .gal-lb-btn--prev {
   top: 50%;
-  left: -20px;
+  left: -22px;
   transform: translateY(-50%);
 }
 .gal-lb-btn--next {
   top: 50%;
-  right: -20px;
+  right: -22px;
   transform: translateY(-50%);
 }
 .gal-lb-btn--close {
-  top: -20px;
-  right: -20px;
+  top: -22px;
+  right: -22px;
 }
 @media (prefers-reduced-motion: reduce) {
   .gal-lb-card {
