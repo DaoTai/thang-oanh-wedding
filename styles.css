@@ -41,6 +41,9 @@
   /* THAY ẢNH: nền mục album — khung tranh thuỷ mặc, hoa dồn ở bốn mép và
      để trống hẳn khoảng giữa cho lưới ảnh (tỉ lệ 1645:956) */
   --bg-album: url("public/assets/bg-album.png");
+  /* THAY ẢNH: nền dải lời cảm ơn — phong cảnh hoàng hôn, hoa đào và đèn lồng
+     hai mép, giữa thoáng cho chữ (tỉ lệ 3:1) */
+  --bg-thanks: url("public/assets/bg-thanks.png");
 
   /* Hoa văn gạch chéo dùng lại ở nhiều chỗ */
   --weave-soft: repeating-linear-gradient(
@@ -2380,6 +2383,393 @@ button:focus-visible,
 }
 
 /* ---------------------------------------------------------
+   Lời cảm ơn — dải nền phong cảnh ngay trên footer
+   Tiền tố .ty- (không dùng .thanks-*: đã là thông báo sau khi gửi form).
+   Trạng thái do initThanks() điều khiển:
+     .ty-armed    ẩn sẵn chữ/đường kẻ/tim để chờ diễn (chỉ khi có JS + cho phép chuyển động)
+     .is-visible  đã cuộn tới → diễn phần vào (một lần)
+     .is-live     đang trong khung nhìn → cho các hiệu ứng lặp chạy, rời đi thì tạm dừng
+   --------------------------------------------------------- */
+.ty-band {
+  --ty-cream: #f8e9d8;
+  --ty-gold: #e6c58f;
+  --ty-h: 320px; /* script.js ghi lại chiều cao thật để tính quãng bay của cánh hoa */
+  --ty-heart-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-7.5-4.6-9.6-9.2C.9 8.3 2.7 4.5 6.4 4.5c2.1 0 3.9 1.2 5.6 3.4 1.7-2.2 3.5-3.4 5.6-3.4 3.7 0 5.5 3.8 4 7.3C19.5 16.4 12 21 12 21z' fill='%23000'/%3E%3C/svg%3E");
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: clamp(280px, 21vw, 420px);
+  padding: 56px var(--gutter);
+  overflow: hidden;
+  text-align: center;
+  color: var(--ty-cream);
+  background: #2a1610;
+}
+
+/* Nền: phóng to nhẹ (inset âm) để có chỗ trôi mà không lộ mép */
+.ty-bg {
+  position: absolute;
+  inset: -7%;
+  z-index: -4;
+  background: var(--bg-thanks) center 58% / cover no-repeat;
+  transform-origin: 50% 60%;
+  animation: tyDrift 28s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+/* Lớp phủ tối dần vào giữa để chữ đọc được, hai mép giữ nguyên hoa đào/đèn lồng */
+.ty-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: radial-gradient(
+      ellipse 58% 95% at 50% 52%,
+      rgba(26, 12, 8, 0.78),
+      rgba(26, 12, 8, 0.5) 60%,
+      rgba(26, 12, 8, 0.08)
+    ),
+    linear-gradient(rgba(34, 16, 10, 0.28), rgba(34, 16, 10, 0.28));
+}
+/* Quầng nắng hoàng hôn phía sau chữ, "thở" chậm */
+.ty-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(
+    ellipse 34% 62% at 50% 46%,
+    rgba(255, 178, 118, 0.3),
+    rgba(255, 178, 118, 0) 70%
+  );
+  animation: tyBreathe 6s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+/* Cánh hoa + tim nhỏ bay lên (JS thêm .ty-fly) */
+.ty-petals {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ty-fly {
+  position: absolute;
+  bottom: -32px;
+  left: 0;
+  animation: tyRise linear infinite;
+  animation-play-state: paused;
+}
+/* .petal gốc là position:absolute + top:-8vh (cho lớp rơi toàn trang) — trả về
+   dòng chảy bình thường để nằm gọn trong .ty-fly */
+.ty-fly > .petal {
+  position: relative;
+  top: auto;
+  animation: tySway ease-in-out infinite alternate;
+  animation-play-state: inherit;
+}
+.ty-mini-heart {
+  display: block;
+  -webkit-mask: var(--ty-heart-shape) center / 100% 100% no-repeat;
+  mask: var(--ty-heart-shape) center / 100% 100% no-repeat;
+  background: linear-gradient(160deg, #ffd3cf, #e8747c 55%, #b23a48);
+  animation: tySway ease-in-out infinite alternate;
+  animation-play-state: inherit;
+}
+.ty-band.is-live .ty-bg,
+.ty-band.is-live .ty-glow,
+.ty-band.is-live .ty-fly {
+  animation-play-state: running;
+}
+
+.ty-inner {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+
+/* Lời cảm ơn */
+.ty-quote {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.3vw, 36px);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--ty-cream);
+  text-shadow: 0 2px 18px rgba(20, 8, 4, 0.75), 0 0 30px rgba(255, 190, 140, 0.22);
+}
+.ty-line {
+  display: block;
+}
+.ty-armed .ty-line {
+  opacity: 0;
+  filter: blur(9px);
+  transform: translateY(18px);
+}
+.ty-armed.is-visible .ty-line {
+  opacity: 1;
+  filter: none;
+  transform: none;
+  transition: opacity 1s ease, filter 1s ease,
+    transform 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: calc(0.25s + var(--i) * 0.3s);
+}
+
+/* Đường kẻ vàng + trái tim */
+.ty-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.ty-rule {
+  position: relative;
+  width: clamp(80px, 12vw, 190px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(230, 197, 143, 0), var(--ty-gold));
+}
+.ty-rule--r {
+  background: linear-gradient(90deg, var(--ty-gold), rgba(230, 197, 143, 0));
+}
+/* Vệt sáng chạy dọc đường kẻ, từ tim ra hai đầu */
+.ty-rule::after {
+  content: "";
+  position: absolute;
+  inset: -1px 0;
+  background: linear-gradient(
+      90deg,
+      rgba(255, 244, 222, 0),
+      rgba(255, 244, 222, 0.95),
+      rgba(255, 244, 222, 0)
+    )
+    no-repeat;
+  background-size: 34% 100%;
+  background-position: 130% 0;
+  animation: tyRuleL 4.2s ease-in-out 2.4s infinite;
+  animation-play-state: paused;
+}
+.ty-rule--r::after {
+  background-position: -30% 0;
+  animation-name: tyRuleR;
+}
+.ty-band.is-live .ty-rule::after {
+  animation-play-state: running;
+}
+.ty-armed .ty-rule {
+  transform: scaleX(0);
+}
+.ty-armed .ty-rule--l {
+  transform-origin: 100% 50%;
+}
+.ty-armed .ty-rule--r {
+  transform-origin: 0 50%;
+}
+.ty-armed.is-visible .ty-rule {
+  transform: none;
+  transition: transform 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) 1.2s;
+}
+
+.ty-heart {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ty-cream);
+  cursor: pointer;
+  filter: drop-shadow(0 0 8px rgba(255, 170, 150, 0.7));
+  -webkit-tap-highlight-color: transparent;
+}
+.ty-heart svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ty-heart:hover svg,
+.ty-heart.is-pop svg {
+  transform: scale(1.3);
+}
+.ty-heart:focus-visible {
+  outline: 1px dashed var(--ty-gold);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+/* Hai vòng sáng lan ra từ tim */
+.ty-heart::before,
+.ty-heart::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(255, 196, 170, 0.75);
+  border-radius: 50%;
+  opacity: 0;
+  animation: tyRipple 3.2s ease-out 2.2s infinite;
+  animation-play-state: paused;
+}
+.ty-heart::after {
+  animation-delay: 3.8s;
+}
+.ty-band.is-live .ty-heart::before,
+.ty-band.is-live .ty-heart::after {
+  animation-play-state: running;
+}
+.ty-armed .ty-heart {
+  transform: scale(0);
+}
+.ty-armed.is-visible .ty-heart {
+  animation: tyHeartPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1.5s both,
+    tyHeartBeat 2.6s ease-in-out 2.5s infinite;
+  animation-play-state: paused;
+}
+.ty-armed.is-visible.is-live .ty-heart {
+  animation-play-state: running;
+}
+
+/* Tim + cánh hoa toé ra khi bấm vào trái tim (JS thêm .ty-pop) */
+.ty-pop {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  pointer-events: none;
+  animation: tyPop 1.6s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes tyDrift {
+  from {
+    transform: scale(1) translate3d(-1.2%, 0, 0);
+  }
+  to {
+    transform: scale(1.06) translate3d(1.2%, -1.2%, 0);
+  }
+}
+@keyframes tyBreathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+@keyframes tyRise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.7);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(var(--dx, 0px), calc(var(--ty-h) * -1.15), 0)
+      scale(1);
+    opacity: 0;
+  }
+}
+@keyframes tySway {
+  from {
+    transform: translateX(calc(var(--sw, 22px) * -1)) rotateZ(-28deg)
+      rotateY(0deg);
+  }
+  to {
+    transform: translateX(var(--sw, 22px)) rotateZ(38deg) rotateY(150deg);
+  }
+}
+@keyframes tyRuleL {
+  0% {
+    background-position: 130% 0;
+  }
+  55%,
+  100% {
+    background-position: -30% 0;
+  }
+}
+@keyframes tyRuleR {
+  0% {
+    background-position: -30% 0;
+  }
+  55%,
+  100% {
+    background-position: 130% 0;
+  }
+}
+@keyframes tyRipple {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@keyframes tyHeartPop {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* Nhịp "thình-thịch": hai nhịp gần nhau rồi nghỉ */
+@keyframes tyHeartBeat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.22);
+  }
+  20% {
+    transform: scale(1.02);
+  }
+  30% {
+    transform: scale(1.16);
+  }
+}
+@keyframes tyPop {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.4) rotate(0deg);
+    opacity: 0;
+  }
+  12%,
+  62% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--px), var(--py), 0) scale(1)
+      rotate(var(--pr, 200deg));
+    opacity: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .ty-band {
+    min-height: 300px;
+    padding: 48px var(--gutter);
+  }
+  .ty-inner {
+    gap: 18px;
+  }
+  .ty-rule {
+    width: clamp(48px, 18vw, 96px);
+  }
+}
+
+/* ---------------------------------------------------------
    Footer
    --------------------------------------------------------- */
 .site-footer {
@@ -2728,8 +3118,14 @@ button:focus-visible,
   border-radius: 4px;
   object-fit: contain;
 }
-/* Nút mở modal chọn món quà, nằm dưới QR */
+/* Nút mở modal chọn món quà, nằm dưới QR. Nghỉ: một vệt sáng vàng quét qua nút
+   mỗi vài giây (nút Cô dâu lệch nhịp để hai nút không loé cùng lúc) và chữ 囍
+   đập nhẹ như nhịp tim. Rê chuột/focus: nền đỏ, nút nhấc lên, vệt sáng chuyển
+   sang trắng và 囍 đung đưa như đèn lồng. */
 .gift-pick {
+  --shine: rgba(176, 141, 94, 0.45);
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2744,17 +3140,85 @@ button:focus-visible,
   font-size: 14px;
   color: var(--red-deep);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
-.gift-pick:hover {
+.gift-pick::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  transform: skewX(-20deg);
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--shine), transparent);
+  animation: gift-shine 3.6s ease-in-out infinite;
+}
+.gift-person:nth-child(2) .gift-pick::after {
+  animation-delay: 1.8s;
+}
+.gift-pick:hover,
+.gift-pick:focus-visible {
+  --shine: rgba(255, 255, 255, 0.5);
   background: var(--red);
   color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(140, 28, 28, 0.28);
+}
+.gift-pick:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
 }
 .gift-pick-icon {
+  display: inline-block;
+  font-family: "Noto Serif TC", var(--font-serif), serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
   color: var(--gold);
+  transition: color 0.2s ease;
+  animation: gift-pick-beat 2.4s ease-in-out infinite;
 }
-.gift-pick:hover .gift-pick-icon {
+.gift-pick:hover .gift-pick-icon,
+.gift-pick:focus-visible .gift-pick-icon {
   color: inherit;
+  animation: gift-pick-beat 1.2s ease-in-out infinite,
+    gift-pick-swing 0.9s ease-in-out infinite;
+}
+@keyframes gift-pick-beat {
+  0%,
+  55%,
+  100% {
+    scale: 1;
+    text-shadow: 0 0 0 rgba(176, 141, 94, 0);
+  }
+  70% {
+    scale: 1.22;
+    text-shadow: 0 0 8px rgba(176, 141, 94, 0.75);
+  }
+  82% {
+    scale: 1.05;
+  }
+}
+@keyframes gift-pick-swing {
+  0%,
+  100% {
+    rotate: -10deg;
+  }
+  50% {
+    rotate: 10deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gift-pick::after {
+    display: none;
+  }
+  .gift-pick-icon,
+  .gift-pick:hover .gift-pick-icon,
+  .gift-pick:focus-visible .gift-pick-icon {
+    animation: none;
+  }
 }
 
 /* Modal chọn món quà: lưới thẻ (ảnh, tên, số tiền) */

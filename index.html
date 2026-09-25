@@ -1196,6 +1196,42 @@
         </div>
       </section>
 
+      <!-- ====================== LỜI CẢM ƠN ====================== -->
+      <!-- Dải nền phong cảnh + lời cảm ơn. Chữ dựng bằng HTML (không nằm trong
+           ảnh) để sắc nét và có hiệu ứng; cánh hoa/tim bay do initThanks() thêm
+           vào #tyPetals. -->
+      <section id="thanks" class="ty-band" aria-labelledby="tyQuote">
+        <div class="ty-bg" aria-hidden="true"></div>
+        <div class="ty-glow" aria-hidden="true"></div>
+        <div class="ty-petals" id="tyPetals" aria-hidden="true"></div>
+
+        <div class="ty-inner">
+          <p class="ty-quote" id="tyQuote">
+            <span class="ty-line" style="--i: 0">“Cảm ơn bạn</span>
+            <span class="ty-line" style="--i: 1">đã là một phần trong</span>
+            <span class="ty-line" style="--i: 2">câu chuyện của chúng tôi!”</span>
+          </p>
+
+          <div class="ty-divider">
+            <span class="ty-rule ty-rule--l" aria-hidden="true"></span>
+            <button
+              type="button"
+              class="ty-heart"
+              id="tyHeart"
+              aria-label="Thả tim"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 2.7 4.5 6.4 4.5c2.1 0 3.9 1.2 5.6 3.4 1.7-2.2 3.5-3.4 5.6-3.4 3.7 0 5.5 3.8 4 7.3C19.5 16.4 12 21 12 21z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <span class="ty-rule ty-rule--r" aria-hidden="true"></span>
+          </div>
+        </div>
+      </section>
+
       <footer class="site-footer">
         <div class="footer-inner">
           <div class="footer-brand">
@@ -1350,7 +1386,7 @@
               />
             </div>
             <button type="button" class="gift-pick" aria-haspopup="dialog">
-              <span class="gift-pick-icon" aria-hidden="true">✿</span>
+              <span class="gift-pick-icon" aria-hidden="true">囍</span>
               <span class="gift-pick-text">Chọn món quà</span>
             </button>
             <dl class="gift-info">
@@ -1386,7 +1422,7 @@
               />
             </div>
             <button type="button" class="gift-pick" aria-haspopup="dialog">
-              <span class="gift-pick-icon" aria-hidden="true">✿</span>
+              <span class="gift-pick-icon" aria-hidden="true">囍</span>
               <span class="gift-pick-text">Chọn món quà</span>
             </button>
             <dl class="gift-info">

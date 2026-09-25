@@ -37,17 +37,17 @@
       img: "public/assets/gifts/angel.png",
     },
     {
-      label: "Super Gà Tình Yêu",
+      label: "Gà bông",
       amount: 1000000,
       img: "public/assets/gifts/na-than.png",
     },
     {
-      label: "Super Boomerang",
+      label: "Boomerang",
       amount: 1000000,
       img: "public/assets/gifts/boomerang.png",
     },
     {
-      label: "Super Nhẫn Hạnh Phúc",
+      label: "Nhẫn Hạnh Phúc",
       amount: 1000000,
       img: "public/assets/gifts/pair-rings.png",
     },
@@ -276,6 +276,134 @@
     targets.forEach(function (el) {
       el.classList.add("fade-up");
       observer.observe(el);
+    });
+  }
+
+  /* -------------------------------------------------------
+     Lời cảm ơn (#thanks)
+     - Chữ, đường kẻ, trái tim diễn vào một lần khi cuộn tới (.is-visible).
+     - Cánh hoa + tim nhỏ bay lên liên tục, nhưng chỉ chạy khi dải đang trong
+       khung nhìn (.is-live) để không tốn máy lúc người xem ở chỗ khác.
+     - Bấm trái tim thì tim và cánh hoa toé ra.
+     Giảm chuyển động / không có IntersectionObserver: bỏ hết, để nguyên chữ tĩnh.
+     ------------------------------------------------------- */
+  function initThanks() {
+    var band = document.getElementById("thanks");
+    var layer = document.getElementById("tyPetals");
+    var heart = document.getElementById("tyHeart");
+    if (!band || !layer) return;
+    if (
+      typeof IntersectionObserver !== "function" ||
+      (window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    )
+      return;
+
+    // Quãng bay của cánh hoa tính theo chiều cao thật của dải
+    function measure() {
+      band.style.setProperty("--ty-h", band.offsetHeight + "px");
+    }
+    measure();
+    if (typeof ResizeObserver === "function") {
+      new ResizeObserver(measure).observe(band);
+    } else {
+      window.addEventListener("resize", measure);
+    }
+
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+    // Nền dải này tối: bỏ hai tông hồng nhạt/trắng (t1, t5) vì trông như đốm trắng,
+    // chỉ giữ đào → đỏ → đỏ nhung cho hợp cánh đào trong ảnh
+    var TY_TONES = [" petal--t2", " petal--t3", " petal--t4", " petal--t3"];
+    // Cánh hoa dùng lại dáng + màu của .petal; tim nhỏ là .ty-mini-heart
+    function makePiece(kind, index, size) {
+      var el = document.createElement("span");
+      if (kind === "heart") {
+        el.className = "ty-mini-heart";
+        el.style.width = el.style.height = size + "px";
+      } else {
+        el.className =
+          "petal" +
+          PETAL_SHAPES[index % PETAL_SHAPES.length] +
+          TY_TONES[index % TY_TONES.length];
+        el.style.width = size + "px";
+        el.style.height = Math.round(size * rand(0.8, 0.95)) + "px";
+      }
+      return el;
+    }
+
+    var FLY_COUNT = 14;
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < FLY_COUNT; i++) {
+      var isHeart = i % 7 === 3 || i % 7 === 6;
+      var fly = document.createElement("span");
+      fly.className = "ty-fly";
+      fly.style.left = ((i * 137.5) % 96) + 2 + "%"; // góc vàng: rải đều theo chiều ngang
+      fly.style.setProperty("--dx", rand(-90, 90) + "px");
+      var dur = rand(9, 16);
+      fly.style.animationDuration = dur + "s";
+      // Trễ âm: vào khung là đã có cánh hoa ở nhiều độ cao, khỏi chờ bay lên từ đáy
+      fly.style.animationDelay = -rand(0, dur) + "s";
+
+      var piece = makePiece(
+        isHeart ? "heart" : "petal",
+        i,
+        isHeart ? rand(8, 14) : rand(11, 19)
+      );
+      piece.style.setProperty("--sw", rand(14, 34) + "px");
+      piece.style.animationDuration = rand(2.6, 5) + "s";
+      fly.appendChild(piece);
+      frag.appendChild(fly);
+    }
+    layer.appendChild(frag);
+
+    band.classList.add("ty-armed");
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          band.classList.toggle("is-live", entry.isIntersecting);
+          if (entry.intersectionRatio >= 0.3) band.classList.add("is-visible");
+        });
+      },
+      { threshold: [0, 0.3] }
+    );
+    observer.observe(band);
+
+    // Bấm tim: tim + cánh hoa toé ra từ trái tim, nghiêng về phía trên
+    if (!heart) return;
+    var MAX_POP = 60;
+    heart.addEventListener("click", function () {
+      heart.classList.add("is-pop");
+      setTimeout(function () {
+        heart.classList.remove("is-pop");
+      }, 260);
+
+      if (layer.querySelectorAll(".ty-pop").length > MAX_POP) return;
+      var b = band.getBoundingClientRect();
+      var h = heart.getBoundingClientRect();
+      var ox = h.left - b.left + h.width / 2;
+      var oy = h.top - b.top + h.height / 2;
+
+      var pops = document.createDocumentFragment();
+      for (var k = 0; k < 20; k++) {
+        var size = k % 2 ? rand(12, 19) : rand(15, 24);
+        var pop = makePiece(k % 2 ? "heart" : "petal", k, size);
+        pop.classList.add("ty-pop");
+        var ang = ((-90 + rand(-105, 105)) * Math.PI) / 180;
+        var dist = rand(70, 190);
+        pop.style.left = ox - size / 2 + "px";
+        pop.style.top = oy - size / 2 + "px";
+        pop.style.setProperty("--px", Math.cos(ang) * dist + "px");
+        pop.style.setProperty("--py", Math.sin(ang) * dist - 20 + "px");
+        pop.style.setProperty("--pr", rand(-260, 260) + "deg");
+        pop.style.animationDuration = rand(1.3, 2.1) + "s";
+        pop.addEventListener("animationend", function () {
+          this.remove();
+        });
+        pops.appendChild(pop);
+      }
+      layer.appendChild(pops);
     });
   }
 
@@ -1716,6 +1844,7 @@
     initStoryBurst();
     initTimelineReveal();
     initFadeUp();
+    initThanks();
     initSlideIn();
     initCalendar();
     initWhenReveal();
