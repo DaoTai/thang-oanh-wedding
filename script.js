@@ -219,7 +219,6 @@
   function initFadeUp() {
     var targets = document.querySelectorAll(
       [
-        ".countdown-section .rule-row",
         ".countdown-section .countdown-wrap",
         ".gallery-rail",
         ".gallery-inner > :not(.gallery-rail)",
@@ -254,6 +253,72 @@
   }
 
   /* -------------------------------------------------------
+     Cánh hoa + tim nhỏ dùng chung cho dải cảm ơn và khối ngày cưới ở mục
+     đếm ngược (.ty-divider)
+     ------------------------------------------------------- */
+  function tyRand(min, max) {
+    return min + Math.random() * (max - min);
+  }
+  // Bỏ hai tông hồng nhạt/trắng (t1, t5) vì trên nền dải cảm ơn trông như
+  // đốm trắng, chỉ giữ đào → đỏ → đỏ nhung cho hợp cánh đào trong ảnh
+  var TY_TONES = [" petal--t2", " petal--t3", " petal--t4", " petal--t3"];
+  // Cánh hoa dùng lại dáng + màu của .petal; tim nhỏ là .ty-mini-heart
+  function tyPiece(kind, index, size) {
+    var el = document.createElement("span");
+    if (kind === "heart") {
+      el.className = "ty-mini-heart";
+      el.style.width = el.style.height = size + "px";
+    } else {
+      el.className =
+        "petal" +
+        PETAL_SHAPES[index % PETAL_SHAPES.length] +
+        TY_TONES[index % TY_TONES.length];
+      el.style.width = size + "px";
+      el.style.height = Math.round(size * tyRand(0.8, 0.95)) + "px";
+    }
+    return el;
+  }
+
+  // Bấm tim: tim + cánh hoa toé ra từ trái tim, nghiêng về phía trên.
+  // layer phủ kín box (position: absolute; inset: 0).
+  function bindTyHeart(heart, layer, box) {
+    if (!heart || !layer || !box) return;
+    var MAX_POP = 60;
+    heart.addEventListener("click", function () {
+      heart.classList.add("is-pop");
+      setTimeout(function () {
+        heart.classList.remove("is-pop");
+      }, 260);
+
+      if (layer.querySelectorAll(".ty-pop").length > MAX_POP) return;
+      var b = box.getBoundingClientRect();
+      var h = heart.getBoundingClientRect();
+      var ox = h.left - b.left + h.width / 2;
+      var oy = h.top - b.top + h.height / 2;
+
+      var pops = document.createDocumentFragment();
+      for (var k = 0; k < 20; k++) {
+        var size = k % 2 ? tyRand(12, 19) : tyRand(15, 24);
+        var pop = tyPiece(k % 2 ? "heart" : "petal", k, size);
+        pop.classList.add("ty-pop");
+        var ang = ((-90 + tyRand(-105, 105)) * Math.PI) / 180;
+        var dist = tyRand(70, 190);
+        pop.style.left = ox - size / 2 + "px";
+        pop.style.top = oy - size / 2 + "px";
+        pop.style.setProperty("--px", Math.cos(ang) * dist + "px");
+        pop.style.setProperty("--py", Math.sin(ang) * dist - 20 + "px");
+        pop.style.setProperty("--pr", tyRand(-260, 260) + "deg");
+        pop.style.animationDuration = tyRand(1.3, 2.1) + "s";
+        pop.addEventListener("animationend", function () {
+          this.remove();
+        });
+        pops.appendChild(pop);
+      }
+      layer.appendChild(pops);
+    });
+  }
+
+  /* -------------------------------------------------------
      Lời cảm ơn (#thanks)
      - Chữ, đường kẻ, trái tim diễn vào một lần khi cuộn tới (.is-visible).
      - Cánh hoa + tim nhỏ bay lên liên tục, nhưng chỉ chạy khi dải đang trong
@@ -284,28 +349,7 @@
       window.addEventListener("resize", measure);
     }
 
-    function rand(min, max) {
-      return min + Math.random() * (max - min);
-    }
-    // Nền dải này tối: bỏ hai tông hồng nhạt/trắng (t1, t5) vì trông như đốm trắng,
-    // chỉ giữ đào → đỏ → đỏ nhung cho hợp cánh đào trong ảnh
-    var TY_TONES = [" petal--t2", " petal--t3", " petal--t4", " petal--t3"];
-    // Cánh hoa dùng lại dáng + màu của .petal; tim nhỏ là .ty-mini-heart
-    function makePiece(kind, index, size) {
-      var el = document.createElement("span");
-      if (kind === "heart") {
-        el.className = "ty-mini-heart";
-        el.style.width = el.style.height = size + "px";
-      } else {
-        el.className =
-          "petal" +
-          PETAL_SHAPES[index % PETAL_SHAPES.length] +
-          TY_TONES[index % TY_TONES.length];
-        el.style.width = size + "px";
-        el.style.height = Math.round(size * rand(0.8, 0.95)) + "px";
-      }
-      return el;
-    }
+    var rand = tyRand;
 
     var FLY_COUNT = 14;
     var frag = document.createDocumentFragment();
@@ -320,7 +364,7 @@
       // Trễ âm: vào khung là đã có cánh hoa ở nhiều độ cao, khỏi chờ bay lên từ đáy
       fly.style.animationDelay = -rand(0, dur) + "s";
 
-      var piece = makePiece(
+      var piece = tyPiece(
         isHeart ? "heart" : "petal",
         i,
         isHeart ? rand(8, 14) : rand(11, 19)
@@ -344,41 +388,7 @@
     );
     observer.observe(band);
 
-    // Bấm tim: tim + cánh hoa toé ra từ trái tim, nghiêng về phía trên
-    if (!heart) return;
-    var MAX_POP = 60;
-    heart.addEventListener("click", function () {
-      heart.classList.add("is-pop");
-      setTimeout(function () {
-        heart.classList.remove("is-pop");
-      }, 260);
-
-      if (layer.querySelectorAll(".ty-pop").length > MAX_POP) return;
-      var b = band.getBoundingClientRect();
-      var h = heart.getBoundingClientRect();
-      var ox = h.left - b.left + h.width / 2;
-      var oy = h.top - b.top + h.height / 2;
-
-      var pops = document.createDocumentFragment();
-      for (var k = 0; k < 20; k++) {
-        var size = k % 2 ? rand(12, 19) : rand(15, 24);
-        var pop = makePiece(k % 2 ? "heart" : "petal", k, size);
-        pop.classList.add("ty-pop");
-        var ang = ((-90 + rand(-105, 105)) * Math.PI) / 180;
-        var dist = rand(70, 190);
-        pop.style.left = ox - size / 2 + "px";
-        pop.style.top = oy - size / 2 + "px";
-        pop.style.setProperty("--px", Math.cos(ang) * dist + "px");
-        pop.style.setProperty("--py", Math.sin(ang) * dist - 20 + "px");
-        pop.style.setProperty("--pr", rand(-260, 260) + "deg");
-        pop.style.animationDuration = rand(1.3, 2.1) + "s";
-        pop.addEventListener("animationend", function () {
-          this.remove();
-        });
-        pops.appendChild(pop);
-      }
-      layer.appendChild(pops);
-    });
+    bindTyHeart(heart, layer, band);
   }
 
   /* -------------------------------------------------------
@@ -848,6 +858,213 @@
       }
       row.appendChild(cell);
     }
+  }
+
+  /* -------------------------------------------------------
+     Trái tim ảnh quanh đồng hồ đếm ngược (#cdHeart)
+     - Tâm từng ảnh đặt lên đường cong trái tim (x = 16sin³t,
+       y = 13cos t − 5cos 2t − 2cos 3t − cos 4t), chia đều theo độ dài cung
+       trên phần viền nằm ngoài ảnh chính, cộng một ảnh ở mũi tim. Tính lại khi đổi kích thước vì
+       trái tim co giãn theo khung (màn hẹp thì cao hơn bề ngang, 7 ảnh).
+     - Cuộn tới thì ảnh bay từ tâm ra vị trí, lần lượt từng ảnh.
+     ------------------------------------------------------- */
+  function initCountdownHeart() {
+    var heart = document.getElementById("cdHeart");
+    if (!heart) return;
+    var tiles = heart.querySelectorAll(".cd-tile");
+    var paths = heart.querySelectorAll(".cd-ring-line path");
+    var narrow = window.matchMedia("(max-width: 620px)");
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var ROT = [-6, 5, -3, 7, -5, 4, -7, 3, -4, 6, -2, 5, -6];
+    var main = heart.querySelector(".cd-main");
+    var NARROW_COUNT = 7;
+    var OVERLAP = 0.2;
+    var OVERLAP_NARROW = 0.5;
+
+    // Lấy mẫu dày đường cong rồi chuẩn hoá về khung [0..1]: x trái → phải,
+    // y trên → dưới. t = 0 là khe giữa hai thuỳ, t tăng thì chạy sang phải.
+    var curve = [];
+    var minY = Infinity;
+    var maxY = -Infinity;
+    for (var k = 0; k <= 720; k++) {
+      var t = (k / 720) * Math.PI * 2;
+      var y =
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t);
+      curve.push([(16 * Math.pow(Math.sin(t), 3) + 16) / 32, y]);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+    curve.forEach(function (p) {
+      p[1] = (maxY - p[1]) / (maxY - minY);
+    });
+
+    var d =
+      curve
+        .filter(function (p, i) {
+          return i % 4 === 0;
+        })
+        .map(function (p, i) {
+          return (
+            (i ? "L" : "M") +
+            (p[0] * 100).toFixed(2) +
+            "," +
+            (p[1] * 100).toFixed(2)
+          );
+        })
+        .join("") + "Z";
+    Array.prototype.forEach.call(paths, function (path) {
+      path.setAttribute("d", d);
+    });
+
+    function layout() {
+      var w = heart.clientWidth;
+      var h = heart.clientHeight;
+      if (!w || !h) return;
+
+      // Chỉ xếp ảnh ở đoạn cung không bị ảnh chính che: tính trên nửa phải
+      // (khe giữa → mũi tim), nửa trái lấy đối xứng. Ảnh viền được lấn sau
+      // ảnh chính tối đa OVERLAP bề ngang của nó.
+      var half = (curve.length - 1) / 2;
+      var tileW = tiles[0].offsetWidth;
+      var clearX =
+        main.offsetWidth / 2 +
+        tileW * (0.5 - (narrow.matches ? OVERLAP_NARROW : OVERLAP));
+      var from = -1;
+      var to = half;
+      for (var k = 0; k <= half; k++) {
+        var clear = Math.abs(curve[k][0] - 0.5) * w >= clearX;
+        if (clear && from < 0) from = k;
+        if (!clear && from >= 0) {
+          to = k - 1;
+          break;
+        }
+      }
+      if (from < 0) from = 0;
+
+      // Độ dài cung tích luỹ, đo bằng điểm ảnh thật của khung hiện tại
+      var acc = [0];
+      for (k = 1; k <= half; k++) {
+        acc.push(
+          acc[k - 1] +
+            Math.hypot(
+              (curve[k][0] - curve[k - 1][0]) * w,
+              (curve[k][1] - curve[k - 1][1]) * h
+            )
+        );
+      }
+      function pointAt(len) {
+        var j = from;
+        while (j < to - 1 && acc[j + 1] < len) j++;
+        var f = (len - acc[j]) / (acc[j + 1] - acc[j] || 1);
+        return [
+          curve[j][0] + (curve[j + 1][0] - curve[j][0]) * f,
+          curve[j][1] + (curve[j + 1][1] - curve[j][1]) * f,
+        ];
+      }
+
+      // Thứ tự ảnh: nửa phải từ trên xuống, ảnh mũi tim (khi số ảnh lẻ — nằm
+      // sau ô đếm kính mờ), rồi nửa trái từ dưới lên
+      var count = narrow.matches
+        ? Math.min(NARROW_COUNT, tiles.length)
+        : tiles.length;
+      var side = Math.floor(count / 2);
+      var span = acc[to] - acc[from];
+      var pos = [];
+      for (var s = 0; s < side; s++) {
+        pos.push(pointAt(acc[from] + ((s + 0.5) / side) * span));
+      }
+      if (count % 2) pos.push(curve[half]);
+      for (s = side - 1; s >= 0; s--) pos.push([1 - pos[s][0], pos[s][1]]);
+
+      Array.prototype.forEach.call(tiles, function (tile, i) {
+        tile.hidden = i >= count;
+        if (tile.hidden) return;
+        var px = pos[i][0];
+        var py = pos[i][1];
+        tile.style.setProperty("--x", (px * 100).toFixed(3) + "%");
+        tile.style.setProperty("--y", (py * 100).toFixed(3) + "%");
+        tile.style.setProperty("--dx", Math.round((0.5 - px) * w) + "px");
+        tile.style.setProperty("--dy", Math.round((0.45 - py) * h) + "px");
+        tile.style.setProperty("--r", ROT[i % ROT.length] + "deg");
+        tile.style.setProperty("--i", i);
+      });
+      heart.classList.add("is-placed");
+    }
+
+    layout();
+    var raf = 0;
+    window.addEventListener("resize", function () {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(layout);
+    });
+
+    // Lắp ráp xong mới bật hover (.is-settled): lúc đó transition đổi sang
+    // loại ngắn, không còn độ trễ lần lượt của màn bay vào
+    function assemble(wait) {
+      heart.classList.add("is-assembled");
+      setTimeout(function () {
+        heart.classList.add("is-settled");
+      }, wait);
+    }
+
+    if (reduce || typeof IntersectionObserver !== "function") {
+      assemble(0);
+    } else {
+      var observer = new IntersectionObserver(
+        function (entries) {
+          if (!entries[0].isIntersecting) return;
+          assemble(1100 + tiles.length * 90);
+          observer.disconnect();
+        },
+        { threshold: 0.25 }
+      );
+      observer.observe(heart);
+    }
+  }
+
+  /* -------------------------------------------------------
+     Mục đếm ngược: hoạ tiết nền + khối ngày cưới
+     - .countdown-section: .cd-armed giấu nét để chờ vẽ; .is-visible (cuộn
+       tới) vẽ nét ký dưới tiêu đề và các hoạ tiết; .is-live (đang trong
+       khung nhìn) cho hoạ tiết bồng bềnh / sao lấp lánh, rời đi thì dừng.
+     - .cd-date: cùng bộ trạng thái của dải cảm ơn (.ty-armed / .is-visible
+       / .is-live) để .ty-divider diễn y hệt; bấm tim thì tim + cánh hoa toé.
+     Giảm chuyển động / không có IntersectionObserver: để nguyên tĩnh.
+     ------------------------------------------------------- */
+  function initCountdownDate() {
+    var section = document.querySelector(".countdown-section");
+    var box = section && section.querySelector(".cd-date");
+    if (!box) return;
+    if (
+      typeof IntersectionObserver !== "function" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+
+    bindTyHeart(
+      document.getElementById("cdHeartBtn"),
+      document.getElementById("cdPops"),
+      box
+    );
+
+    function watch(el, armClass, ratio) {
+      el.classList.add(armClass);
+      new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            el.classList.toggle("is-live", entry.isIntersecting);
+            if (entry.intersectionRatio >= ratio)
+              el.classList.add("is-visible");
+          });
+        },
+        { threshold: [0, ratio] }
+      ).observe(el);
+    }
+    watch(section, "cd-armed", 0.15);
+    watch(box, "ty-armed", 0.3);
   }
 
   /* -------------------------------------------------------
@@ -2181,6 +2398,8 @@
     initThanks();
     initCalendar();
     initWhenReveal();
+    initCountdownHeart();
+    initCountdownDate();
     initCountdown();
     initRsvp();
     initShare();

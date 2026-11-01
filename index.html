@@ -97,6 +97,22 @@
          đầu tiên đã có màn che — người xem không kịp thấy nội dung trang
          nhấp nháy. Nhịp diễn do initIntro() trong script.js điều khiển. -->
     <div class="intro" id="intro">
+      <!-- Hai đèn lồng treo ở hai mép làm hoạ tiết hai bên -->
+      <div class="lantern lantern--left" aria-hidden="true">
+        <span class="lantern-cord"></span>
+        <span class="lantern-cap"></span>
+        <span class="lantern-body"><span class="lantern-char">囍</span></span>
+        <span class="lantern-cap"></span>
+        <span class="lantern-tassel"></span>
+      </div>
+      <div class="lantern lantern--right" aria-hidden="true">
+        <span class="lantern-cord"></span>
+        <span class="lantern-cap"></span>
+        <span class="lantern-body"><span class="lantern-char">囍</span></span>
+        <span class="lantern-cap"></span>
+        <span class="lantern-tassel"></span>
+      </div>
+
       <div class="intro-stage" id="introStage" aria-hidden="true">
         <div class="intro-halo"></div>
 
@@ -331,24 +347,209 @@
       </section>
 
       <!-- ========================== ĐẾM NGƯỢC ========================== -->
-      <section class="countdown-section">
-        <div class="rule-row rule-row--heading">
-          <span class="rule rule--wide"></span>
-          <h2 class="a rule-text">Đếm ngược thời gian</h2>
-          <span class="rule rule--wide"></span>
+      <section class="countdown-section" aria-labelledby="cdTitle">
+        <!-- Hoạ tiết tình yêu vẽ nét quanh trái tim: tự vẽ khi cuộn tới rồi
+             bồng bềnh nhẹ. --l/--t là tâm hoạ tiết (% theo mục), --w là bề
+             ngang, --draw là độ trễ lúc vẽ. Màn hẹp ẩn các .cd-deco--wide. -->
+        <div class="cd-decor" aria-hidden="true">
+          <!-- Cặp nhẫn cưới lồng nhau -->
+          <span class="cd-deco cd-deco--rings" style="--l: 9%; --t: 66%; --w: 130px; --rot: -8deg; --draw: 0.2s">
+            <svg viewBox="0 0 120 90" focusable="false">
+              <circle pathLength="1" cx="44" cy="54" r="26" />
+              <circle pathLength="1" cx="74" cy="54" r="26" />
+              <path pathLength="1" d="M66 22 L74 14 L82 22 L74 29 Z" />
+              <path pathLength="1" d="M74 8 V3 M85 12 L89 8 M63 12 L59 8" />
+            </svg>
+          </span>
+          <!-- Phong thư gắn dấu tim -->
+          <span class="cd-deco cd-deco--letter" style="--l: 91%; --t: 64%; --w: 120px; --rot: 7deg; --draw: 0.5s">
+            <svg viewBox="0 0 120 90" focusable="false">
+              <path pathLength="1" d="M14 24 H106 Q110 24 110 28 V80 Q110 84 106 84 H14 Q10 84 10 80 V28 Q10 24 14 24 Z" />
+              <path pathLength="1" d="M10 28 L60 60 L110 28" />
+              <path pathLength="1" d="M12 82 L46 52 M108 82 L74 52" />
+              <path class="is-fill cd-deco-rose" d="M60.0 69.5s-6.2 -3.8 -8.0 -7.7C50.8 58.9 52.2 55.8 55.3 55.8c1.8 0.0 3.2 1.0 4.7 2.8 1.4 -1.8 2.9 -2.8 4.7 -2.8 3.1 0.0 4.6 3.2 3.3 6.1C66.2 65.7 60.0 69.5 60.0 69.5z" />
+              <path class="cd-deco-rose" pathLength="1" d="M60.0 14.5s-3.8 -2.3 -4.8 -4.6C54.5 8.2 55.4 6.2 57.2 6.2c1.1 0.0 1.9 0.6 2.8 1.7 0.8 -1.1 1.8 -1.7 2.8 -1.7 1.9 0.0 2.8 1.9 2.0 3.6C63.8 12.2 60.0 14.5 60.0 14.5z" />
+            </svg>
+          </span>
+          <!-- Trái tim xuyên mũi tên -->
+          <span class="cd-deco cd-deco--wide" style="--l: 21%; --t: 86%; --w: 104px; --rot: -6deg; --draw: 0.9s">
+            <svg viewBox="0 0 120 100" focusable="false">
+              <path class="cd-deco-rose" pathLength="1" d="M60 86 C 22 62, 10 38, 27 23 C 41 12, 56 19, 60 32 C 64 19, 79 12, 93 23 C 110 38, 98 62, 60 86 Z" />
+              <path pathLength="1" d="M8 80 L112 18 M112 18 L99 19 M112 18 L106 30 M8 80 L12 68 M8 80 L20 78 M16 75 L20 63 M16 75 L28 73" />
+            </svg>
+          </span>
+          <!-- Hai trái tim lồng vào nhau -->
+          <span class="cd-deco cd-deco--wide" style="--l: 80%; --t: 87%; --w: 100px; --rot: 5deg; --draw: 1.2s">
+            <svg viewBox="0 0 120 80" focusable="false">
+              <path pathLength="1" d="M46.0 63.0s-17.5 -10.7 -22.4 -21.5C20.1 33.4 24.3 24.5 32.9 24.5c4.9 0.0 9.1 2.8 13.1 7.9 4.0 -5.1 8.2 -7.9 13.1 -7.9 8.6 0.0 12.8 8.9 9.3 17.0C63.5 52.3 46.0 63.0 46.0 63.0z" />
+              <path class="cd-deco-rose" pathLength="1" d="M74.0 62.0s-15.0 -9.2 -19.2 -18.4C51.8 36.6 55.4 29.0 62.8 29.0c4.2 0.0 7.8 2.4 11.2 6.8 3.4 -4.4 7.0 -6.8 11.2 -6.8 7.4 0.0 11.0 7.6 8.0 14.6C89.0 52.8 74.0 62.0 74.0 62.0z" />
+            </svg>
+          </span>
+          <!-- Tim nhỏ viền nét rải trong khoảng trống -->
+          <span class="cd-deco cd-deco--wide cd-deco-rose" style="--l: 42%; --t: 5%; --w: 20px; --rot: -14deg; --draw: 1s">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path pathLength="1" d="M12.0 21.0s-7.5 -4.6 -9.6 -9.2C0.9 8.3 2.7 4.5 6.4 4.5c2.1 0.0 3.9 1.2 5.6 3.4 1.7 -2.2 3.5 -3.4 5.6 -3.4 3.7 0.0 5.5 3.8 4.0 7.3C19.5 16.4 12.0 21.0 12.0 21.0z" />
+            </svg>
+          </span>
+          <span class="cd-deco cd-deco--wide" style="--l: 58%; --t: 4%; --w: 16px; --rot: 12deg; --draw: 1.3s">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path pathLength="1" d="M12.0 21.0s-7.5 -4.6 -9.6 -9.2C0.9 8.3 2.7 4.5 6.4 4.5c2.1 0.0 3.9 1.2 5.6 3.4 1.7 -2.2 3.5 -3.4 5.6 -3.4 3.7 0.0 5.5 3.8 4.0 7.3C19.5 16.4 12.0 21.0 12.0 21.0z" />
+            </svg>
+          </span>
+          <span class="cd-deco cd-deco-rose" style="--l: 4%; --t: 92%; --w: 22px; --rot: 10deg; --draw: 1.5s">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path pathLength="1" d="M12.0 21.0s-7.5 -4.6 -9.6 -9.2C0.9 8.3 2.7 4.5 6.4 4.5c2.1 0.0 3.9 1.2 5.6 3.4 1.7 -2.2 3.5 -3.4 5.6 -3.4 3.7 0.0 5.5 3.8 4.0 7.3C19.5 16.4 12.0 21.0 12.0 21.0z" />
+            </svg>
+          </span>
+          <span class="cd-deco" style="--l: 96%; --t: 90%; --w: 18px; --rot: -10deg; --draw: 1.7s">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path pathLength="1" d="M12.0 21.0s-7.5 -4.6 -9.6 -9.2C0.9 8.3 2.7 4.5 6.4 4.5c2.1 0.0 3.9 1.2 5.6 3.4 1.7 -2.2 3.5 -3.4 5.6 -3.4 3.7 0.0 5.5 3.8 4.0 7.3C19.5 16.4 12.0 21.0 12.0 21.0z" />
+            </svg>
+          </span>
+          <!-- Ánh sao lấp lánh -->
+          <i class="cd-spark" style="--l: 34%; --t: 21%; --w: 22px; --delay: 0s"></i>
+          <i class="cd-spark" style="--l: 66%; --t: 25%; --w: 16px; --delay: -1.2s"></i>
+          <i class="cd-spark" style="--l: 14%; --t: 56%; --w: 18px; --delay: -2.1s"></i>
+          <i class="cd-spark" style="--l: 86%; --t: 54%; --w: 24px; --delay: -0.6s"></i>
+          <i class="cd-spark" style="--l: 30%; --t: 75%; --w: 16px; --delay: -1.7s"></i>
+          <i class="cd-spark" style="--l: 70%; --t: 74%; --w: 18px; --delay: -2.6s"></i>
+        </div>
+        <!-- Ảnh chính ở giữa, các ảnh album xếp thành viền
+             trái tim bao quanh. Vị trí từng ảnh do initCountdownHeart
+             (script.js) tính theo đường cong trái tim. Bốn ô đếm kính mờ đè
+             lên mũi trái tim. -->
+        <div class="cd-band">
+          <div class="cd-stage">
+            <div class="cd-heart" id="cdHeart">
+              <!-- THAY ẢNH: các ảnh viền trái tim — bản thu nhỏ trong
+                   album/thumbs. Thứ tự: nửa phải từ trên xuống, ảnh giữa ở mũi
+                   tim, rồi nửa trái từ dưới lên. Số ảnh nên lẻ để có ảnh ở
+                   mũi tim. Màn hẹp chỉ dùng 7 ảnh đầu. -->
+              <div class="cd-ring" aria-hidden="true">
+                <svg
+                  class="cd-ring-line"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  focusable="false"
+                >
+                  <path class="cd-ring-glow" />
+                </svg>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0215.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0075.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0686.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0903.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_9720.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0179.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0945.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_9422.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0238.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_9956.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="cd-tile">
+                  <img
+                    src="public/assets/album/thumbs/nmt_0801.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+              </div>
+              <!-- THAY ẢNH: ảnh chính diện (bản thu nhỏ của album/NMT_0196.JPG) -->
+              <figure class="cd-main">
+                <img
+                  src="public/assets/album/thumbs/nmt_0196-main.webp"
+                  alt="Cô dâu chú rể trao nhẫn"
+                  decoding="async"
+                />
+                <h2 class="cd-title" id="cdTitle">
+                  <span class="cd-title-text">Đếm ngược thời gian</span>
+                  <!-- Nét ký uốn dưới chữ, tự vẽ khi cuộn tới -->
+                  <svg
+                    class="cd-title-swash"
+                    viewBox="0 0 300 40"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      pathLength="1"
+                      d="M6 24 C 64 34, 142 34, 214 20 C 244 14, 270 8, 286 10 C 297 12, 294 21, 282 19 C 274 18, 272 12, 280 8"
+                    />
+                  </svg>
+                </h2>
+              </figure>
+            </div>
+          </div>
         </div>
         <div class="countdown-wrap">
-          <div class="lantern lantern--left" aria-hidden="true">
-            <span class="lantern-cord"></span>
-            <span class="lantern-cap"></span>
-            <span class="lantern-body"
-              ><span class="lantern-char">囍</span></span
-            >
-            <span class="lantern-cap"></span>
-            <span class="lantern-tassel"></span>
-          </div>
-          <!-- Hoa văn giữa hai đèn (chỉ hiện ở mobile để lấp khoảng trống) -->
-          <span class="cd-ornament" aria-hidden="true">囍</span>
           <div class="countdown">
             <div class="cd-cell">
               <div class="cd-num" id="cdDays">00</div>
@@ -367,22 +568,47 @@
               <div class="cd-label">Giây</div>
             </div>
           </div>
-          <div class="lantern lantern--right" aria-hidden="true">
-            <span class="lantern-cord"></span>
-            <span class="lantern-cap"></span>
-            <span class="lantern-body"
-              ><span class="lantern-char">囍</span></span
-            >
-            <span class="lantern-cap"></span>
-            <span class="lantern-tassel"></span>
-          </div>
         </div>
-        <div class="cd-divider" aria-hidden="true">
-          <span class="cd-divider-line"></span>
-          <span class="cd-divider-mark">❖</span>
-          <span class="cd-divider-mark cd-divider-mark--main">❊</span>
-          <span class="cd-divider-mark">❖</span>
-          <span class="cd-divider-line"></span>
+        <!-- Đường kẻ vàng + tim bấm được (giống hệt .ty-divider ở dải cảm ơn:
+             vệt sáng chạy, tim đập, bấm thì tim và cánh hoa toé ra) và ngày
+             cưới. Diễn vào do initCountdownDate (script.js). -->
+        <div class="cd-date">
+          <div class="ty-petals cd-pops" id="cdPops" aria-hidden="true"></div>
+          <div class="ty-divider">
+            <span class="ty-rule ty-rule--l" aria-hidden="true"></span>
+            <button
+              type="button"
+              class="ty-heart"
+              id="cdHeartBtn"
+              aria-label="Thả tim"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 2.7 4.5 6.4 4.5c2.1 0 3.9 1.2 5.6 3.4 1.7-2.2 3.5-3.4 5.6-3.4 3.7 0 5.5 3.8 4 7.3C19.5 16.4 12 21 12 21z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <span class="ty-rule ty-rule--r" aria-hidden="true"></span>
+          </div>
+          <p class="cd-save">Save the date</p>
+          <time class="cd-cal" datetime="2026-11-28">
+            <span class="cd-cal-side">Thứ Bảy</span>
+            <span class="cd-cal-day">
+              <svg
+                class="cd-cal-ring"
+                viewBox="0 0 100 100"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <circle pathLength="1" cx="50" cy="50" r="48" />
+                <circle class="cd-cal-ring-dots" cx="50" cy="50" r="43" />
+              </svg>
+              <span class="cd-cal-num">28</span>
+            </span>
+            <span class="cd-cal-side">Tháng 11</span>
+            <span class="cd-cal-year">2026</span>
+          </time>
         </div>
       </section>
 
@@ -540,7 +766,7 @@
                   <span class="ms-paper"
                     ><span class="ms-sheet">
                       <img
-                        src="public/assets/story-4.webp"
+                        src="public/assets/album/NMT_9422.jpg"
                         alt="Lễ thành hôn"
                         width="800"
                         height="640"
