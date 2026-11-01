@@ -1,5 +1,5 @@
 /* =========================================================
-   Thiệp cưới Tài & Mai — stylesheet
+   Thiệp cưới— stylesheet
    Chuyển thể từ "Wedding Invitation.dc.html" sang CSS thuần.
    ========================================================= */
 
@@ -44,6 +44,10 @@
   /* THAY ẢNH: nền dải lời cảm ơn — phong cảnh hoàng hôn, hoa đào và đèn lồng
      hai mép, giữa thoáng cho chữ (tỉ lệ 3:1) */
   --bg-thanks: url("public/assets/bg-thanks.png");
+  /* THAY ẢNH: nền mục Hành trình — dải lụa đỏ lượn ngang giữa, hoa đào và
+     lầu các hai mép (tỉ lệ ~2.2:1). Bản -sm dùng cho màn hẹp. */
+  --bg-story: url("public/assets/bg-story.webp");
+  --bg-story-sm: url("public/assets/bg-story-sm.webp");
 
   /* Hoa văn gạch chéo dùng lại ở nhiều chỗ */
   --weave-soft: repeating-linear-gradient(
@@ -152,8 +156,8 @@ body {
 }
 
 /* Header fixed sẽ che mất đầu mỗi mục khi nhảy theo neo — chừa sẵn khoảng trống */
+/* #story không cần: khung tiêu đề đã tự chừa chỗ cho header */
 #top,
-#story,
 #album,
 #when,
 #rsvp {
@@ -194,7 +198,11 @@ button:focus-visible,
   );
   font-family: var(--font-body);
   color: var(--ink);
+  /* clip thay vì hidden: hidden biến .page thành khung cuộn và làm hỏng
+     position: sticky của mục Hành trình. Trình duyệt cũ không hiểu clip
+     thì dùng hidden (mục Hành trình khi đó tự về bố cục không dính). */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ---------------------------------------------------------
@@ -1320,8 +1328,7 @@ button:focus-visible,
     #c0262b 55%,
     #8f1519 100%
   );
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 220, 150, 0.35),
+  box-shadow: inset 0 0 0 1px rgba(255, 220, 150, 0.35),
     0 0 18px 4px rgba(255, 90, 60, 0.45);
   animation: lantern-glow 2.6s ease-in-out infinite;
 }
@@ -1348,26 +1355,35 @@ button:focus-visible,
   box-shadow: -5px 4px 0 -1px #d9a441, 5px 4px 0 -1px #d9a441;
 }
 @keyframes lantern-sway {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
 }
 @keyframes lantern-glow {
-  0%, 100% {
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 220, 150, 0.35),
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 1px rgba(255, 220, 150, 0.35),
       0 0 12px 2px rgba(255, 90, 60, 0.3);
     filter: brightness(0.95);
   }
   50% {
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 220, 150, 0.6),
+    box-shadow: inset 0 0 0 1px rgba(255, 220, 150, 0.6),
       0 0 30px 10px rgba(255, 110, 60, 0.6);
     filter: brightness(1.15);
   }
 }
 @keyframes lantern-char-glow {
-  0%, 100% { text-shadow: 0 0 5px rgba(255, 210, 110, 0.6); }
-  50% { text-shadow: 0 0 14px rgba(255, 230, 150, 1); }
+  0%,
+  100% {
+    text-shadow: 0 0 5px rgba(255, 210, 110, 0.6);
+  }
+  50% {
+    text-shadow: 0 0 14px rgba(255, 230, 150, 1);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .lantern,
@@ -1385,8 +1401,13 @@ button:focus-visible,
   animation: cd-xi-glow 2.6s ease-in-out infinite;
 }
 @keyframes cd-xi-glow {
-  0%, 100% { text-shadow: 0 0 4px rgba(192, 38, 43, 0.2); }
-  50% { text-shadow: 0 0 14px rgba(230, 90, 60, 0.75); }
+  0%,
+  100% {
+    text-shadow: 0 0 4px rgba(192, 38, 43, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 14px rgba(230, 90, 60, 0.75);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .cd-ornament {
@@ -1470,289 +1491,1054 @@ button:focus-visible,
 }
 
 /* ---------------------------------------------------------
-   Our Story
+   Our Story — hành trình yêu thương
+   Desktop (đủ rộng & đủ cao): .story cao nhiều lần màn hình, .story-stage
+   dính giữa màn; cuộn tới đâu dây chuyền sáng chạy tới đó, mốc gần nhất
+   được nhấc lên và toả sáng. Màn hẹp: các mốc xếp so le, dây chuyền vắt
+   zigzag qua từng ảnh, mốc ở giữa màn hình là mốc đang sáng.
+   Hình học dây chuyền và mọi trạng thái do initStoryJourney (script.js);
+   khi cuộn, JS chỉ đổi transform / stroke-dashoffset / class nên không
+   gây reflow.
    --------------------------------------------------------- */
-.story-section {
-  display: grid;
-  grid-template-columns: minmax(0, 68%) minmax(260px, 1fr);
-  gap: 56px;
-  align-items: start;
-  width: 100%;
-  max-width: var(--shell);
-  margin: 0 auto;
-  padding: 10px var(--gutter) 60px;
+.story {
+  --ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
+  --story-fade: #f6e9dc;
+  position: relative;
+  isolation: isolate;
+  /* Nền sticky ở màn hẹp có margin-bottom âm nên tràn xuống dưới mục và che
+     mục kế tiếp — cắt gọn ở mép mục. clip (không phải hidden) để không biến
+     .story thành khung cuộn, sticky vẫn chạy. */
+  overflow: hidden;
+  overflow: clip;
 }
-.story-Oanhn {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, 34%);
-  gap: 40px;
-  align-items: center;
+/* Hoà mép trên/dưới của mục vào nền giấy của trang: dải kem mờ dần phủ lên
+   ảnh nền (dưới nội dung), để không có đường cắt ngang giữa các mục */
+.story::before,
+.story::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  height: clamp(80px, 14vh, 160px);
+  pointer-events: none;
 }
-.story-copy .btn {
-  margin-top: 26px;
+.story::before {
+  top: 0;
+  background: linear-gradient(
+    180deg,
+    var(--story-fade) 0%,
+    rgba(246, 233, 220, 0.6) 40%,
+    rgba(246, 233, 220, 0)
+  );
+}
+.story::after {
+  bottom: 0;
+  background: linear-gradient(
+    0deg,
+    var(--story-fade) 0%,
+    rgba(246, 233, 220, 0.6) 40%,
+    rgba(246, 233, 220, 0)
+  );
+}
+.story-stage {
+  position: relative;
+  padding: 0 0 72px;
 }
 
-.album {
-  position: relative;
-  /* chừa chỗ bên phải cho khung ảnh trước đang thò ra ngoài */
-  padding: 10px 10% 34px 0;
+/* Màn hẹp: nền dính vào khung nhìn suốt chiều dài mục (sticky nên do
+   compositor lo, cuộn không tốn gì), nội dung trôi qua bên trên */
+.story-bg {
+  position: sticky;
+  top: 0;
+  z-index: -1;
+  height: 100vh;
+  height: 100lvh;
+  margin-bottom: -100vh;
+  margin-bottom: -100lvh;
+  background: var(--cream) var(--bg-story-sm) 50% 50% / cover no-repeat;
 }
-.album-photo {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 3 / 4;
-  border: 8px solid var(--paper);
-  overflow: hidden;
-}
-.album-photo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.album-photo--back {
-  box-shadow: 0 22px 44px -26px rgba(125, 18, 32, 0.5);
-  transform: rotate(-3deg);
-}
-.album-photo--front {
+/* Hoà mép trên/dưới vào nền kem của các mục kề bên */
+.story-bg::after {
+  content: "";
   position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 244, 236, 0.7) 0%,
+    rgba(251, 244, 236, 0) 14%,
+    rgba(251, 244, 236, 0) 86%,
+    rgba(251, 244, 236, 0.7) 100%
+  );
+}
+
+/* Tiêu đề */
+.story-head {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  padding: calc(var(--header-h) + 36px) var(--gutter) 8px;
+  text-align: center;
+}
+.story-title {
+  margin: 0;
+  padding: 0 0.3em;
+  font-family: var(--font-aquarelle);
+  font-weight: normal;
+  font-size: clamp(50px, 14vw, 72px);
+  line-height: 1.15;
+  color: #3b2622;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.8s var(--ease-lux);
+}
+.story-sub {
+  position: relative;
+  margin: 8px 0 0;
+  padding: 0 14px 8px;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--red-deep);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 1s ease 0.5s, transform 1s var(--ease-lux) 0.5s;
+}
+.story-sub::after {
+  content: "";
+  position: absolute;
+  left: 0;
   right: 0;
   bottom: 0;
-  width: 62%;
-  background-color: #efdccb;
-  box-shadow: 0 22px 44px -26px rgba(125, 18, 32, 0.45);
-  transform: rotate(4deg);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(140, 28, 28, 0),
+    rgba(140, 28, 28, 0.55) 20%,
+    rgba(140, 28, 28, 0.55) 80%,
+    rgba(140, 28, 28, 0)
+  );
 }
-
-/* ---------------------------------------------------------
-   Dòng thời gian
-   Mỗi mốc tự diễn khi lọt vào khung nhìn: viên kim cương nở ra kèm vòng
-   sóng lan, đường kẻ vàng vẽ dần xuống, rồi ngày – tiêu đề – lời kể lần
-   lượt trượt vào. Mọi trạng thái do .is-visible điều khiển
-   (initTimelineReveal trong script.js).
-   --------------------------------------------------------- */
-.timeline {
-  display: grid;
-  gap: 0;
-  padding-top: 8px;
-}
-
-/* Hoa văn mở đầu: bông tứ quý canh đúng tâm trục dọc (cột mốc rộng 24px,
-   hoa rộng 34px nên lùi trái 5px). Nét vẽ dần bằng stroke-dashoffset. */
-.tl-ornament {
-  width: 34px;
-  height: 34px;
-  margin: 0 0 18px -5px;
+.story-knot {
+  width: 120px;
+  height: 16px;
+  margin-top: 8px;
   overflow: visible;
   fill: none;
   stroke: var(--red);
   stroke-width: 1.1;
+}
+.story-knot path {
+  stroke-dasharray: 44;
+  stroke-dashoffset: 44;
+  transition: stroke-dashoffset 1.1s ease 0.9s;
+}
+.story-knot rect,
+.story-knot circle {
   opacity: 0;
-  transform: rotate(-40deg) scale(0.55);
-  transform-origin: 50% 50%;
-  transition: opacity 0.9s ease, transform 1s cubic-bezier(0.22, 0.7, 0.2, 1);
+  transform: scale(0.4);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.7s ease 0.8s, transform 0.9s var(--ease-lux) 0.8s;
 }
-.tl-ornament-petals circle {
-  /* Chu vi cánh r=7.5 ≈ 47.1 → làm tròn 48 cho nét khép kín */
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-  transition: stroke-dashoffset 1.2s ease 0.25s;
-}
-.tl-ornament-core {
+.story-knot circle {
   fill: var(--red);
   stroke: none;
-  opacity: 0;
-  transition: opacity 0.7s ease 0.9s;
 }
-.tl-ornament-dots circle {
-  fill: var(--gold);
-  stroke: none;
-  opacity: 0;
-  transition: opacity 0.8s ease 1s;
+.story-head.is-in .story-title {
+  clip-path: inset(0 -10% 0 -10%);
 }
-.timeline.is-visible .tl-ornament {
+.story-head.is-in .story-sub {
   opacity: 1;
   transform: none;
 }
-.timeline.is-visible .tl-ornament-petals circle {
+.story-head.is-in .story-knot path {
   stroke-dashoffset: 0;
 }
-.timeline.is-visible .tl-ornament-core,
-.timeline.is-visible .tl-ornament-dots circle {
+.story-head.is-in .story-knot rect,
+.story-head.is-in .story-knot circle {
+  opacity: 1;
+  transform: none;
+}
+
+/* Dây chuyền: nằm dưới ảnh, chạy xuyên qua từng khung nên nhìn như được
+   xâu lại với nhau. Nền là chuỗi hạt vàng mờ; phần đã đi qua là sợi vàng
+   sáng kèm quầng (hai nét chồng nhau thay cho filter blur — filter trên
+   một path đổi dashoffset mỗi khung là rất đắt trên điện thoại). */
+.story-track {
+  position: relative;
+  z-index: 1;
+}
+.story-chain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Sợi chỉ nền: mảnh như tơ, gần như chìm vào giấy */
+.chain-track {
+  stroke: rgba(176, 141, 94, 0.42);
+  stroke-width: 0.9;
+  opacity: 0;
+  transition: opacity 1.2s ease 0.6s;
+}
+/* Phần đã sáng: quầng mờ + sợi vàng hồng + một chỉ sáng trắng chạy dọc
+   lòng sợi, nhìn như thuỷ tinh kéo sợi bắt ánh đèn */
+.chain-glow {
+  stroke: rgba(255, 214, 160, 0.3);
+  stroke-width: 6;
+}
+.chain-lit {
+  stroke: url(#storyChainGold);
+  stroke-width: 1.6;
+}
+.chain-gleam {
+  stroke: rgba(255, 253, 245, 0.95);
+  stroke-width: 0.55;
+}
+.story-track.is-in .chain-track {
   opacity: 1;
 }
-/* Bốn chấm vàng xoay chậm quanh bông hoa sau khi nét đã vẽ xong */
-.timeline.is-visible .tl-ornament-dots {
-  transform-box: view-box;
-  transform-origin: 24px 24px;
-  animation: tl-dots-turn 24s linear 1.4s infinite;
+
+/* Hạt trên dây (JS rải giữa các ảnh): ngọc trai thuỷ tinh khi chưa tới,
+   hoá hồng ngọc phát sáng khi dây đi qua, kèm một tia sao lấp lánh.
+   --d: độ trễ nhấp nháy riêng từng hạt (JS ghi) để không nháy đồng loạt. */
+.chain-bead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 30%,
+    #ffffff 0 14%,
+    #f6ead8 32%,
+    #d8bf98 78%,
+    #b8956a 100%
+  );
+  box-shadow: 0 1px 2px rgba(90, 50, 30, 0.35);
+  pointer-events: none;
 }
-@keyframes tl-dots-turn {
+.chain-bead::before,
+.chain-bead::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+}
+.chain-bead::before {
+  inset: 0;
+  background: radial-gradient(
+    circle at 34% 30%,
+    #ffffff 0 12%,
+    #ff9d8f 24%,
+    #c41f36 58%,
+    #6a0816 100%
+  );
+  box-shadow: 0 0 6px 2px rgba(255, 196, 150, 0.75),
+    0 0 16px 4px rgba(255, 170, 120, 0.3);
+  transform: scale(0.5);
+  transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+/* Tia sao bốn cánh */
+.chain-bead::after {
+  inset: -9px;
+  border-radius: 0;
+  background: linear-gradient(
+      90deg,
+      transparent 46%,
+      rgba(255, 250, 235, 0.95) 50%,
+      transparent 54%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 46%,
+      rgba(255, 250, 235, 0.95) 50%,
+      transparent 54%
+    );
+  -webkit-mask: radial-gradient(circle, #000 0 12%, transparent 60%);
+  mask: radial-gradient(circle, #000 0 12%, transparent 60%);
+}
+.chain-bead.is-lit::before {
+  opacity: 1;
+  transform: none;
+}
+.chain-bead.is-lit::after {
+  animation: story-glint 3.2s ease-in-out var(--d, 0s) infinite;
+}
+
+/* Đốm sáng ở đầu dây — JS đặt transform theo điểm cuối phần đã sáng */
+.chain-spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  will-change: transform;
+}
+.chain-spark::before,
+.chain-spark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.chain-spark::before {
+  background: radial-gradient(
+    circle,
+    #fffdf6 0 6%,
+    rgba(255, 228, 170, 0.8) 14%,
+    rgba(240, 188, 108, 0.22) 36%,
+    rgba(240, 188, 108, 0) 66%
+  );
+  animation: story-twinkle 1.8s ease-in-out infinite;
+}
+/* Tia sáng chữ thập xoay chậm */
+.chain-spark::after {
+  inset: 2px;
+  border-radius: 0;
+  background: linear-gradient(
+      90deg,
+      transparent 48%,
+      rgba(255, 248, 228, 0.95) 50%,
+      transparent 52%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 48%,
+      rgba(255, 248, 228, 0.95) 50%,
+      transparent 52%
+    );
+  -webkit-mask: radial-gradient(circle, #000 0 14%, transparent 64%);
+  mask: radial-gradient(circle, #000 0 14%, transparent 64%);
+  animation: story-spin 7s linear infinite;
+}
+.chain-spark.is-on {
+  opacity: 1;
+}
+@keyframes story-twinkle {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+@keyframes story-spin {
   to {
     transform: rotate(360deg);
   }
 }
-
-.tl-item {
-  display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: 18px;
-}
-.tl-marker {
-  display: grid;
-  justify-items: center;
-  grid-template-rows: auto 1fr;
-}
-
-/* Mốc: viên kim cương đỏ trên nền giấy, có vòng sóng lan ra khi hiện */
-.tl-dot {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  margin-top: 3px;
-}
-.tl-dot-gem {
-  width: 9px;
-  height: 9px;
-  background: var(--red);
-  box-shadow: 0 0 0 4px var(--cream);
-  transform: rotate(45deg) scale(0);
-  transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.4, 1);
-}
-.tl-dot-halo {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(140, 28, 28, 0.45);
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0.35);
-}
-.tl-item.is-visible .tl-dot-gem {
-  transform: rotate(45deg) scale(1);
-}
-.tl-item.is-visible .tl-dot-halo {
-  animation: tl-halo 1.6s ease-out 0.3s 2;
-}
-@keyframes tl-halo {
-  from {
-    opacity: 0.75;
-    transform: scale(0.35);
-  }
-  to {
+/* Lấp lánh: loé lên, xoay nửa vòng, tắt — nghỉ lâu giữa hai lần để nhẹ nhàng */
+@keyframes story-glint {
+  0%,
+  62%,
+  100% {
     opacity: 0;
-    transform: scale(2);
+    transform: scale(0.2) rotate(0deg);
+  }
+  74% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  86% {
+    opacity: 0;
+    transform: scale(0.3) rotate(90deg);
   }
 }
 
-/* Đường kẻ: rãnh mờ sẵn, phần vàng đậm được kéo dần từ trên xuống */
-.tl-line {
+/* Danh sách mốc — màn hẹp: ảnh và chữ so le hai bên */
+.story-list {
   position: relative;
-  width: 1px;
-  background: rgba(176, 141, 94, 0.18);
+  z-index: 1;
+  display: grid;
+  gap: 72px;
+  margin: 0;
+  padding: 56px var(--gutter) 48px;
+  list-style: none;
 }
-.tl-line-fill {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(176, 141, 94, 0.75),
-    rgba(176, 141, 94, 0.45)
-  );
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
-}
-.tl-item.is-visible .tl-line-fill {
-  transform: scaleY(1);
-}
-/* Mốc cuối: đường kẻ nhạt dần rồi tắt thay vì cắt ngang */
-.tl-item--last .tl-line {
-  background: transparent;
-}
-.tl-item--last .tl-line-fill {
-  background: linear-gradient(
-    180deg,
-    rgba(176, 141, 94, 0.5),
-    rgba(176, 141, 94, 0) 70%
-  );
-}
-
-.tl-body {
-  padding-bottom: 34px;
-}
-.tl-date,
-.tl-title,
-.tl-text {
+.ms {
+  --rot: -3deg;
+  display: grid;
+  grid-template-columns: minmax(0, 56%) minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
   opacity: 0;
-  transform: translate(14px, 6px);
-  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.7, 0.2, 1);
+  transform: translateY(36px);
+  transition: opacity 1s ease, transform 1.2s var(--ease-lux);
 }
-.tl-item.is-visible .tl-date,
-.tl-item.is-visible .tl-title,
-.tl-item.is-visible .tl-text {
+.ms:nth-child(even) {
+  --rot: 3deg;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 56%);
+}
+.ms:nth-child(odd) .ms-copy {
+  order: 1;
+}
+.ms.is-in {
   opacity: 1;
   transform: none;
 }
-.tl-item.is-visible .tl-date {
-  transition-delay: 0.2s;
+
+.ms-copy {
+  display: grid;
+  justify-items: center;
+  padding: 14px 4px;
+  text-align: center;
+  /* Quầng kem sau chữ: dải lụa đỏ của nền có thể chạy ngang qua chữ */
+  background: radial-gradient(
+    closest-side,
+    rgba(253, 246, 238, 0.92) 55%,
+    rgba(253, 246, 238, 0)
+  );
+  opacity: 0.72;
+  transform: translateY(6px);
+  transition: opacity 0.7s ease, transform 0.8s var(--ease-lux);
 }
-.tl-item.is-visible .tl-title {
-  transition-delay: 0.32s;
+.ms.is-past .ms-copy {
+  opacity: 0.85;
+  transform: none;
 }
-.tl-item.is-visible .tl-text {
-  transition-delay: 0.44s;
+.ms.is-active .ms-copy {
+  opacity: 1;
+  transform: translateY(-4px);
 }
-.tl-date {
+.ms-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(176, 141, 94, 0.6);
+  border-radius: 50%;
+  background: rgba(255, 253, 250, 0.7);
+  color: var(--red);
+  transition: background-color 0.6s ease, color 0.6s ease,
+    border-color 0.6s ease;
+}
+.ms-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ms-icon::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid rgba(217, 168, 90, 0.85);
+  border-radius: 50%;
+  opacity: 0;
+}
+.ms.is-active .ms-icon {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff4dc;
+}
+.ms.is-active .ms-icon::after {
+  animation: story-ring 2.2s ease-out infinite;
+}
+@keyframes story-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+.ms-date {
   font-family: var(--font-serif);
-  font-size: 15px;
-  letter-spacing: 0.1em;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   color: var(--red-bright);
 }
-.tl-title {
-  margin-top: 6px;
+.ms-title {
+  margin: 4px 0 0;
   font-family: var(--font-serif);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--brown-dark);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #3b2622;
+  transition: color 0.6s ease;
 }
-.tl-text {
-  margin-top: 6px;
-  font-size: 13.5px;
-  line-height: 1.8;
+.ms.is-active .ms-title {
+  color: var(--red-deep);
+}
+.ms-text {
+  max-width: 24ch;
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.65;
   color: var(--muted-deep);
 }
 
-/* Rê chuột lên một mốc: viên kim cương lớn hơn một chút, chữ nhích sang */
-@media (hover: hover) {
-  .tl-item.is-visible:hover .tl-dot-gem {
-    transform: rotate(45deg) scale(1.3);
+/* Tấm ảnh như giấy ảnh mềm: mép hơi gợn sóng (mask SVG), nghiêng nhẹ trong
+   không gian 3D, mặt giấy có dải sáng – tối cong như vừa bị uốn, bóng đổ
+   bám đúng đường gợn của mép (drop-shadow ở lớp cha của lớp bị mask).
+   Cấu trúc: .ms-photo (transform, quầng sáng, gợn sóng, đốm sáng)
+     > .ms-paper (bóng đổ, nhấp nhô khi sáng) > .ms-sheet (mask, giấy, ảnh, lớp phủ).
+   .ms-photo có will-change nên khi nhấc/phóng chỉ compositor làm việc,
+   bóng đổ (filter) không bị vẽ lại. */
+.ms-photo {
+  --tilt: 8deg;
+  --paper-wave: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M2 3C24 0 61 5.4 98.2 1C100 30 96.8 68 99 98.4C68 100 36 95.8 1 99.2C3.4 66 0 35 2 3Z'/></svg>");
+  position: relative;
+  margin: 0;
+  transform: perspective(1100px) rotateY(var(--tilt)) rotateX(4deg)
+    rotate(var(--rot));
+  transition: transform 1.1s var(--ease-lux);
+  will-change: transform;
+}
+.ms:nth-child(even) .ms-photo {
+  --tilt: -8deg;
+}
+.ms-paper {
+  display: block;
+  filter: drop-shadow(0 1px 1.5px rgba(90, 40, 30, 0.28))
+    drop-shadow(0 14px 14px rgba(110, 30, 25, 0.26));
+}
+.ms-sheet {
+  position: relative;
+  display: block;
+  padding: 8px;
+  background: linear-gradient(
+    125deg,
+    #fffdf8 0%,
+    #f5ebde 38%,
+    #fffaf1 62%,
+    #eadbc8 100%
+  );
+  -webkit-mask: var(--paper-wave) 0 0 / 100% 100% no-repeat;
+  mask: var(--paper-wave) 0 0 / 100% 100% no-repeat;
+}
+.ms-sheet img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  border-radius: 2px;
+}
+/* Ánh sáng cong trên mặt giấy: sáng – tối – sáng xen nhau theo đường chéo
+   cho cảm giác tấm ảnh hơi uốn sóng; viền tối mờ ở mép làm mặt giấy dày,
+   mịn như nhung */
+.ms-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(70, 25, 15, 0.1) 44%,
+      rgba(255, 255, 255, 0) 58%,
+      rgba(255, 246, 225, 0.24) 78%,
+      rgba(70, 25, 15, 0.12) 100%
+    ),
+    radial-gradient(
+      130% 100% at 50% 45%,
+      rgba(70, 25, 15, 0) 62%,
+      rgba(70, 25, 15, 0.16) 100%
+    );
+}
+/* Quầng vàng mềm sau ảnh đang sáng (gradient, không dùng blur) */
+.ms-photo::before {
+  content: "";
+  position: absolute;
+  inset: -30% -22%;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 226, 170, 0.95) 40%,
+    rgba(255, 206, 140, 0.4) 68%,
+    rgba(255, 206, 140, 0)
+  );
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.9s ease, transform 1.2s var(--ease-lux);
+}
+.ms.is-active .ms-photo::before {
+  opacity: 1;
+  transform: none;
+}
+/* Mốc đang sáng: ảnh sáng và đậm màu hơn một chút; các mốc khác giữ nguyên ảnh gốc */
+.ms-sheet img {
+  transition: filter 0.9s ease;
+}
+.ms.is-active .ms-sheet img {
+  filter: brightness(1.08) contrast(1.12) saturate(1.06);
+}
+
+/* Mặt giấy uốn sóng: khi mốc sáng, tấm ảnh nhấp nhô nhẹ trong không gian 3D
+   (.ms-paper) và các dải sáng – tối trên mặt giấy (.ms-ripple) trôi ngang
+   như gợn sóng chạy qua. .ms-ripple nằm ngoài .ms-paper để dải sáng chuyển
+   động không bắt drop-shadow của .ms-paper vẽ lại mỗi khung; hai lớp chạy
+   cùng một keyframes, cùng lúc nên luôn khớp nhau. */
+.ms-paper {
+  transform-origin: 50% 60%;
+}
+.ms-ripple {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: 50% 60%;
+  transition: opacity 0.9s ease;
+  -webkit-mask: var(--paper-wave) 0 0 / 100% 100% no-repeat;
+  mask: var(--paper-wave) 0 0 / 100% 100% no-repeat;
+}
+/* Rộng gấp đôi khung, dải lặp mỗi 1/4 bề rộng → trượt đúng 25% là liền mạch */
+.ms-ripple::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: -50%;
+  width: 200%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 250, 238, 0.26) 0%,
+    rgba(255, 255, 255, 0) 6.25%,
+    rgba(70, 25, 15, 0.12) 12.5%,
+    rgba(255, 255, 255, 0) 18.75%,
+    rgba(255, 250, 238, 0.26) 25%
+  );
+  transform: skewX(-14deg);
+}
+.ms.is-active .ms-ripple {
+  opacity: 1;
+}
+.ms.is-active .ms-ripple::before {
+  animation: ms-ripple 6s linear infinite;
+}
+.ms.is-active .ms-paper,
+.ms.is-active .ms-ripple {
+  animation: ms-wave 5.2s ease-in-out 0.4s infinite;
+}
+@keyframes ms-ripple {
+  to {
+    transform: translateX(-25%) skewX(-14deg);
   }
-  .tl-item.is-visible:hover .tl-date {
-    transform: translateX(3px);
-    transition-delay: 0s;
+}
+@keyframes ms-wave {
+  0%,
+  100% {
+    transform: perspective(900px) rotateX(0deg) rotateY(0deg) skewY(0deg)
+      translateY(0);
+  }
+  25% {
+    transform: perspective(900px) rotateX(5deg) rotateY(-6deg) skewY(-0.9deg)
+      translateY(-5px);
+  }
+  50% {
+    transform: perspective(900px) rotateX(-3deg) rotateY(3deg) skewY(0.6deg)
+      translateY(2px);
+  }
+  75% {
+    transform: perspective(900px) rotateX(3deg) rotateY(6deg) skewY(-0.5deg)
+      translateY(-4px);
   }
 }
 
-/* Bỏ chuyển động: mọi thứ hiện thẳng ở trạng thái cuối */
+/* Đốm sáng bay quanh ảnh đang sáng (JS gắn vào mỗi khung, mỗi đốm có
+   --o: khoảng cách ra ngoài mép, --s: cỡ, --t: thời gian một vòng,
+   --dl: độ trễ âm để rải đều, --dir: chiều bay).
+   .ms-mote rộng đúng bằng khung + 2·--o và chạy translate(0 → 100%) theo
+   bốn cạnh: đốm ở góc trên-trái của nó nhờ vậy men theo một hình chữ nhật
+   bao quanh ảnh — chỉ là transform nên compositor tự lo. */
+.ms-mote {
+  position: absolute;
+  inset: calc(var(--o, 10px) * -1);
+  z-index: 4;
+  pointer-events: none;
+  animation: ms-orbit var(--t, 12s) linear var(--dl, 0s) infinite
+    var(--dir, normal) paused;
+}
+.ms-mote i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--s, 8px);
+  height: var(--s, 8px);
+  margin: calc(var(--s, 8px) / -2) 0 0 calc(var(--s, 8px) / -2);
+  /* Hạt vàng kim: điểm phản quang trắng lệch tâm → vàng champagne → đồng
+     sẫm ở mép, quầng sáng mảnh màu vàng ấm như kim loại bắt đèn */
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    #ffffff 0 12%,
+    #fff1c8 26%,
+    #e9c27a 52%,
+    #b9873f 80%,
+    #8a5a22 100%
+  );
+  box-shadow: 0 0 2px rgba(255, 236, 190, 0.9),
+    0 0 6px 1px rgba(232, 184, 100, 0.45);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  animation: ms-bob 2.6s ease-in-out var(--dl, 0s) infinite alternate paused;
+}
+/* Tia chữ thập rất mảnh loé lên thưa thớt trên hạt */
+.ms-mote i::before {
+  content: "";
+  position: absolute;
+  inset: -180%;
+  background: linear-gradient(
+      90deg,
+      transparent 48.5%,
+      rgba(255, 246, 220, 0.95) 50%,
+      transparent 51.5%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 48.5%,
+      rgba(255, 246, 220, 0.95) 50%,
+      transparent 51.5%
+    );
+  -webkit-mask: radial-gradient(circle, #000 0 8%, transparent 55%);
+  mask: radial-gradient(circle, #000 0 8%, transparent 55%);
+  opacity: 0;
+  animation: ms-twinkle var(--tw, 3.4s) ease-in-out var(--dl, 0s) infinite
+    paused;
+}
+.ms.is-active .ms-mote,
+.ms.is-active .ms-mote i,
+.ms.is-active .ms-mote i::before {
+  animation-play-state: running;
+}
+.ms.is-active .ms-mote i {
+  opacity: 1;
+}
+@keyframes ms-orbit {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  28% {
+    transform: translate(100%, 0);
+  }
+  50% {
+    transform: translate(100%, 100%);
+  }
+  78% {
+    transform: translate(0, 100%);
+  }
+}
+@keyframes ms-bob {
+  from {
+    transform: translate(-3px, 2px);
+  }
+  to {
+    transform: translate(3px, -3px);
+  }
+}
+@keyframes ms-twinkle {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  90% {
+    opacity: 0;
+    transform: scale(0.4) rotate(90deg);
+  }
+}
+
+/* Chấm tiến trình & gợi ý cuộn: chỉ dùng ở chế độ dính (desktop) */
+.story-dots,
+.story-hint {
+  display: none;
+}
+
+/* ---- Desktop: khung dính, các mốc trải ngang theo dải lụa ----
+   Điều kiện này phải trùng với PIN_QUERY trong initStoryJourney. */
+@media (min-width: 900px) and (min-height: 560px) {
+  @supports (overflow-x: clip) {
+    .story {
+      /* --story-n do JS ghi theo số mốc */
+      height: calc(100vh + var(--story-n, 4) * 72vh);
+    }
+    .story-stage {
+      position: sticky;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 0;
+      overflow: hidden;
+    }
+    .story-bg {
+      position: absolute;
+      inset: -3%;
+      height: auto;
+      margin: 0;
+      background-image: var(--bg-story);
+      will-change: transform;
+    }
+    /* Khung dính phủ lên .story::before nên tự hoà mép trên ở đây; mép dưới
+       đã có .story::after (nằm trên khung) lo khi khung rời màn hình */
+    .story-bg::after {
+      background: linear-gradient(
+        180deg,
+        var(--story-fade) 0%,
+        rgba(246, 233, 220, 0.55) 7%,
+        rgba(246, 233, 220, 0) 20%
+      );
+    }
+
+    .story-head {
+      padding: calc(var(--header-h) + 1.5vh) var(--gutter) 0;
+    }
+    .story-title {
+      font-size: clamp(56px, 10.5vh, 110px);
+      line-height: 1.05;
+    }
+    .story-sub {
+      font-size: clamp(12px, 1.6vh, 15px);
+    }
+
+    .story-track {
+      flex: 1;
+      min-height: 0;
+    }
+    .story-list {
+      grid-template-columns: repeat(var(--story-n, 4), minmax(0, 1fr));
+      align-items: start;
+      gap: 2.4vw;
+      height: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
+      /* bên phải chừa chỗ cho cột chấm tiến trình */
+      padding: 0 calc(var(--gutter) + 4vw) 0 calc(var(--gutter) + 2vw);
+    }
+    /* Vị trí so le bám theo đường lượn của dải lụa trong ảnh nền */
+    .ms,
+    .ms:nth-child(even) {
+      --y: 8vh;
+      --w: min(100%, 16vw, 30vh);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: var(--y);
+      transition-delay: calc(var(--i, 0) * 0.16s + 0.5s);
+    }
+    .ms:nth-child(4n + 2) {
+      --y: 4vh;
+    }
+    .ms:nth-child(4n + 3) {
+      --y: 2vh;
+      --rot: -4deg;
+    }
+    .ms:nth-child(4n) {
+      --y: -8vh;
+      --w: min(100%, 19vw, 36vh);
+    }
+    .ms:nth-child(odd) .ms-copy {
+      order: 0;
+    }
+    .ms-copy {
+      padding: 0;
+      background: none;
+    }
+    .ms-title {
+      font-size: clamp(18px, 2.7vh, 26px);
+    }
+    .ms-text {
+      font-size: clamp(12.5px, 1.65vh, 14.5px);
+    }
+    .ms-photo {
+      width: var(--w);
+      margin-top: 2.2vh;
+    }
+    .ms-sheet {
+      padding: 10px;
+    }
+    .ms.is-active .ms-photo {
+      transform: perspective(1100px) rotateY(calc(var(--tilt) * 0.3))
+        rotateX(0deg) rotate(calc(var(--rot) * 0.35)) translateY(-12px)
+        scale(1.1);
+    }
+
+    .story-dots {
+      position: absolute;
+      top: 50%;
+      right: 26px;
+      z-index: 3;
+      display: grid;
+      gap: 22px;
+      transform: translateY(-50%);
+    }
+    .story-dots::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 50%;
+      width: 1px;
+      background: rgba(140, 28, 28, 0.25);
+    }
+    .story-dot {
+      position: relative;
+      width: 12px;
+      height: 12px;
+      padding: 0;
+      border: 1px solid rgba(140, 28, 28, 0.6);
+      border-radius: 50%;
+      background: var(--cream-soft);
+      cursor: pointer;
+      transition: transform 0.5s var(--ease-lux), background-color 0.5s ease;
+    }
+    .story-dot::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border: 1px solid rgba(140, 28, 28, 0.4);
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.5s ease, transform 0.5s var(--ease-lux);
+    }
+    .story-dot.is-past {
+      background: rgba(140, 28, 28, 0.55);
+    }
+    .story-dot.is-active {
+      background: var(--red);
+      transform: scale(1.15);
+    }
+    .story-dot.is-active::after {
+      opacity: 1;
+      transform: none;
+    }
+    .story-dot:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    .story-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 2.6vh;
+      z-index: 3;
+      display: grid;
+      justify-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      transform: translateX(-50%);
+      transition: opacity 0.6s ease;
+    }
+    .story-hint.is-done {
+      opacity: 0;
+    }
+    .story-hint-mouse {
+      display: grid;
+      justify-items: center;
+      width: 20px;
+      height: 32px;
+      padding-top: 6px;
+      border: 1.3px solid var(--red);
+      border-radius: 12px;
+    }
+    .story-hint-mouse i {
+      width: 2px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--red);
+      animation: story-wheel 1.8s ease-in-out infinite;
+    }
+    .story-hint-chev {
+      width: 12px;
+      height: 8px;
+      fill: none;
+      stroke: var(--red);
+      stroke-width: 1.4;
+      animation: story-nudge 1.8s ease-in-out infinite;
+    }
+    @keyframes story-wheel {
+      0% {
+        opacity: 0;
+        transform: translateY(-2px);
+      }
+      30% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(9px);
+      }
+    }
+    @keyframes story-nudge {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(4px);
+      }
+    }
+  }
+}
+
+/* Bỏ chuyển động: hiện thẳng trạng thái cuối, không đốm sáng, không gợn sóng */
 @media (prefers-reduced-motion: reduce) {
-  .tl-ornament,
-  .tl-ornament-petals circle,
-  .tl-ornament-core,
-  .tl-ornament-dots circle,
-  .tl-dot-gem,
-  .tl-line-fill,
-  .tl-date,
-  .tl-title,
-  .tl-text {
+  .story-title,
+  .story-sub,
+  .story-knot *,
+  .ms,
+  .ms-copy,
+  .ms-photo,
+  .ms-photo::before,
+  .ms-sheet img,
+  .ms-ripple,
+  .chain-track,
+  .chain-bead::before {
     transition: none !important;
-    animation: none !important;
   }
-  .timeline.is-visible .tl-ornament-dots {
-    animation: none !important;
-  }
-  .tl-dot-halo {
+  .chain-spark,
+  .ms-mote,
+  .ms-ripple::before,
+  .chain-bead::after,
+  .story-hint-mouse i,
+  .story-hint-chev,
+  .ms.is-active .ms-icon::after {
     display: none;
+    animation: none !important;
+  }
+  .ms.is-active .ms-paper,
+  .ms.is-active .ms-ripple {
+    animation: none !important;
   }
 }
 
@@ -2498,7 +3284,8 @@ button:focus-visible,
   line-height: 1.5;
   letter-spacing: 0.01em;
   color: var(--ty-cream);
-  text-shadow: 0 2px 18px rgba(20, 8, 4, 0.75), 0 0 30px rgba(255, 190, 140, 0.22);
+  text-shadow: 0 2px 18px rgba(20, 8, 4, 0.75),
+    0 0 30px rgba(255, 190, 140, 0.22);
 }
 .ty-line {
   display: block;
@@ -2989,7 +3776,7 @@ button:focus-visible,
   position: absolute;
   inset: 0;
   /* rgb(125, 18, 32) = --red-deep, cùng bộ ba dùng cho các box-shadow đỏ
-     trong suốt khác trong file (vd. .album-photo--back) */
+     trong suốt khác trong file (vd. bóng ảnh mục Hành trình) */
   background: rgba(125, 18, 32, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -3074,28 +3861,30 @@ button:focus-visible,
   /* Từ trên xuống: nền thẻ (chỉ phần trong viền) che phần ruột của các lớp
      dưới → vệt sáng → hai lớp tia lửa (chu kỳ 40° và 24° lệch nhau nên không
      đều, mỗi lớp nhấp nháy theo nhịp riêng) → nền viền vàng. */
-  background:
-    linear-gradient(var(--fx-fill), var(--fx-fill)) padding-box,
+  background: linear-gradient(var(--fx-fill), var(--fx-fill)) padding-box,
     conic-gradient(
-      from var(--fx-angle),
-      transparent 0deg 262deg,
-      rgba(125, 18, 32, 0.5) 300deg,
-      #7d1220 338deg,
-      #d12a3f 354deg,
-      #ff6a5c 360deg
-    ) border-box,
+        from var(--fx-angle),
+        transparent 0deg 262deg,
+        rgba(125, 18, 32, 0.5) 300deg,
+        #7d1220 338deg,
+        #d12a3f 354deg,
+        #ff6a5c 360deg
+      )
+      border-box,
     repeating-conic-gradient(
-      from var(--fx-spark),
-      transparent 0deg 16.6deg,
-      rgba(214, 40, 56, var(--fx-tw-a)) 18.9deg,
-      transparent 21.2deg 40deg
-    ) border-box,
+        from var(--fx-spark),
+        transparent 0deg 16.6deg,
+        rgba(214, 40, 56, var(--fx-tw-a)) 18.9deg,
+        transparent 21.2deg 40deg
+      )
+      border-box,
     repeating-conic-gradient(
-      from calc(var(--fx-spark) * -1 + 9deg),
-      transparent 0deg 8.8deg,
-      rgba(255, 122, 96, var(--fx-tw-b)) 10.9deg,
-      transparent 13deg 24deg
-    ) border-box,
+        from calc(var(--fx-spark) * -1 + 9deg),
+        transparent 0deg 8.8deg,
+        rgba(255, 122, 96, var(--fx-tw-b)) 10.9deg,
+        transparent 13deg 24deg
+      )
+      border-box,
     linear-gradient(var(--line-gold), var(--line-gold)) border-box;
   background-color: var(--fx-fill);
   box-shadow: var(--fx-base), 0 0 16px rgba(200, 50, 64, 0.28);
@@ -3158,8 +3947,7 @@ button:focus-visible,
   .music-modal-card,
   .gal-lb-card {
     animation: none;
-    background:
-      linear-gradient(var(--fx-fill), var(--fx-fill)) padding-box,
+    background: linear-gradient(var(--fx-fill), var(--fx-fill)) padding-box,
       linear-gradient(var(--line-gold), var(--line-gold)) border-box;
     background-color: var(--fx-fill);
     box-shadow: var(--fx-base), 0 0 16px rgba(200, 50, 64, 0.18);
@@ -3442,8 +4230,7 @@ button:focus-visible,
   font-family: var(--font-serif);
   color: var(--brown-dark);
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .gift-card:hover,
 .gift-card:focus-visible {
@@ -3692,12 +4479,25 @@ button:focus-visible,
   animation: qr-loader-ring 1.2s ease-out infinite;
 }
 @keyframes qr-loader-beat {
-  0%, 100% { transform: scale(0.9); opacity: 0.7; }
-  50% { transform: scale(1.08); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
 }
 @keyframes qr-loader-ring {
-  0% { transform: scale(0.6); opacity: 0.6; }
-  100% { transform: scale(1.15); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .qr-loader span,
@@ -4412,10 +5212,6 @@ button:focus-visible,
   .header-inner {
     gap: 16px;
   }
-  .story-section {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 44px;
-  }
 }
 
 @media (max-width: 900px) {
@@ -4485,22 +5281,6 @@ button:focus-visible,
     grid-template-columns: minmax(0, 1fr);
     gap: 36px;
     padding: 90px var(--gutter) 24px;
-  }
-
-  .story-Oanhn {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 48px;
-  }
-  /* width phải khai báo rõ: margin auto trên grid item sẽ làm khối co lại theo nội dung */
-  .album {
-    width: 100%;
-    max-width: 320px;
-    justify-self: center;
-    padding: 10px 8% 24px 0;
-  }
-  .album-photo--front {
-    right: -4%;
-    width: 58%;
   }
 
   .when-card {
@@ -5163,20 +5943,10 @@ button:focus-visible,
 .fade-up {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 .fade-up.is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-/* Trượt từ trái sang phải (phần "Hành trình") */
-.slide-in {
-  opacity: 0;
-  transform: translateX(-48px);
-  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-.slide-in.is-visible {
   opacity: 1;
   transform: none;
 }

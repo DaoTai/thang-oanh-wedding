@@ -386,137 +386,182 @@
         </div>
       </section>
 
-      <!-- ========================== OUR STORY ========================== -->
-      <section id="story" class="story-section">
-        <div class="story-Oanhn">
-          <div class="story-copy">
-            <!-- <p class="eyebrow">Our story</p> -->
-            <h2 class="script-heading">Hành trình<br />của chúng tôi</h2>
-            <p class="body-text">
-              Từ những ngày đầu gặp gỡ, qua bao khoảnh khắc cùng nhau, chúng tôi
-              đã chọn nắm tay, đồng hành và viết tiếp câu chuyện tình yêu của
-              mình.
-            </p>
-            <p class="body-text">
-              Và giờ đây, chúng tôi muốn tiếp tục hành trình ấy với một chương
-              mới — hôn nhân.
-            </p>
-            <a href="#album" class="btn btn--outline"
-              >Xem thêm <span>→</span></a
+      <!-- ========================== OUR STORY ==========================
+           Desktop: mục cao nhiều lần màn hình, khung .story-stage dính (sticky)
+           giữa màn — cuộn tới đâu dây chuyền sáng chạy tới đó và mốc gần nhất
+           được làm nổi. Màn hẹp: các mốc xếp dọc so le, dây chuyền nối ảnh theo
+           đường zigzag. Toàn bộ diễn biến do initStoryJourney (script.js). -->
+      <section id="story" class="story" aria-labelledby="storyTitle">
+        <div class="story-stage">
+          <!-- THAY ẢNH: nền mục — tranh thuỷ mặc, dải lụa đỏ chạy ngang giữa -->
+          <div class="story-bg" aria-hidden="true"></div>
+
+          <header class="story-head">
+            <h2 class="story-title" id="storyTitle">Chuyện đôi ta</h2>
+            <p class="story-sub">Hành trình yêu thương</p>
+            <div
+              class="gal-divider"
+              aria-hidden="true"
+              style="margin-top: 0.5em"
             >
+              <span class="gal-divider-line"></span>
+              <span class="gal-divider-seal">囍</span>
+              <span class="gal-divider-line"></span>
+            </div>
+          </header>
+
+          <div class="story-track">
+            <svg class="story-chain" aria-hidden="true" focusable="false">
+              <defs>
+                <!-- Vàng hồng: sáng – đậm – ánh hồng – sáng, như kim loại quý -->
+                <linearGradient id="storyChainGold" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#fbe9c4" />
+                  <stop offset="0.3" stop-color="#e2b46e" />
+                  <stop offset="0.55" stop-color="#f0c3b0" />
+                  <stop offset="0.8" stop-color="#d9a35c" />
+                  <stop offset="1" stop-color="#fff3d6" />
+                </linearGradient>
+              </defs>
+              <path class="chain-track" />
+              <path class="chain-glow" />
+              <path class="chain-lit" />
+              <path class="chain-gleam" />
+            </svg>
+            <span class="chain-spark" aria-hidden="true"></span>
+
+            <!-- THAY ẢNH / NỘI DUNG: mỗi <li> là một mốc. Thêm bớt mốc thoải
+                 mái — script tự dựng lại dây chuyền theo số mốc. -->
+            <ol class="story-list">
+              <li class="ms">
+                <div class="ms-copy">
+                  <span class="ms-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="8.5" cy="7.5" r="2.8" />
+                      <circle cx="15.5" cy="7.5" r="2.8" />
+                      <path
+                        d="M3.5 19.5c0-3.2 2.2-5.6 5-5.6 1.4 0 2.6.6 3.5 1.6.9-1 2.1-1.6 3.5-1.6 2.8 0 5 2.4 5 5.6"
+                      />
+                    </svg>
+                  </span>
+                  <time class="ms-date" datetime="2021-03-12">12.03.2021</time>
+                  <h3 class="ms-title">Lần đầu gặp nhau</h3>
+                  <p class="ms-text">Một buổi chiều thật đặc biệt...</p>
+                </div>
+                <figure class="ms-photo">
+                  <span class="ms-paper"
+                    ><span class="ms-sheet">
+                      <img
+                        src="public/assets/story-1.webp"
+                        alt="Lần đầu gặp nhau"
+                        width="800"
+                        height="640"
+                        loading="lazy"
+                        decoding="async"
+                      /> </span
+                  ></span>
+                </figure>
+              </li>
+
+              <li class="ms">
+                <div class="ms-copy">
+                  <span class="ms-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="9" />
+                      <path
+                        d="M12 16.2s-4.2-2.6-4.2-5.3c0-1.3 1-2.3 2.2-2.3.9 0 1.6.5 2 1.2.4-.7 1.1-1.2 2-1.2 1.2 0 2.2 1 2.2 2.3 0 2.7-4.2 5.3-4.2 5.3Z"
+                      />
+                    </svg>
+                  </span>
+                  <time class="ms-date" datetime="2022-08-20">20.08.2022</time>
+                  <h3 class="ms-title">Chính thức hẹn hò</h3>
+                  <p class="ms-text">
+                    Từ bạn bè, chúng tôi trở thành người yêu.
+                  </p>
+                </div>
+                <figure class="ms-photo">
+                  <span class="ms-paper"
+                    ><span class="ms-sheet">
+                      <img
+                        src="public/assets/story-2.webp"
+                        alt="Chính thức hẹn hò"
+                        width="800"
+                        height="640"
+                        loading="lazy"
+                        decoding="async"
+                      /> </span
+                  ></span>
+                </figure>
+              </li>
+
+              <li class="ms">
+                <div class="ms-copy">
+                  <span class="ms-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="15" r="5.8" />
+                      <path d="M9.6 6.2 12 3.5l2.4 2.7L12 9.2Z" />
+                      <path d="M9.6 6.2h4.8" />
+                    </svg>
+                  </span>
+                  <time class="ms-date" datetime="2024-02-14">14.02.2024</time>
+                  <h3 class="ms-title">Cầu hôn</h3>
+                  <p class="ms-text">Một lời hứa cho tương lai.</p>
+                </div>
+                <figure class="ms-photo">
+                  <span class="ms-paper"
+                    ><span class="ms-sheet">
+                      <img
+                        src="public/assets/story-3.webp"
+                        alt="Cầu hôn"
+                        width="800"
+                        height="640"
+                        loading="lazy"
+                        decoding="async"
+                      /> </span
+                  ></span>
+                </figure>
+              </li>
+
+              <li class="ms">
+                <div class="ms-copy">
+                  <span class="ms-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3.5 11 12 4l8.5 7" />
+                      <path d="M5.5 9.5V20h13V9.5" />
+                      <path
+                        d="M12 17.2s-2.6-1.6-2.6-3.3c0-.8.6-1.4 1.4-1.4.5 0 1 .3 1.2.7.2-.4.7-.7 1.2-.7.8 0 1.4.6 1.4 1.4 0 1.7-2.6 3.3-2.6 3.3Z"
+                      />
+                    </svg>
+                  </span>
+                  <time class="ms-date" datetime="2026-11-28">28.11.2026</time>
+                  <h3 class="ms-title">Lễ thành hôn</h3>
+                  <p class="ms-text">Chúng tôi chính thức về chung một nhà.</p>
+                </div>
+                <figure class="ms-photo">
+                  <span class="ms-paper"
+                    ><span class="ms-sheet">
+                      <img
+                        src="public/assets/story-4.webp"
+                        alt="Lễ thành hôn"
+                        width="800"
+                        height="640"
+                        loading="lazy"
+                        decoding="async"
+                      /> </span
+                  ></span>
+                </figure>
+              </li>
+            </ol>
           </div>
 
-          <!-- THAY ẢNH: album, hai khung 3:4 xếp chồng -->
-          <div class="album">
-            <div class="album-photo album-photo--back photo-ph">
-              <img
-                src="public/assets/3-4-v2.png"
-                alt="Ảnh cưới 3:4"
-                class="album-photo-img"
-              />
-            </div>
-            <div class="album-photo album-photo--front">
-              <img
-                src="public/assets/3-4-v2.png"
-                alt="Ảnh cưới 3:4"
-                class="album-photo-img"
-              />
-            </div>
-          </div>
-        </div>
+          <!-- Chấm tiến trình bên phải (chỉ desktop): bấm để nhảy tới mốc -->
+          <nav class="story-dots" aria-label="Các mốc hành trình"></nav>
 
-        <div class="timeline">
-          <!-- Hoa văn đầu dòng thời gian: bông tứ quý (quatrefoil) nằm chính
-               giữa trục dọc. Nét được "vẽ" dần bằng stroke-dashoffset khi
-               .is-visible được thêm (initTimelineReveal trong script.js). -->
-          <svg
-            class="tl-ornament"
-            viewBox="0 0 48 48"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <g class="tl-ornament-petals">
-              <circle cx="24" cy="15" r="7.5" />
-              <circle cx="33" cy="24" r="7.5" />
-              <circle cx="24" cy="33" r="7.5" />
-              <circle cx="15" cy="24" r="7.5" />
-            </g>
-            <rect
-              class="tl-ornament-core"
-              x="20.5"
-              y="20.5"
-              width="7"
-              height="7"
-              transform="rotate(45 24 24)"
-            />
-            <g class="tl-ornament-dots">
-              <circle cx="9.5" cy="9.5" r="1.5" />
-              <circle cx="38.5" cy="9.5" r="1.5" />
-              <circle cx="9.5" cy="38.5" r="1.5" />
-              <circle cx="38.5" cy="38.5" r="1.5" />
-            </g>
-          </svg>
-
-          <div class="tl-item">
-            <div class="tl-marker">
-              <span class="tl-dot">
-                <span class="tl-dot-halo"></span>
-                <span class="tl-dot-gem"></span>
-              </span>
-              <span class="tl-line"><i class="tl-line-fill"></i></span>
-            </div>
-            <div class="tl-body">
-              <div class="tl-date">12.03.2021</div>
-              <div class="tl-title">Lần đầu gặp nhau</div>
-              <div class="tl-text">Một buổi chiều thật đặc biệt...</div>
-            </div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-marker">
-              <span class="tl-dot">
-                <span class="tl-dot-halo"></span>
-                <span class="tl-dot-gem"></span>
-              </span>
-              <span class="tl-line"><i class="tl-line-fill"></i></span>
-            </div>
-            <div class="tl-body">
-              <div class="tl-date">20.08.2022</div>
-              <div class="tl-title">Chính thức hẹn hò</div>
-              <div class="tl-text">
-                Từ bạn bè, chúng tôi trở thành người yêu.
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-marker">
-              <span class="tl-dot">
-                <span class="tl-dot-halo"></span>
-                <span class="tl-dot-gem"></span>
-              </span>
-              <span class="tl-line"><i class="tl-line-fill"></i></span>
-            </div>
-            <div class="tl-body">
-              <div class="tl-date">14.02.2024</div>
-              <div class="tl-title">Cầu hôn</div>
-              <div class="tl-text">Một lời hứa cho tương lai.</div>
-            </div>
-          </div>
-
-          <div class="tl-item tl-item--last">
-            <div class="tl-marker">
-              <span class="tl-dot">
-                <span class="tl-dot-halo"></span>
-                <span class="tl-dot-gem"></span>
-              </span>
-              <span class="tl-line"><i class="tl-line-fill"></i></span>
-            </div>
-            <div class="tl-body">
-              <div class="tl-date">28.11.2026</div>
-              <div class="tl-title">Lễ thành hôn</div>
-              <div class="tl-text">Chúng tôi chính thức về chung một nhà.</div>
-            </div>
+          <div class="story-hint" aria-hidden="true">
+            <span class="story-hint-mouse"><i></i></span>
+            <span class="story-hint-text">Cuộn xuống để khám phá thêm</span>
+            <svg class="story-hint-chev" viewBox="0 0 12 8">
+              <path d="M1 1.5 6 6.5 11 1.5" />
+            </svg>
           </div>
         </div>
       </section>
@@ -1209,7 +1254,9 @@
           <p class="ty-quote" id="tyQuote">
             <span class="ty-line" style="--i: 0">“Cảm ơn bạn</span>
             <span class="ty-line" style="--i: 1">đã là một phần trong</span>
-            <span class="ty-line" style="--i: 2">câu chuyện của chúng tôi!”</span>
+            <span class="ty-line" style="--i: 2"
+              >câu chuyện của chúng tôi!”</span
+            >
           </p>
 
           <div class="ty-divider">

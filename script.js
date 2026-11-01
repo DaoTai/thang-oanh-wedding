@@ -148,7 +148,9 @@
   }
 
   function initStoryBurst() {
-    var story = document.getElementById("story");
+    // Quan sát khối tiêu đề chứ không cả mục: #story cao gấp mấy lần màn
+    // hình (chế độ dính) nên tỉ lệ giao của cả mục không bao giờ đạt ngưỡng
+    var story = document.querySelector("#story .story-head");
     if (!story || typeof IntersectionObserver !== "function") return;
     if (
       window.matchMedia &&
@@ -165,7 +167,7 @@
           observer.disconnect();
         });
       },
-      { threshold: 0.25 }
+      { threshold: 0.5 }
     );
 
     observer.observe(story);
@@ -206,34 +208,6 @@
 
     mapBlocks.forEach(function (block) {
       observer.observe(block);
-    });
-  }
-
-  /* Phần "Hành trình": chữ và album trượt vào từ trái sang phải */
-  function initSlideIn() {
-    var els = document.querySelectorAll(".story-copy, .story-section .album");
-    if (
-      !els.length ||
-      typeof IntersectionObserver !== "function" ||
-      (window.matchMedia &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-    )
-      return;
-
-    var observer = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-    );
-    els.forEach(function (el, i) {
-      el.classList.add("slide-in");
-      el.style.transitionDelay = i * 0.25 + "s";
-      observer.observe(el);
     });
   }
 
@@ -408,68 +382,428 @@
   }
 
   /* -------------------------------------------------------
-     Dòng thời gian
-     Hoa văn mở đầu và từng mốc được đánh dấu .is-visible khi lọt vào khung
-     nhìn; CSS lo phần diễn. Mỗi phần tử chỉ diễn một lần (unobserve ngay)
-     để cuộn lên cuộn xuống không làm thiệp nhấp nháy.
+     Hành trình — dây chuyền sáng theo cuộn
+     Desktop: .story-stage dính giữa màn (CSS), tiến độ cuộn qua mục
+     (0 → 1) đẩy đầu dây chạy từ mép trái qua từng ảnh tới mép phải; dây
+     "dừng" một nhịp ở giữa mỗi ảnh (smoothstep) để mốc kịp toả sáng.
+     Màn hẹp: dây zigzag dọc, đầu dây bám theo đường ngang giữa màn hình.
+     Dây được dựng lại theo vị trí thật của ảnh (Catmull-Rom qua mép vào/ra
+     của từng ảnh) mỗi khi bố cục đổi, nên thêm bớt mốc không phải sửa gì.
+     Mỗi khung chỉ đọc getBoundingClientRect rồi ghi transform /
+     stroke-dashoffset / class — không có thao tác nào gây reflow.
      ------------------------------------------------------- */
-  function initTimelineReveal() {
-    var timeline = document.querySelector(".timeline");
-    if (!timeline) return;
+  function initStoryJourney() {
+    var section = document.getElementById("story");
+    if (!section) return;
+    var track = section.querySelector(".story-track");
+    var svg = section.querySelector(".story-chain");
+    var items = [].slice.call(section.querySelectorAll(".ms"));
+    var n = items.length;
+    if (!track || !svg || !n) return;
 
-    var targets = [timeline].concat(
-      Array.prototype.slice.call(timeline.querySelectorAll(".tl-item"))
+    var bg = section.querySelector(".story-bg");
+    var head = section.querySelector(".story-head");
+    var spark = section.querySelector(".chain-spark");
+    var hint = section.querySelector(".story-hint");
+    var dotsNav = section.querySelector(".story-dots");
+    var trackPath = svg.querySelector(".chain-track");
+    var glowPath = svg.querySelector(".chain-glow");
+    var litPath = svg.querySelector(".chain-lit");
+    var gleamPath = svg.querySelector(".chain-gleam");
+    var drawn = [glowPath, litPath, gleamPath].filter(Boolean);
+
+    var reduce =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Phải trùng điều kiện @media + @supports của chế độ dính trong styles.css
+    var pinQuery = window.matchMedia
+      ? window.matchMedia("(min-width: 900px) and (min-height: 560px)")
+      : null;
+    var canClip = !!(
+      window.CSS &&
+      CSS.supports &&
+      CSS.supports("overflow-x", "clip")
     );
 
-    function showAll() {
-      targets.forEach(function (el) {
-        el.classList.add("is-visible");
+    // Khoảng t (đơn vị: mốc) mà chế độ dính quét qua: bắt đầu khi đầu dây
+    // còn cách mốc đầu 3/4 chặng, kết thúc khi đã vượt mốc cuối 3/4 chặng.
+    var T_FROM = -0.75;
+    var T_TO = n - 1 + 0.75;
+    // Số đốm sáng bay quanh mỗi ảnh
+    var MOTES = 8;
+
+    section.style.setProperty("--story-n", n);
+
+    var dots = [];
+    items.forEach(function (li, i) {
+      li.style.setProperty("--i", i);
+      var fig = li.querySelector(".ms-photo");
+      if (fig) {
+        // Lớp gợn sóng trên mặt giấy (chỉ chạy khi mốc đang sáng)
+        var ripple = document.createElement("span");
+        ripple.className = "ms-ripple";
+        ripple.setAttribute("aria-hidden", "true");
+        fig.appendChild(ripple);
+      }
+      // Đốm sáng bay quanh khung: rải đều trên một vòng (độ trễ âm), xen
+      // kẽ chiều bay, khoảng cách tới mép và cỡ để không thành hàng lối
+      for (var g = 0; fig && g < MOTES; g++) {
+        var mote = document.createElement("span");
+        mote.className = "ms-mote";
+        mote.setAttribute("aria-hidden", "true");
+        var dur = 11 + ((g * 3.7 + i * 1.9) % 7);
+        mote.style.setProperty("--t", dur.toFixed(1) + "s");
+        mote.style.setProperty("--dl", (-(g / MOTES) * dur).toFixed(2) + "s");
+        mote.style.setProperty("--o", 6 + ((g * 5) % 13) + "px");
+        mote.style.setProperty("--s", 3 + ((g * 3) % 4) * 0.7 + "px");
+        mote.style.setProperty("--tw", (2.8 + ((g * 1.3) % 2.4)).toFixed(1) + "s");
+        if (g % 3 === 1) mote.style.setProperty("--dir", "reverse");
+        mote.appendChild(document.createElement("i"));
+        fig.appendChild(mote);
+      }
+      if (dotsNav) {
+        var title = li.querySelector(".ms-title");
+        var dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "story-dot";
+        dot.setAttribute(
+          "aria-label",
+          title ? title.textContent : "Mốc " + (i + 1)
+        );
+        dot.addEventListener("click", function () {
+          goTo(i);
+        });
+        dotsNav.appendChild(dot);
+        dots.push(dot);
+      }
+    });
+
+    var pinned = false;
+    var stops = []; // độ dài dây tại: đầu dây, giữa từng ảnh, cuối dây
+    var stopY = []; // toạ độ y tương ứng (dùng ở màn hẹp)
+    var total = 0;
+    var beads = [];
+    var active = -2;
+    var lastLit = -1;
+    var sparkOn = false;
+    var hintDone = false;
+
+    function clamp(v, lo, hi) {
+      return v < lo ? lo : v > hi ? hi : v;
+    }
+
+    // Toạ độ của el trong track, bỏ qua transform (xoay/nhấc ảnh, trượt vào)
+    function offsetIn(el) {
+      var x = 0;
+      var y = 0;
+      while (el && el !== track) {
+        x += el.offsetLeft;
+        y += el.offsetTop;
+        el = el.offsetParent;
+      }
+      return { x: x, y: y };
+    }
+
+    // Catmull-Rom → các đoạn Bézier bậc ba đi qua đúng từng điểm
+    function pathData(pts, upto) {
+      var d = "M" + pts[0][0] + " " + pts[0][1];
+      for (var i = 0; i < upto; i++) {
+        var p0 = pts[i - 1] || pts[i];
+        var p1 = pts[i];
+        var p2 = pts[i + 1];
+        var p3 = pts[i + 2] || p2;
+        d +=
+          " C" +
+          (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) +
+          " " +
+          (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) +
+          " " +
+          (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) +
+          " " +
+          (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) +
+          " " +
+          p2[0].toFixed(1) +
+          " " +
+          p2[1].toFixed(1);
+      }
+      return d;
+    }
+
+    function layout() {
+      pinned = !!(pinQuery && pinQuery.matches && canClip);
+      var W = track.clientWidth;
+      var H = track.clientHeight;
+      if (!W || !H) return;
+
+      // Mỗi ảnh góp hai điểm: mép vào và mép ra (ngang ở desktop, dọc ở
+      // màn hẹp), để dây đi xuyên qua khung chứ không cắt chéo qua chữ.
+      var pts = [];
+      var mids = [];
+      items.forEach(function (li) {
+        var fig = li.querySelector(".ms-photo");
+        var o = offsetIn(fig);
+        var w = fig.offsetWidth;
+        var h = fig.offsetHeight;
+        if (pinned) {
+          pts.push([o.x, o.y + h / 2], [o.x + w, o.y + h / 2]);
+        } else {
+          pts.push([o.x + w / 2, o.y], [o.x + w / 2, o.y + h]);
+        }
+        mids.push(o.y + h / 2);
+      });
+      var first = pts[0];
+      var last = pts[pts.length - 1];
+      if (pinned) {
+        var lift = H * 0.08;
+        pts.unshift([-40, first[1] + lift]);
+        pts.push([W + 40, last[1] - lift]);
+      } else {
+        pts.unshift([W / 2, 0]);
+        pts.push([W / 2, H]);
+      }
+
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+      // Độ dài tích luỹ tới từng điểm: đo bằng cách dựng dần path
+      var cum = [0];
+      for (var k = 1; k < pts.length; k++) {
+        litPath.setAttribute("d", pathData(pts, k));
+        cum.push(litPath.getTotalLength());
+      }
+      var d = pathData(pts, pts.length - 1);
+      [trackPath].concat(drawn).forEach(function (p) {
+        p.setAttribute("d", d);
+      });
+      total = cum[cum.length - 1];
+
+      stops = [0];
+      stopY = [pts[0][1]];
+      for (var i = 0; i < n; i++) {
+        stops.push((cum[1 + 2 * i] + cum[2 + 2 * i]) / 2);
+        stopY.push(mids[i]);
+      }
+      stops.push(total);
+      stopY.push(pts[pts.length - 1][1]);
+
+      var dash = total + " " + total;
+      drawn.forEach(function (p) {
+        p.style.strokeDasharray = dash;
+      });
+
+      // Hạt ngọc: giữa đoạn dẫn vào/ra, và hai hạt ở mỗi khoảng giữa hai ảnh
+      beads.forEach(function (b) {
+        b.el.remove();
+      });
+      beads = [];
+      var at = [(cum[0] + cum[1]) / 2];
+      for (var g = 0; g < n - 1; g++) {
+        var a0 = cum[2 + 2 * g];
+        var a1 = cum[3 + 2 * g];
+        at.push(a0 + (a1 - a0) / 3, a0 + ((a1 - a0) * 2) / 3);
+      }
+      at.push((cum[cum.length - 2] + total) / 2);
+      var frag = document.createDocumentFragment();
+      at.forEach(function (len, i) {
+        var pt = litPath.getPointAtLength(len);
+        var el = document.createElement("span");
+        el.className = "chain-bead";
+        // Lệch nhịp lấp lánh giữa các hạt để không nháy đồng loạt
+        el.style.setProperty("--d", ((i * 1.13) % 3.2).toFixed(2) + "s");
+        el.style.transform =
+          "translate(" + pt.x.toFixed(1) + "px," + pt.y.toFixed(1) + "px)";
+        frag.appendChild(el);
+        beads.push({ el: el, len: len, lit: false });
+      });
+      track.insertBefore(frag, svg.nextSibling);
+
+      if (bg && !pinned) bg.style.transform = "";
+      lastLit = -1;
+      frame();
+    }
+
+    // t (đơn vị mốc: -1 = đầu dây, 0..n-1 = các ảnh, n = cuối dây) → độ dài
+    function litAt(t, ease) {
+      var k = clamp(Math.floor(t), -1, n - 1);
+      var f = clamp(t - k, 0, 1);
+      if (ease) f = f * f * (3 - 2 * f);
+      var a = stops[k + 1];
+      var b = stops[k + 2];
+      return b === undefined ? a : a + (b - a) * f;
+    }
+
+    function frame() {
+      ticking = false;
+      if (!stops.length) return;
+      var vh = window.innerHeight;
+      var t;
+      var p = 0;
+
+      if (pinned) {
+        var rect = section.getBoundingClientRect();
+        var range = rect.height - vh;
+        p = range > 0 ? clamp(-rect.top / range, 0, 1) : 0;
+        t = T_FROM + p * (T_TO - T_FROM);
+      } else {
+        // Đường ngang hơi dưới giữa màn hình là "đầu dây"
+        var y = vh * 0.56 - track.getBoundingClientRect().top;
+        t = -1;
+        for (var s = 0; s < stopY.length - 1; s++) {
+          if (y < stopY[s + 1] || s === stopY.length - 2) {
+            t =
+              s -
+              1 +
+              clamp((y - stopY[s]) / (stopY[s + 1] - stopY[s] || 1), 0, 1);
+            break;
+          }
+        }
+      }
+
+      var lit = litAt(t, pinned);
+      if (Math.abs(lit - lastLit) > 0.3) {
+        lastLit = lit;
+        var off = (total - lit).toFixed(1);
+        drawn.forEach(function (p) {
+          p.style.strokeDashoffset = off;
+        });
+
+        var on = lit > 2 && lit < total - 2;
+        if (on && spark && !reduce) {
+          var pt = litPath.getPointAtLength(lit);
+          spark.style.transform =
+            "translate3d(" +
+            pt.x.toFixed(1) +
+            "px," +
+            pt.y.toFixed(1) +
+            "px,0)";
+        }
+        if (spark && on !== sparkOn) {
+          sparkOn = on;
+          spark.classList.toggle("is-on", on);
+        }
+        beads.forEach(function (b) {
+          var l = b.len <= lit;
+          if (l !== b.lit) {
+            b.lit = l;
+            b.el.classList.toggle("is-lit", l);
+          }
+        });
+      }
+
+      if (pinned && bg && !reduce) {
+        // Nền lùi xa và trôi nhẹ sang trái theo tiến độ — chỉ là transform
+        bg.style.transform =
+          "translate3d(" +
+          (1.5 - p * 3).toFixed(2) +
+          "%,0,0) scale(" +
+          (1.06 - p * 0.06).toFixed(4) +
+          ")";
+      }
+      if (hint) {
+        var done = p > 0.9;
+        if (done !== hintDone) {
+          hintDone = done;
+          hint.classList.toggle("is-done", done);
+        }
+      }
+
+      var next = t < -0.5 ? -1 : clamp(Math.round(t), 0, n - 1);
+      if (pinned) next = Math.max(next, 0);
+      if (next !== active) {
+        active = next;
+        items.forEach(function (li, i) {
+          li.classList.toggle("is-active", i === active);
+          li.classList.toggle("is-past", i < active);
+        });
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle("is-active", i === active);
+          dot.classList.toggle("is-past", i < active);
+          if (i === active) dot.setAttribute("aria-current", "step");
+          else dot.removeAttribute("aria-current");
+        });
+      }
+    }
+
+    // Bấm chấm tiến trình: cuộn tới đúng vị trí mà mốc i nằm giữa nhịp dừng
+    function goTo(i) {
+      if (!pinned) {
+        items[i].scrollIntoView({ block: "center" });
+        return;
+      }
+      var rect = section.getBoundingClientRect();
+      var range = rect.height - window.innerHeight;
+      var p = (i - T_FROM) / (T_TO - T_FROM);
+      window.scrollTo({
+        top: window.pageYOffset + rect.top + p * range,
+        behavior: reduce ? "auto" : "smooth",
       });
     }
 
-    if (typeof IntersectionObserver !== "function") {
-      showAll();
-      return;
+    var ticking = false;
+    var inView = true;
+    function requestFrame() {
+      if (ticking || !inView) return;
+      ticking = true;
+      requestAnimationFrame(frame);
     }
-    if (
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      showAll();
-      return;
-    }
-
-    // Các mốc hiện lần lượt, cách nhau ~1s dù cuộn nhanh hay chậm
-    var STAGGER_MS = 1000;
-    var nextSlot = 0;
-    function reveal(el) {
-      var now = Date.now();
-      var at = Math.max(now, nextSlot);
-      nextSlot = at + STAGGER_MS;
-      setTimeout(function () {
-        el.classList.add("is-visible");
-      }, at - now);
+    var layoutQueued = false;
+    function requestLayout() {
+      if (layoutQueued) return;
+      layoutQueued = true;
+      requestAnimationFrame(function () {
+        layoutQueued = false;
+        layout();
+      });
     }
 
-    var observer = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          observer.unobserve(entry.target);
-          if (entry.target === timeline) {
-            entry.target.classList.add("is-visible");
-          } else {
-            reveal(entry.target);
-          }
-        });
-      },
-      // Lùi mép dưới lên 12% để mốc chỉ diễn khi đã vào hẳn trong tầm mắt
-      { threshold: 0.35, rootMargin: "0px 0px -12% 0px" }
-    );
+    window.addEventListener("scroll", requestFrame, { passive: true });
+    if (typeof ResizeObserver === "function") {
+      new ResizeObserver(requestLayout).observe(track);
+    }
+    // Chế độ dính chỉ đổi theo chiều cao màn hình thì track chưa chắc đổi
+    // cỡ, nên vẫn nghe resize (đã gộp theo khung hình)
+    window.addEventListener("resize", requestLayout);
+    window.addEventListener("load", requestLayout);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(requestLayout);
+    }
 
-    targets.forEach(function (el) {
-      observer.observe(el);
-    });
+    if (typeof IntersectionObserver === "function") {
+      // Chỉ tính khung hình khi mục đang ở gần khung nhìn
+      new IntersectionObserver(
+        function (entries) {
+          inView = entries[0].isIntersecting;
+          if (inView) requestFrame();
+        },
+        { rootMargin: "200px 0px" }
+      ).observe(section);
+    }
+
+    // Màn mở: tiêu đề viết ra, dây hiện, từng mốc trượt lên (một lần)
+    var reveal = [head].concat(items).filter(Boolean);
+    if (reduce || typeof IntersectionObserver !== "function") {
+      reveal.concat(track).forEach(function (el) {
+        el.classList.add("is-in");
+      });
+    } else {
+      var revealer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-in");
+            // Dây chuyền mờ hiện cùng tiêu đề (track có thể cao hơn màn hình
+            // nhiều lần nên không tự quan sát được theo threshold)
+            if (entry.target === head) track.classList.add("is-in");
+            revealer.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.2, rootMargin: "0px 0px -8% 0px" }
+      );
+      reveal.forEach(function (el) {
+        revealer.observe(el);
+      });
+    }
+
+    layout();
   }
 
   /* -------------------------------------------------------
@@ -1842,10 +2176,9 @@
     initNavSpy();
     renderPetals();
     initStoryBurst();
-    initTimelineReveal();
+    initStoryJourney();
     initFadeUp();
     initThanks();
-    initSlideIn();
     initCalendar();
     initWhenReveal();
     initCountdown();
